@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10.0,
                   offset: const Offset(0, 5), // changes position of shadow
                 ),
@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: TextField(
                     controller: _usernameController,
-                    decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.0)), labelText: 'Email'),
+                    decoration: InputDecoration(labelText: 'Username', border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0))),
                   ),
                 ),
                 //password field
@@ -58,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
+                      labelText: 'Password',
                       suffixIcon: IconButton(
                         icon: Icon(isPasswordVisible ? Icons.visibility : Icons.visibility_off),
                         onPressed: () {
@@ -66,8 +67,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           });
                         },
                       ),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.0)),
-                      labelText: 'Password',
                     ),
                   ),
                 ),
