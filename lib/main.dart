@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intern_app/home_screen.dart';
-import 'package:intern_app/shope_screen.dart';
+import 'package:project/home_screen.dart';
+import 'package:project/login.dart';
+import 'package:project/shope_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,16 +14,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _router = GoRouter(
-      initialLocation: '/',
+      initialLocation: '/login',
       routes: [
         GoRoute(
           name: 'home', // Optional, add name to your routes. Allows you navigate by name instead of path
-          path: '/',
+          path: '/home',
           builder: (context, state) => HomeScreen(),
+        ),
+        GoRoute(
+          name: 'login', // Optional, add name to your routes. Allows you navigate by name instead of path
+          path: '/login',
+          builder: (context, state) => LoginScreen(),
         ),
         GoRoute(name: 'shope', path: '/shope', builder: (context, state) => ShopeScreen()),
       ],
     );
-    return MaterialApp.router(routerConfig: _router);
+    return MaterialApp.router(routerConfig: _router, theme: ThemeData(primarySwatch: Colors.blue));
   }
 }

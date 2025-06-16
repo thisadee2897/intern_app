@@ -14,6 +14,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Home Screen'),
       backgroundColor: Colors.amber,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () {
+            // Navigate to the login screen
+            context.go('/login');
+          },
+        ),
+      ],
       ),
       body: Center(
         child: Column(
