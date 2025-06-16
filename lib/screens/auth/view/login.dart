@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:project/config/routes/route_config.dart';
+import 'package:project/config/routes/route_helper.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool isPasswordVisible = false;
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -77,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Perform login action
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logging in as ${_usernameController.text}')));
                       // Navigate to home screen or perform other actions
-                      context.go('/home'); // Assuming you have a GoRouter set up
+                      ref.goFromPath(Routes.home);
                     }
                   },
                   child: const Text('Login'),
