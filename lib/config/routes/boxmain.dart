@@ -38,12 +38,23 @@ class _ScaffoldWithAppbarState extends ConsumerState<ScaffoldWithAppbar> {
       body: Row(
         children: [
           if (!isSmallScreen && showBottomBar)
-            NavigationRail(
-              selectedIndex: widget.navigationShell.currentIndex,
-              onDestinationSelected: _onTap,
-              labelType: NavigationRailLabelType.all,
-              destinations:
-                  appDestinations.map((e) => NavigationRailDestination(icon: Icon(e.icon), selectedIcon: Icon(e.activeIcon), label: Text(e.label))).toList(),
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  right: BorderSide(
+                    color: Colors.grey.shade300,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              child: NavigationRail(
+                indicatorShape: const CircleBorder(side: BorderSide(color: Colors.transparent, width: 0.0)),
+                selectedIndex: widget.navigationShell.currentIndex,
+                onDestinationSelected: _onTap,
+                labelType: NavigationRailLabelType.all,
+                destinations:
+                    appDestinations.map((e) => NavigationRailDestination(icon: Icon(e.icon), selectedIcon: Icon(e.activeIcon), label: Text(e.label))).toList(),
+              ),
             ),
           Expanded(child: widget.navigationShell),
         ],

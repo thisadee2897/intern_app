@@ -56,6 +56,7 @@ sealed class AppTheme {
     lightIsWhite: true,
     surfaceTint: const Color(0xFF0064B0),
     subThemesData: const FlexSubThemesData(
+      appBarCenterTitle: false,
       interactionEffects: true,
       tintedDisabledControls: true,
       useM2StyleDividerInM3: true,
