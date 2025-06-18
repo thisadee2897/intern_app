@@ -58,8 +58,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: Routes.project,
                 pageBuilder: (context, state) => const NoTransitionPage(child: ProjectScreen()),
-                routes: [GoRoute(path: Routes.projectDetail, pageBuilder: (context, state) =>  NoTransitionPage(child: ProjectDetailScreen())
-            )],
+                routes: [
+                  GoRoute(
+                    path: Routes.projectDetail,
+                    pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()),
+                    routes: [GoRoute(path: Routes.projectDetail, pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()))],
+                  ),
+                ],
               ),
             ],
           ),

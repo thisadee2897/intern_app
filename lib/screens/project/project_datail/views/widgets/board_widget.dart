@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
 
+import '../comment_task_screen.dart';
+
 class BoardWidget extends BaseStatefulWidget {
   const BoardWidget({super.key});
   @override
@@ -10,7 +12,8 @@ class BoardWidget extends BaseStatefulWidget {
 class _BoardWidgetState extends BaseState<BoardWidget> {
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
-    return Container(color: Colors.amber[50], child: Center(child: Text('Desktop View', style: Theme.of(context).textTheme.titleLarge)));
+    return CommentTaskScreen();
+    // return Container(color: Colors.amber[50], child: Center(child: Text('Desktop View', style: Theme.of(context).textTheme.titleLarge)));
   }
 
   @override

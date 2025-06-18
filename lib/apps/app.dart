@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/config/routes/app_router.dart';
 import 'package:project/config/theme/app_theme.dart';
@@ -30,7 +32,12 @@ class _AppState extends ConsumerState<App> {
       theme: AppTheme.light,
       themeMode: ThemeMode.light,
       title: 'Printer',
-      // localizationsDelegates: const [Trans.delegate],
+      localizationsDelegates: [
+        FlutterQuillLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
       // supportedLocales: Trans.delegate.supportedLocales,
       routerConfig: appRouter,
     );
