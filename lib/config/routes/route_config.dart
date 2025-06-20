@@ -5,6 +5,5 @@ class Routes {
   static const String project = '/project';
   static const String projectDetail = 'detail';
   static const String setting = '/setting';
-  static const String contactUs = '/contact-us';
 }
   
