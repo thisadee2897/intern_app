@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project/config/routes/boxmain.dart';
 import 'package:project/config/routes/route_config.dart';
+import 'package:project/screens/contact_us/views/contact_us_screen.dart';
 import 'package:project/screens/home/views/home_screen.dart';
 import 'package:project/screens/auth/view/login.dart';
 import 'package:project/screens/project/project_datail/views/project_detail_screen.dart';
@@ -13,6 +14,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>();
 final _shellNavigatorProjectKey = GlobalKey<NavigatorState>();
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>();
+final _shellNavigatorContactUsKey = GlobalKey<NavigatorState>();
 final appRouterProvider = Provider<GoRouter>((ref) {
   // ref.read(localStorageServiceProvider).getUserLogin();
   return GoRouter(
@@ -25,15 +27,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return CustomTransitionPage(
             child: Scaffold(
               resizeToAvoidBottomInset: false,
-              body: GestureDetector(onTap: () => FocusScope.of(_rootNavigatorKey.currentContext!).unfocus(), child: const LoginScreen()),
+              body: GestureDetector(
+                onTap:
+                    () =>
+                        FocusScope.of(
+                          _rootNavigatorKey.currentContext!,
+                        ).unfocus(),
+                child: const LoginScreen(),
+              ),
             ),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
               final scaffold = Scaffold(
                 resizeToAvoidBottomInset: false,
                 body: FadeTransition(
-                  opacity: animation.drive(Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeInOut))),
+                  opacity: animation.drive(
+                    Tween(
+                      begin: 0.0,
+                      end: 1.0,
+                    ).chain(CurveTween(curve: Curves.easeInOut)),
+                  ),
                   child: ScaleTransition(
-                    scale: animation.drive(Tween(begin: 0.9, end: 1.0).chain(CurveTween(curve: Curves.easeInOut))),
+                    scale: animation.drive(
+                      Tween(
+                        begin: 0.9,
+                        end: 1.0,
+                      ).chain(CurveTween(curve: Curves.easeInOut)),
+                    ),
                     child: const LoginScreen(),
                   ),
                 ),
@@ -50,19 +74,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             navigatorKey: _shellNavigatorHomeKey,
-            routes: [GoRoute(path: Routes.home, pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()))],
+            routes: [
+              GoRoute(
+                path: Routes.home,
+                pageBuilder:
+                    (context, state) =>
+                        const NoTransitionPage(child: HomeScreen()),
+              ),
+            ],
           ),
           StatefulShellBranch(
             navigatorKey: _shellNavigatorProjectKey,
             routes: [
               GoRoute(
                 path: Routes.project,
-                pageBuilder: (context, state) => const NoTransitionPage(child: ProjectScreen()),
+                pageBuilder:
+                    (context, state) =>
+                        const NoTransitionPage(child: ProjectScreen()),
                 routes: [
                   GoRoute(
                     path: Routes.projectDetail,
-                    pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()),
-                    routes: [GoRoute(path: Routes.projectDetail, pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()))],
+                    pageBuilder:
+                        (context, state) =>
+                            NoTransitionPage(child: ProjectDetailScreen()),
+                    routes: [
+                      GoRoute(
+                        path: Routes.projectDetail,
+                        pageBuilder:
+                            (context, state) =>
+                                NoTransitionPage(child: ProjectDetailScreen()),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -73,7 +115,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.setting,
-                pageBuilder: (context, state) => NoTransitionPage(child: SettingScreen()),
+                pageBuilder:
+                    (context, state) =>
+                        NoTransitionPage(child: SettingScreen()),
+                // routes: [
+                //   GoRoute(
+                //     path: Routes.appointmentDetail,
+                //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
+                //     routes: const [],
+                //   ),
+                // ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorContactUsKey,
+            routes: [
+              GoRoute(
+                path: Routes.contactUs,
+                pageBuilder:
+                    (context, state) =>
+                        NoTransitionPage(child: ContactUsScreen()),
                 // routes: [
                 //   GoRoute(
                 //     path: Routes.appointmentDetail,
