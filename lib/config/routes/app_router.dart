@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project/config/routes/boxmain.dart';
 import 'package:project/config/routes/route_config.dart';
+import 'package:project/screens/documentation/views/documetation_screen.dart';
 import 'package:project/screens/home/views/home_screen.dart';
 import 'package:project/screens/auth/view/login.dart';
 import 'package:project/screens/project/project_datail/views/project_detail_screen.dart';
@@ -13,6 +14,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>();
 final _shellNavigatorProjectKey = GlobalKey<NavigatorState>();
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>();
+final _shellNavigatorDocumentationKey = GlobalKey<NavigatorState>();
 final appRouterProvider = Provider<GoRouter>((ref) {
   // ref.read(localStorageServiceProvider).getUserLogin();
   return GoRouter(
@@ -74,6 +76,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: Routes.setting,
                 pageBuilder: (context, state) => NoTransitionPage(child: SettingScreen()),
+                // routes: [
+                //   GoRoute(
+                //     path: Routes.appointmentDetail,
+                //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
+                //     routes: const [],
+                //   ),
+                // ],
+              ),
+            ],
+          ),
+                    StatefulShellBranch(
+            navigatorKey: _shellNavigatorDocumentationKey,
+            routes: [
+              GoRoute(
+                path: Routes.documentation,
+                pageBuilder: (context, state) => NoTransitionPage(child: DocumetationScreen()),
                 // routes: [
                 //   GoRoute(
                 //     path: Routes.appointmentDetail,
