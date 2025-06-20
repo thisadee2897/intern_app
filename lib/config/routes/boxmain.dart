@@ -19,6 +19,7 @@ const List<AppDestination> appDestinations = [
   AppDestination(icon: Icons.settings_outlined, activeIcon: Icons.settings_rounded, label: 'Settings'),
   AppDestination(icon: Icons.mail, activeIcon: Icons.mail, label: 'Contact Us'),
   AppDestination(icon: Icons.update, activeIcon: Icons.settings_rounded, label: 'Product Update'),
+  AppDestination(icon: Icons.mail, activeIcon: Icons.mail, label: 'Documentation'),
 ];
 
 class ScaffoldWithAppbar extends ConsumerStatefulWidget {
