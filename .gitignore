@@ -1,6 +1,7 @@
 # Miscellaneous
 *.class
 *.log
+*.lock
 *.pyc
 *.swp
 .DS_Store
@@ -32,6 +33,11 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/macos/
+/windows/
+#macOS-all
+
+
 
 # Symbolication related
 app.*.symbols
