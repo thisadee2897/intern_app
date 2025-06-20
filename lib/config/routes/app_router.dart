@@ -5,6 +5,7 @@ import 'package:project/config/routes/boxmain.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/screens/home/views/home_screen.dart';
 import 'package:project/screens/auth/view/login.dart';
+import 'package:project/screens/product_update/view/product_updat_screen.dart';
 import 'package:project/screens/project/project_datail/views/project_detail_screen.dart';
 import 'package:project/screens/project/views/project_screen.dart';
 import 'package:project/screens/settings/views/setting_screen.dart';
@@ -13,6 +14,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>();
 final _shellNavigatorProjectKey = GlobalKey<NavigatorState>();
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>();
+final _shellNavigatorproductupdate = GlobalKey<NavigatorState>();
 final appRouterProvider = Provider<GoRouter>((ref) {
   // ref.read(localStorageServiceProvider).getUserLogin();
   return GoRouter(
@@ -74,6 +76,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: Routes.setting,
                 pageBuilder: (context, state) => NoTransitionPage(child: SettingScreen()),
+                // routes: [
+                //   GoRoute(
+                //     path: Routes.appointmentDetail,
+                //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
+                //     routes: const [],
+                //   ),
+                // ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorproductupdate,
+            routes: [
+              GoRoute(
+                path: Routes.productUpdate,
+                pageBuilder: (context, state) => NoTransitionPage(child: ProductUpdatScreen()),
                 // routes: [
                 //   GoRoute(
                 //     path: Routes.appointmentDetail,
