@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:project/config/routes/route_config.dart';
+import 'package:project/config/routes/route_helper.dart';
 import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 import 'package:project/screens/auth/widgets/widgets.dart';
 
@@ -78,10 +80,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     try {
       // ตัวอย่าง:
       await ref.read(loginProvider.notifier).get(userName: _emailController.text.trim(), password: _passwordController.text);
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
+      ref.goFromPath(Routes.login);
       // Save login data if login is successful
       await LoginPreferences.saveLoginData(email: _emailController.text.trim(), password: _passwordController.text, rememberPassword: _rememberPassword);
       // Show success message
