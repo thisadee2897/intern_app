@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project/utils/extension/comtext_extension.dart';
+import 'package:project/utils/extension/context_extension.dart';
 
 class ContextSummaryWidget extends StatelessWidget {
   final double width;
