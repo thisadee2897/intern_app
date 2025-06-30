@@ -41,3 +41,10 @@ final isLoggedInProvider = FutureProvider<bool>((ref) async {
   final token = await ref.watch(localStorageServiceProvider).getToken();
   return token != null;
 });
+
+// logout Function
+final logoutProvider = FutureProvider<void>((ref) async {
+  await ref.watch(localStorageServiceProvider).clear();
+  ref.invalidate(isLoggedInProvider);
+  ref.invalidate(loginProvider);
+});
