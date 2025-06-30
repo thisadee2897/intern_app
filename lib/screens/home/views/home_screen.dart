@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
+import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +18,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text('Home Screen'),
         backgroundColor: Colors.amber,
-        actions: [IconButton(icon: const Icon(Icons.logout), onPressed: () => ref.goFromPath(Routes.login))],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await ref.read(logoutProvider.future);
+              ref.goFromPath(Routes.login);
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
