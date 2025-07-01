@@ -1,42 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:project/config/routes/route_config.dart';
-import 'package:project/config/routes/route_helper.dart';
-import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
+import 'package:project/components/export.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+import 'widgets/ui_desktop.dart';
+
+class HomeScreen extends BaseStatefulWidget {
   const HomeScreen({super.key});
-
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  BaseState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends BaseState<HomeScreen> {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Screen'),
-        backgroundColor: Colors.amber,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(logoutProvider.future);
-              ref.goFromPath(Routes.login);
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Welcome to the Home Screen!'),
-            ElevatedButton(onPressed: () => ref.goFromPath(Routes.setting), child: const Text('Go to setting Screen')),
-          ],
-        ),
-      ),
-    );
+  Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
+    return HomeDesktopUI();
+  }
+
+  @override
+  Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
+    return Center(child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge));
+  }
+
+  @override
+  Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
+    return Center(child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge));
   }
 }

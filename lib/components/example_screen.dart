@@ -1,13 +1,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
-class SummaryWidget extends BaseStatefulWidget {
-  const SummaryWidget({super.key});
+class ExampleScreen extends BaseStatefulWidget {
+  const ExampleScreen({super.key});
   @override
-  BaseState<SummaryWidget> createState() => _SummaryWidgetState();
+  BaseState<ExampleScreen> createState() => _ExampleScreenState();
 }
 
-class _SummaryWidgetState extends BaseState<SummaryWidget> {
+class _ExampleScreenState extends BaseState<ExampleScreen> {
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
     return Center(child: Text('Desktop View', style: Theme.of(context).textTheme.titleLarge));
