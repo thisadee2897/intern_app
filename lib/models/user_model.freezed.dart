@@ -38,6 +38,16 @@ mixin _$UserModel {
   String? get updatedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'image')
   String? get image => throw _privateConstructorUsedError;
+  @JsonKey(name: 'public_name')
+  String? get publicName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'job_title')
+  String? get jobTitle => throw _privateConstructorUsedError;
+  @JsonKey(name: 'department')
+  String? get department => throw _privateConstructorUsedError;
+  @JsonKey(name: 'base_in')
+  String? get baseIn => throw _privateConstructorUsedError;
+  @JsonKey(name: 'phone_number')
+  String? get phoneNumber => throw _privateConstructorUsedError;
 
   /// Serializes this UserModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -63,7 +73,12 @@ abstract class $UserModelCopyWith<$Res> {
       @JsonKey(name: 'active') bool? active,
       @JsonKey(name: 'created_at') String? createdAt,
       @JsonKey(name: 'updated_at') String? updatedAt,
-      @JsonKey(name: 'image') String? image});
+      @JsonKey(name: 'image') String? image,
+      @JsonKey(name: 'public_name') String? publicName,
+      @JsonKey(name: 'job_title') String? jobTitle,
+      @JsonKey(name: 'department') String? department,
+      @JsonKey(name: 'base_in') String? baseIn,
+      @JsonKey(name: 'phone_number') String? phoneNumber});
 }
 
 /// @nodoc
@@ -90,6 +105,11 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? image = freezed,
+    Object? publicName = freezed,
+    Object? jobTitle = freezed,
+    Object? department = freezed,
+    Object? baseIn = freezed,
+    Object? phoneNumber = freezed,
   }) {
     return _then(_value.copyWith(
       tableName: freezed == tableName
@@ -128,6 +148,26 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
               as String?,
+      publicName: freezed == publicName
+          ? _value.publicName
+          : publicName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      jobTitle: freezed == jobTitle
+          ? _value.jobTitle
+          : jobTitle // ignore: cast_nullable_to_non_nullable
+              as String?,
+      department: freezed == department
+          ? _value.department
+          : department // ignore: cast_nullable_to_non_nullable
+              as String?,
+      baseIn: freezed == baseIn
+          ? _value.baseIn
+          : baseIn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      phoneNumber: freezed == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -149,7 +189,12 @@ abstract class _$$UserModelImplCopyWith<$Res>
       @JsonKey(name: 'active') bool? active,
       @JsonKey(name: 'created_at') String? createdAt,
       @JsonKey(name: 'updated_at') String? updatedAt,
-      @JsonKey(name: 'image') String? image});
+      @JsonKey(name: 'image') String? image,
+      @JsonKey(name: 'public_name') String? publicName,
+      @JsonKey(name: 'job_title') String? jobTitle,
+      @JsonKey(name: 'department') String? department,
+      @JsonKey(name: 'base_in') String? baseIn,
+      @JsonKey(name: 'phone_number') String? phoneNumber});
 }
 
 /// @nodoc
@@ -174,6 +219,11 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? image = freezed,
+    Object? publicName = freezed,
+    Object? jobTitle = freezed,
+    Object? department = freezed,
+    Object? baseIn = freezed,
+    Object? phoneNumber = freezed,
   }) {
     return _then(_$UserModelImpl(
       tableName: freezed == tableName
@@ -212,6 +262,26 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
               as String?,
+      publicName: freezed == publicName
+          ? _value.publicName
+          : publicName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      jobTitle: freezed == jobTitle
+          ? _value.jobTitle
+          : jobTitle // ignore: cast_nullable_to_non_nullable
+              as String?,
+      department: freezed == department
+          ? _value.department
+          : department // ignore: cast_nullable_to_non_nullable
+              as String?,
+      baseIn: freezed == baseIn
+          ? _value.baseIn
+          : baseIn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      phoneNumber: freezed == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -228,7 +298,12 @@ class _$UserModelImpl implements _UserModel {
       @JsonKey(name: 'active') this.active,
       @JsonKey(name: 'created_at') this.createdAt,
       @JsonKey(name: 'updated_at') this.updatedAt,
-      @JsonKey(name: 'image') this.image});
+      @JsonKey(name: 'image') this.image,
+      @JsonKey(name: 'public_name') this.publicName,
+      @JsonKey(name: 'job_title') this.jobTitle,
+      @JsonKey(name: 'department') this.department,
+      @JsonKey(name: 'base_in') this.baseIn,
+      @JsonKey(name: 'phone_number') this.phoneNumber});
 
   factory _$UserModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserModelImplFromJson(json);
@@ -260,10 +335,25 @@ class _$UserModelImpl implements _UserModel {
   @override
   @JsonKey(name: 'image')
   final String? image;
+  @override
+  @JsonKey(name: 'public_name')
+  final String? publicName;
+  @override
+  @JsonKey(name: 'job_title')
+  final String? jobTitle;
+  @override
+  @JsonKey(name: 'department')
+  final String? department;
+  @override
+  @JsonKey(name: 'base_in')
+  final String? baseIn;
+  @override
+  @JsonKey(name: 'phone_number')
+  final String? phoneNumber;
 
   @override
   String toString() {
-    return 'UserModel(tableName: $tableName, id: $id, name: $name, email: $email, password: $password, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, image: $image)';
+    return 'UserModel(tableName: $tableName, id: $id, name: $name, email: $email, password: $password, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, image: $image, publicName: $publicName, jobTitle: $jobTitle, department: $department, baseIn: $baseIn, phoneNumber: $phoneNumber)';
   }
 
   @override
@@ -283,13 +373,36 @@ class _$UserModelImpl implements _UserModel {
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
-            (identical(other.image, image) || other.image == image));
+            (identical(other.image, image) || other.image == image) &&
+            (identical(other.publicName, publicName) ||
+                other.publicName == publicName) &&
+            (identical(other.jobTitle, jobTitle) ||
+                other.jobTitle == jobTitle) &&
+            (identical(other.department, department) ||
+                other.department == department) &&
+            (identical(other.baseIn, baseIn) || other.baseIn == baseIn) &&
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, tableName, id, name, email,
-      password, active, createdAt, updatedAt, image);
+  int get hashCode => Object.hash(
+      runtimeType,
+      tableName,
+      id,
+      name,
+      email,
+      password,
+      active,
+      createdAt,
+      updatedAt,
+      image,
+      publicName,
+      jobTitle,
+      department,
+      baseIn,
+      phoneNumber);
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.
@@ -309,15 +422,21 @@ class _$UserModelImpl implements _UserModel {
 
 abstract class _UserModel implements UserModel {
   const factory _UserModel(
-      {@JsonKey(name: 'table_name') final String? tableName,
-      @JsonKey(name: 'id') final String? id,
-      @JsonKey(name: 'name') final String? name,
-      @JsonKey(name: 'email') final String? email,
-      @JsonKey(name: 'password') final String? password,
-      @JsonKey(name: 'active') final bool? active,
-      @JsonKey(name: 'created_at') final String? createdAt,
-      @JsonKey(name: 'updated_at') final String? updatedAt,
-      @JsonKey(name: 'image') final String? image}) = _$UserModelImpl;
+          {@JsonKey(name: 'table_name') final String? tableName,
+          @JsonKey(name: 'id') final String? id,
+          @JsonKey(name: 'name') final String? name,
+          @JsonKey(name: 'email') final String? email,
+          @JsonKey(name: 'password') final String? password,
+          @JsonKey(name: 'active') final bool? active,
+          @JsonKey(name: 'created_at') final String? createdAt,
+          @JsonKey(name: 'updated_at') final String? updatedAt,
+          @JsonKey(name: 'image') final String? image,
+          @JsonKey(name: 'public_name') final String? publicName,
+          @JsonKey(name: 'job_title') final String? jobTitle,
+          @JsonKey(name: 'department') final String? department,
+          @JsonKey(name: 'base_in') final String? baseIn,
+          @JsonKey(name: 'phone_number') final String? phoneNumber}) =
+      _$UserModelImpl;
 
   factory _UserModel.fromJson(Map<String, dynamic> json) =
       _$UserModelImpl.fromJson;
@@ -349,6 +468,21 @@ abstract class _UserModel implements UserModel {
   @override
   @JsonKey(name: 'image')
   String? get image;
+  @override
+  @JsonKey(name: 'public_name')
+  String? get publicName;
+  @override
+  @JsonKey(name: 'job_title')
+  String? get jobTitle;
+  @override
+  @JsonKey(name: 'department')
+  String? get department;
+  @override
+  @JsonKey(name: 'base_in')
+  String? get baseIn;
+  @override
+  @JsonKey(name: 'phone_number')
+  String? get phoneNumber;
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.
