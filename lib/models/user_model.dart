@@ -16,6 +16,11 @@ class UserModel with _$UserModel {
   @JsonKey(name: 'created_at') String? createdAt,
   @JsonKey(name: 'updated_at') String? updatedAt,
   @JsonKey(name: 'image') String? image,
+  @JsonKey(name: 'public_name') String? publicName,
+  @JsonKey(name: 'job_title') String? jobTitle,
+  @JsonKey(name: 'department') String? department,
+  @JsonKey(name: 'base_in') String? baseIn,
+  @JsonKey(name: 'phone_number') String? phoneNumber,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
