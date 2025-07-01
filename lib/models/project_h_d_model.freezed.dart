@@ -44,6 +44,8 @@ mixin _$ProjectHDModel {
   UserModel? get updatedBy => throw _privateConstructorUsedError;
   @JsonKey(name: 'active')
   bool? get active => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  double get progress => throw _privateConstructorUsedError;
 
   /// Serializes this ProjectHDModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -73,7 +75,8 @@ abstract class $ProjectHDModelCopyWith<$Res> {
       @JsonKey(name: 'updated_at') String? updatedAt,
       @JsonKey(name: 'created_by') UserModel? createdBy,
       @JsonKey(name: 'updated_by') UserModel? updatedBy,
-      @JsonKey(name: 'active') bool? active});
+      @JsonKey(name: 'active') bool? active,
+      @JsonKey(ignore: true) double progress});
 
   $UserModelCopyWith<$Res>? get leader;
   $UserModelCopyWith<$Res>? get createdBy;
@@ -107,6 +110,7 @@ class _$ProjectHDModelCopyWithImpl<$Res, $Val extends ProjectHDModel>
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
     Object? active = freezed,
+    Object? progress = null,
   }) {
     return _then(_value.copyWith(
       tableName: freezed == tableName
@@ -157,6 +161,10 @@ class _$ProjectHDModelCopyWithImpl<$Res, $Val extends ProjectHDModel>
           ? _value.active
           : active // ignore: cast_nullable_to_non_nullable
               as bool?,
+      progress: null == progress
+          ? _value.progress
+          : progress // ignore: cast_nullable_to_non_nullable
+              as double,
     ) as $Val);
   }
 
@@ -223,7 +231,8 @@ abstract class _$$ProjectHDModelImplCopyWith<$Res>
       @JsonKey(name: 'updated_at') String? updatedAt,
       @JsonKey(name: 'created_by') UserModel? createdBy,
       @JsonKey(name: 'updated_by') UserModel? updatedBy,
-      @JsonKey(name: 'active') bool? active});
+      @JsonKey(name: 'active') bool? active,
+      @JsonKey(ignore: true) double progress});
 
   @override
   $UserModelCopyWith<$Res>? get leader;
@@ -258,6 +267,7 @@ class __$$ProjectHDModelImplCopyWithImpl<$Res>
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
     Object? active = freezed,
+    Object? progress = null,
   }) {
     return _then(_$ProjectHDModelImpl(
       tableName: freezed == tableName
@@ -308,6 +318,10 @@ class __$$ProjectHDModelImplCopyWithImpl<$Res>
           ? _value.active
           : active // ignore: cast_nullable_to_non_nullable
               as bool?,
+      progress: null == progress
+          ? _value.progress
+          : progress // ignore: cast_nullable_to_non_nullable
+              as double,
     ));
   }
 }
@@ -327,7 +341,8 @@ class _$ProjectHDModelImpl implements _ProjectHDModel {
       @JsonKey(name: 'updated_at') this.updatedAt,
       @JsonKey(name: 'created_by') this.createdBy,
       @JsonKey(name: 'updated_by') this.updatedBy,
-      @JsonKey(name: 'active') this.active});
+      @JsonKey(name: 'active') this.active,
+      @JsonKey(ignore: true) this.progress = 0.0});
 
   factory _$ProjectHDModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProjectHDModelImplFromJson(json);
@@ -368,10 +383,13 @@ class _$ProjectHDModelImpl implements _ProjectHDModel {
   @override
   @JsonKey(name: 'active')
   final bool? active;
+  @override
+  @JsonKey(ignore: true)
+  final double progress;
 
   @override
   String toString() {
-    return 'ProjectHDModel(tableName: $tableName, id: $id, categoryId: $categoryId, name: $name, key: $key, description: $description, leader: $leader, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy, active: $active)';
+    return 'ProjectHDModel(tableName: $tableName, id: $id, categoryId: $categoryId, name: $name, key: $key, description: $description, leader: $leader, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy, active: $active, progress: $progress)';
   }
 
   @override
@@ -397,7 +415,9 @@ class _$ProjectHDModelImpl implements _ProjectHDModel {
                 other.createdBy == createdBy) &&
             (identical(other.updatedBy, updatedBy) ||
                 other.updatedBy == updatedBy) &&
-            (identical(other.active, active) || other.active == active));
+            (identical(other.active, active) || other.active == active) &&
+            (identical(other.progress, progress) ||
+                other.progress == progress));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -415,7 +435,8 @@ class _$ProjectHDModelImpl implements _ProjectHDModel {
       updatedAt,
       createdBy,
       updatedBy,
-      active);
+      active,
+      progress);
 
   /// Create a copy of ProjectHDModel
   /// with the given fields replaced by the non-null parameter values.
@@ -447,7 +468,8 @@ abstract class _ProjectHDModel implements ProjectHDModel {
       @JsonKey(name: 'updated_at') final String? updatedAt,
       @JsonKey(name: 'created_by') final UserModel? createdBy,
       @JsonKey(name: 'updated_by') final UserModel? updatedBy,
-      @JsonKey(name: 'active') final bool? active}) = _$ProjectHDModelImpl;
+      @JsonKey(name: 'active') final bool? active,
+      @JsonKey(ignore: true) final double progress}) = _$ProjectHDModelImpl;
 
   factory _ProjectHDModel.fromJson(Map<String, dynamic> json) =
       _$ProjectHDModelImpl.fromJson;
@@ -488,6 +510,9 @@ abstract class _ProjectHDModel implements ProjectHDModel {
   @override
   @JsonKey(name: 'active')
   bool? get active;
+  @override
+  @JsonKey(ignore: true)
+  double get progress;
 
   /// Create a copy of ProjectHDModel
   /// with the given fields replaced by the non-null parameter values.
