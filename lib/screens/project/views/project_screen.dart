@@ -1,211 +1,199 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:project/models/project_h_d_model.dart';
-import 'package:project/config/routes/route_config.dart';
-import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
 
-
-// 🎨 พาเลตสีจาก Dashboard
-const backgroundColor = Color(0xFFF5F7FB);     // ฟ้าอ่อน
-const cardColor = Colors.white;               // กล่องสีขาว
-const shadowColor = Color(0xFFE0E6F1);         // เงานวล
-const primaryTextColor = Color(0xFF1A237E);    // น้ำเงินเข้ม
-const accentColor = Color(0xFF3D5AFE);         // น้ำเงินสด
-const progressBackground = Color(0xFFE0E6F1);  // สีหลัง progress bar
-
-class ProjectScreen extends ConsumerWidget {
-  const ProjectScreen({super.key});
+class ProjectScreen extends ConsumerStatefulWidget {
+  const ProjectScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final projectController = ref.read(projectControllerProvider);
-    final categoryController = ref.read(categoryControllerProvider);
-    return FutureBuilder(
-      future: Future.wait([
-        projectController.getProjects(),
-        categoryController.getCategories(),
-      ]),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        } else if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(child: Text('Error: \\${snapshot.error}')),
-          );
-        } else {
-          final projects = snapshot.data![0] as List<ProjectHDModel>;
-          final categories = snapshot.data![1]; // List<CategoryModel>
-          final categorizedProjects = <String, List<ProjectHDModel>>{
-            'โปรเจคด้านแอปพลิเคชันมือถือ (Mobile App Projects)':
-                projects.where((p) => p.categoryId == 'mobile').toList(),
-            'โปรเจคด้านการพัฒนาเว็บ (Web Development Projects)':
-                projects.where((p) => p.categoryId == 'web').toList(),
-            'โปรเจคด้านปัญญาประดิษฐ์ (AI Projects)':
-                projects.where((p) => p.categoryId == 'ai').toList(),
-            'โปรเจคด้านเกม (Game Development Projects)':
-                projects.where((p) => p.categoryId == 'game').toList(),
-          };
+  ConsumerState<ProjectScreen> createState() => _ProjectScreenState();
+}
 
-          return Scaffold(
-            backgroundColor: const Color.fromARGB(255, 219, 239, 243),
-            appBar: AppBar(
-              title: const Text('Projects'),
-              shape: const Border(bottom: BorderSide(color: Colors.transparent)),
-            ),
-            body: Stack(
-              children: [
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1000),
-                    child: ListView(
-                      padding: const EdgeInsets.all(24),
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(24),
-                          margin: const EdgeInsets.only(bottom: 24),
-                          decoration: BoxDecoration(
-                            color: cardColor,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: shadowColor.withOpacity(0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: const Text(
-                            'รายการโครงการที่พัฒนาทั้งหมด',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                              color: primaryTextColor,
-                            ),
-                          ),
+class _ProjectScreenState extends ConsumerState<ProjectScreen> {
+  String selectedWorkspaceId = '1';
+  Map<String, bool> categoryExpansionState = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryAsyncValue = ref.watch(categoryListProvider(selectedWorkspaceId));
+    final allProjectsAsyncValue = ref.watch(projectListByCategoryProvider('0'));
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 168, 208, 240),
+        title: const Text('Project Screen'),
+        centerTitle: false,
+      ),
+      body: categoryAsyncValue.when(
+        data: (categories) {
+          if (categories.isEmpty) {
+            return const Center(child: Text('ไม่พบหมวดหมู่โปรเจค'));
+          }
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              /// All Categories Section
+              ExpansionTile(
+                title: const Text(
+                  'โปรเจคทั้งหมด (All Categories)',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                initiallyExpanded: categoryExpansionState['0'] ?? false,
+                onExpansionChanged: (expanded) {
+                  setState(() {
+                    categoryExpansionState['0'] = expanded;
+                  });
+                },
+                children: [
+                  allProjectsAsyncValue.when(
+                    data: (projects) {
+                      if (projects.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('ไม่มีโปรเจคในหมวดหมู่นี้'),
+                        );
+                      }
+
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(8),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 4 / 3,
                         ),
-                        ...categorizedProjects.entries.map((entry) {
-                          return Theme(
-                            data: Theme.of(context).copyWith(
-                              dividerColor: Colors.transparent,
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                            ),
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              decoration: BoxDecoration(
-                                color: cardColor,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: shadowColor.withOpacity(0.3),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ExpansionTile(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-                                title: Text(
-                                  entry.key,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: primaryTextColor,
-                                  ),
-                                ),
-                                childrenPadding: const EdgeInsets.only(bottom: 12),
-                                children: entry.value.isEmpty
-                                    ? [
-                                        const Padding(
-                                          padding: EdgeInsets.all(16),
-                                          child: Text('ไม่มีโปรเจคในหมวดหมู่นี้'),
-                                        ),
-                                      ]
-                                    : entry.value.map((project) {
-                                        final progress = project.progress ?? 0.0;
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: backgroundColor,
-                                              borderRadius: BorderRadius.circular(10),
-                                            ),
-                                            child: ListTile(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
-                                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                              leading: const Icon(Icons.folder_open_rounded, color: accentColor),
-                                              title: Text(
-                                                project.name ?? 'ไม่มีชื่อโปรเจกต์',
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                              subtitle: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    children: [
-                                                      SizedBox(
-                                                        width: 80,
-                                                        height: 6,
-                                                        child: Stack(
-                                                          children: [
-                                                            Container(
-                                                              decoration: BoxDecoration(
-                                                                color: progressBackground,
-                                                                borderRadius: BorderRadius.circular(4),
-                                                              ),
-                                                            ),
-                                                            FractionallySizedBox(
-                                                              widthFactor: progress,
-                                                              alignment: Alignment.centerLeft,
-                                                              child: Container(
-                                                                decoration: BoxDecoration(
-                                                                  color: accentColor,
-                                                                  borderRadius: BorderRadius.circular(4),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Text('${(progress * 100).toStringAsFixed(0)}%'),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                                              onTap: () => Navigator.of(context).pushNamed(Routes.projectDetail),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
+                        itemCount: projects.length,
+                        itemBuilder: (context, index) {
+                          final project = projects[index];
+                          return _buildProjectCard(project);
+                        },
+                      );
+                    },
+                    loading: () => const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (error, _) => Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text('โหลดโปรเจคล้มเหลว: $error'),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+
+              /// ✅ Category Sections
+              ...categories.map((category) {
+                final categoryId = category.id ?? '0';
+                final categoryName = category.name ?? '-';
+                final isExpanded = categoryExpansionState[categoryId] ?? false;
+                final projectAsyncValue = ref.watch(projectListByCategoryProvider(categoryId));
+
+                return ExpansionTile(
+                  backgroundColor: const Color.fromARGB(119, 204, 233, 247),
+                  title: Text(
+                    '$categoryName ($categoryId)',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  initiallyExpanded: isExpanded,
+                  onExpansionChanged: (expanded) {
+                    setState(() {
+                      categoryExpansionState[categoryId] = expanded;
+                    });
+                  },
+                  children: [
+                    projectAsyncValue.when(
+                      data: (projects) {
+                        if (projects.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text('ไม่มีโปรเจคในหมวดหมู่นี้'),
+                          );
+                        }
+
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(8),
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 4 / 3,
+                          ),
+                          itemCount: projects.length,
+                          itemBuilder: (context, index) {
+                            final project = projects[index];
+                            return _buildProjectCard(project);
+                          },
+                        );
+                      },
+                      loading: () => const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                      error: (error, _) => Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text('โหลดโปรเจคล้มเหลว: $error'),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ],
           );
-        }
-      },
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text('เกิดข้อผิดพลาด: $error')),
+      ),
+    );
+  }
+
+  /// ✅ Extracted reusable Card Widget
+  Widget _buildProjectCard(dynamic project) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () {
+          // TODO: เปิดรายละเอียดโปรเจค
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.image, size: 48), // หรือใส่ Image.network(project.imageUrl ?? '')
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                project.name ?? '-',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'ID: ${project.id}',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
