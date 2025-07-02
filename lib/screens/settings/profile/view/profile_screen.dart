@@ -11,7 +11,7 @@ class ProfileScreen extends BaseStatefulWidget {
 }
 
 class _ProfileScreenState extends BaseState<ProfileScreen> {
-  bool _obscurePassword = true;
+  bool _obscurePassword = true; // สำหรับซ่อน/แสดงรหัสผ่าน
 
   @override
   void initState() {
@@ -22,6 +22,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 169, 212, 216),
       appBar: AppBar(title: const Text('My Profile')),
       body: Consumer(
         builder: (context, ref, _) {
@@ -56,10 +57,10 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                             radius: 70,
                             backgroundImage: user.image != null && user.image!.isNotEmpty
                                 ? NetworkImage(user.image!)
-                                : const AssetImage('assets/images/avatar_placeholder.png') as ImageProvider,
+                                : null, // ✅ ไม่ใช้ AssetImage แล้ว
                             child: user.image == null || user.image!.isEmpty
                                 ? const Icon(Icons.person, size: 70, color: Colors.grey)
-                                : null,
+                                : null, // แสดง icon ถ้าไม่มีรูป
                           ),
                         ),
                         const SizedBox(width: 48),
@@ -115,7 +116,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                                       icon: IconButton(
                                         icon: Icon(
                                           _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                                          size: 18,
+                                          size: 20,
                                         ),
                                         onPressed: () {
                                           setState(() {
@@ -141,6 +142,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
     );
   }
 
+  // ✅ ใช้ Flexible + ปุ่ม toggle รหัสผ่าน
   Widget _profileInfoRow(String label, String? value, {Widget? icon}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,8 +153,9 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
         ),
         Expanded(
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(child: Text(value ?? '-', style: const TextStyle(color: Colors.black87))),
+              Flexible(child: Text(value ?? '-', style: const TextStyle(color: Colors.black87))),
               if (icon != null) icon,
             ],
           ),

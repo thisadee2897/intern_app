@@ -40,6 +40,8 @@ class _EditProfileScreenState extends BaseState<EditProfileScreen> {
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
+      filled: true, // ✅ ป้องกันพื้นหลังทะลุ input
+      fillColor: Colors.white, // ✅ สีพื้น input
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
@@ -50,128 +52,154 @@ class _EditProfileScreenState extends BaseState<EditProfileScreen> {
     final isLoading = ref.watch(profileControllerProvider).isLoading;
 
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 188, 224, 231), // พื้นหลังหลัก
       appBar: AppBar(title: const Text('Edit Profile')),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 600),
           padding: const EdgeInsets.all(32),
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Name
-                TextField(
-                  controller: nameController,
-                  decoration: _inputDecoration('Name'),
-                ),
-                const SizedBox(height: 20),
+            child: Card(
+              elevation: 6,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'แก้ไขข้อมูลส่วนตัว',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 24),
 
-                // Email
-                TextField(
-                  controller: emailController,
-                  decoration: _inputDecoration('Email'),
-                ),
-                const SizedBox(height: 20),
+                    // Name
+                    TextField(
+                      controller: nameController,
+                      decoration: _inputDecoration('Name'),
+                    ),
+                    const SizedBox(height: 20),
 
-                // Phone
-                TextField(
-                  controller: phoneController,
-                  decoration: _inputDecoration('Phone'),
-                ),
-                const SizedBox(height: 20),
+                    // Email
+                    TextField(
+                      controller: emailController,
+                      decoration: _inputDecoration('Email'),
+                    ),
+                    const SizedBox(height: 20),
 
-                // Image preview
-                if (imageController.text.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
+                    // Phone
+                    TextField(
+                      controller: phoneController,
+                      decoration: _inputDecoration('Phone'),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Image preview
+                    if (imageController.text.isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.network(
+                          imageController.text,
+                          height: 150,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 150,
+                            color: Colors.grey[200],
+                            child: const Center(child: Text('Invalid image URL')),
+                          ),
+                        ),
+                      ),
+
+                    // Image URL toggle
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: imageController,
+                            decoration: _inputDecoration('Image URL'),
+                            enabled: isEditingImage,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          tooltip: 'Clear image',
+                          onPressed: () {
+                            imageController.clear();
+                            setState(() {});
+                          },
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              isEditingImage = !isEditingImage;
+                              if (!isEditingImage) {
+                                imageController.text = widget.user.image ?? '';
+                              }
+                            });
+                          },
+                          child: Text(isEditingImage ? 'ยกเลิก' : 'แก้ไข'),
                         ),
                       ],
                     ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Image.network(
-                      imageController.text,
-                      height: 150,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        height: 150,
-                        color: Colors.grey[200],
-                        child: const Center(child: Text('Invalid image URL')),
-                      ),
-                    ),
-                  ),
 
-                // Image URL with toggle
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: imageController,
-                        decoration: _inputDecoration('Image URL'),
-                        enabled: isEditingImage,
+                    const SizedBox(height: 32),
+
+                    // Save Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.save),
+                        label: isLoading ? const Text('Saving...') : const Text('Save'),
+                        onPressed: isLoading
+                            ? null
+                            : () async {
+                                // ✅ ตรวจสอบว่าชื่อและอีเมลไม่ว่าง
+                                if (nameController.text.trim().isEmpty ||
+                                    emailController.text.trim().isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('กรุณากรอกชื่อและอีเมล'),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                final updatedUser = widget.user.copyWith(
+                                  name: nameController.text,
+                                  email: emailController.text,
+                                  phoneNumber: phoneController.text,
+                                  image: imageController.text,
+                                );
+
+                                await ref
+                                    .read(profileControllerProvider.notifier)
+                                    .updateProfile(updatedUser);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Profile updated successfully')),
+                                );
+
+                                Navigator.pop(context, true);
+                              },
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      tooltip: 'Clear image',
-                      onPressed: () {
-                        imageController.clear();
-                        setState(() {});
-                      },
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          isEditingImage = !isEditingImage;
-                          if (!isEditingImage) {
-                            imageController.text = widget.user.image ?? '';
-                          }
-                        });
-                      },
-                      child: Text(isEditingImage ? 'ยกเลิก' : 'แก้ไข'),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 32),
-
-                // Save Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.save),
-                    label: isLoading ? const Text('Saving...') : const Text('Save'),
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            final updatedUser = widget.user.copyWith(
-                              name: nameController.text,
-                              email: emailController.text,
-                              phoneNumber: phoneController.text,
-                              image: imageController.text,
-                            );
-
-                            await ref
-                                .read(profileControllerProvider.notifier)
-                                .updateProfile(updatedUser);
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Profile updated successfully')),
-                            );
-
-                            Navigator.pop(context, true);
-                          },
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
