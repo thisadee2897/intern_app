@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:project/config/routes/route_config.dart';
+import 'package:project/config/routes/route_helper.dart';
+import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 
 final isShowButtomNavigationBar = StateProvider<bool>((ref) => true);
 
@@ -42,21 +45,36 @@ class _ScaffoldWithAppbarState extends ConsumerState<ScaffoldWithAppbar> {
         children: [
           if (!isSmallScreen && showBottomBar)
             Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  right: BorderSide(
-                    color: Colors.grey.shade300,
-                    width: 1.0,
+              decoration: BoxDecoration(color: Colors.white, border: Border(right: BorderSide(color: Colors.grey.shade300, width: 1.0))),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: NavigationRail(
+                      indicatorShape: const CircleBorder(side: BorderSide(color: Colors.transparent, width: 0.0)),
+                      selectedIndex: widget.navigationShell.currentIndex,
+                      onDestinationSelected: _onTap,
+                      labelType: NavigationRailLabelType.all,
+                      destinations:
+                          appDestinations
+                              .map((e) => NavigationRailDestination(icon: Icon(e.icon), selectedIcon: Icon(e.activeIcon), label: Text(e.label)))
+                              .toList(),
+                    ),
                   ),
-                ),
-              ),
-              child: NavigationRail(
-                indicatorShape: const CircleBorder(side: BorderSide(color: Colors.transparent, width: 0.0)),
-                selectedIndex: widget.navigationShell.currentIndex,
-                onDestinationSelected: _onTap,
-                labelType: NavigationRailLabelType.all,
-                destinations:
-                    appDestinations.map((e) => NavigationRailDestination(icon: Icon(e.icon), selectedIcon: Icon(e.activeIcon), label: Text(e.label))).toList(),
+                  //Logout Button
+                  IconButton(
+                    icon: const Icon(Icons.logout),
+                    onPressed: () async {
+                      print('Logout button pressed');
+                      try {
+                        await ref.read(logoutProvider.future);
+                        ref.goFromPath(Routes.login);
+                      } catch (e, stx) {
+                        print(stx);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
           Expanded(child: widget.navigationShell),

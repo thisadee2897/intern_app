@@ -23,17 +23,15 @@ final _shellNavigatorDocumentationKey = GlobalKey<NavigatorState>();
 final appRouterProvider = Provider<GoRouter>((ref) {
   ref.read(localStorageServiceProvider).getUserLogin();
   return GoRouter(
-    redirect: (context, state)async {
+    redirect: (context, state) async {
       //ถ้า Token ไม่มีให้ไปหน้า Login
-      String? token = await ref.read(localStorageServiceProvider).getToken();
+      String? token = ref.read(localStorageServiceProvider).userToken;
       var currentPath = state.fullPath;
       if (token == null || token.isEmpty) {
-        if (currentPath != Routes.login) {
-          return Routes.login;
-        }
+        return Routes.login;
       } else {
         //ถ้า Token มีให้ไปหน้า Home
-        if (currentPath == Routes.login) {
+        if (currentPath == Routes.login || currentPath == Routes.init) {
           return Routes.home;
         }
       }

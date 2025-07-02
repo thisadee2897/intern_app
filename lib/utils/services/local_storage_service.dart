@@ -149,6 +149,10 @@ class LocalStorageService {
   Future<void> clear() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+    _userLoginData = const UserLoginModel();
+    _userToken = null;
+    fcmToken = null;
+    _profileImage = null;
   }
 }
 
