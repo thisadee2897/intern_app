@@ -148,7 +148,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.documentation,
-                pageBuilder: (context, state) => NoTransitionPage(child: DocumetationScreen()),
+                pageBuilder: (context, state) => NoTransitionPage(child: DocumentationScreen()),
                 // routes: [
                 //   GoRoute(
                 //     path: Routes.appointmentDetail,
