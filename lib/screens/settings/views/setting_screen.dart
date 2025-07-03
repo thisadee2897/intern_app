@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:project/components/export.dart';
+import 'package:project/config/routes/route_config.dart';
+import 'package:project/config/routes/route_helper.dart';
+import '../../auth/providers/controllers/auth_controller.dart';
 
-class SettingScreen extends StatefulWidget {
+
+class SettingScreen extends ConsumerStatefulWidget {
   const SettingScreen({super.key});
 
   @override
-  State<SettingScreen> createState() => _SettingScreenState();
+  ConsumerState<SettingScreen> createState() => _SettingScreenState();
 }
 
-class _SettingScreenState extends State<SettingScreen> {
+class _SettingScreenState extends ConsumerState<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,33 +23,27 @@ class _SettingScreenState extends State<SettingScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              // Handle logout action
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Logged out')),
-              );
+            onPressed: () async {
+              await ref.read(logoutProvider.future);
+              ref.goFromPath(Routes.login);
             },
           ),
         ],
       ),
       extendBodyBehindAppBar: true,
-      body: ListView.builder(
-        itemCount: 2000000,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('Setting Item ${index + 1}'),
-            subtitle: const Text('Description of the setting item'),
-            leading: const Icon(Icons.settings),
+      body: ListView(
+        children: [
+          ListTile(
+            title: const Text('My Profile'),
+            subtitle: const Text('View and edit your profile'),
+            leading: const Icon(Icons.person),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              // Handle tap on setting item
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Tapped on Setting Item ${index + 1}')),
-              );
+              context.push('/setting/profile');
             },
-          );
-        },
+          ),
+        ],
       ),
-      );
+    );
   }
 }

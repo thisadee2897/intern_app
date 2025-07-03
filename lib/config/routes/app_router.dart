@@ -10,6 +10,7 @@ import 'package:project/screens/auth/view/login.dart';
 import 'package:project/screens/product_update/view/product_updat_screen.dart';
 import 'package:project/screens/project/project_datail/views/project_detail_screen.dart';
 import 'package:project/screens/project/views/project_screen.dart';
+import 'package:project/screens/settings/profile/view/profile_screen.dart';
 import 'package:project/screens/settings/views/setting_screen.dart';
 import 'package:project/utils/services/local_storage_service.dart';
 
@@ -95,7 +96,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: Routes.setting,
                 pageBuilder: (context, state) => NoTransitionPage(child: SettingScreen()),
-                // routes: [
+                routes: [
+                  GoRoute(
+                    path: 'profile',
+                    pageBuilder: (context, state) => NoTransitionPage(child: ProfileScreen()),
+                  ),
+                ],
                 //   GoRoute(
                 //     path: Routes.appointmentDetail,
                 //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
