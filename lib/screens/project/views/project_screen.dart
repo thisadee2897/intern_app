@@ -85,7 +85,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
                 ],
               ),
 
-              /// ✅ Category Sections
+              ///  Category Sections
               ...categories.map((category) {
                 final categoryId = category.id ?? '0';
                 final categoryName = category.name ?? '-';
@@ -152,7 +152,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
     );
   }
 
-  /// ✅ Extracted reusable Card Widget
+  ///  Extracted reusable Card Widget
   Widget _buildProjectCard(dynamic project) {
     return Card(
       elevation: 2,
