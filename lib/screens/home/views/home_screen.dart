@@ -52,12 +52,22 @@ class _HomeScreenState extends BaseState<HomeScreen> {
   }
 
   @override
-  Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge));
+  Widget buildTablet(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
+    return Center(
+      child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge),
+    );
   }
 
   @override
-  Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge));
+  Widget buildMobile(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
+    return Center(
+      child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge),
+    );
   }
 }
