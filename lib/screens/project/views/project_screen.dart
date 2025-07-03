@@ -7,8 +7,36 @@ class ProjectScreen extends ConsumerStatefulWidget {
   const ProjectScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<ProjectScreen> createState() => _ProjectScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final projectController = ref.read(projectControllerProvider);
+    final categoryController = ref.read(categoryControllerProvider);
+    return FutureBuilder(
+      future: Future.wait([
+        projectController.getProjects(),
+        categoryController.getCategories(),
+      ]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(child: Text('Error: \\${snapshot.error}')),
+          );
+        } else {
+          final projects = snapshot.data![0] as List<ProjectHDModel>;
+          final categories = snapshot.data![1]; // List<CategoryModel>
+          final categorizedProjects = <String, List<ProjectHDModel>>{
+            'โปรเจคด้านแอปพลิเคชันมือถือ (Mobile App Projects)':
+                projects.where((p) => p.categoryId == 'mobile').toList(),
+            'โปรเจคด้านการพัฒนาเว็บ (Web Development Projects)':
+                projects.where((p) => p.categoryId == 'web').toList(),
+            'โปรเจคด้านปัญญาประดิษฐ์ (AI Projects)':
+                projects.where((p) => p.categoryId == 'ai').toList(),
+            'โปรเจคด้านเกม (Game Development Projects)':
+                projects.where((p) => p.categoryId == 'game').toList(),
+          };
 
 class _ProjectScreenState extends ConsumerState<ProjectScreen> {
   String selectedWorkspaceId = '1';
