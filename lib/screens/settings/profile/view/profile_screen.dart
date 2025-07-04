@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';  
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:ui';
 import 'package:project/components/export.dart';
 import 'package:project/screens/settings/profile/provider/controller/profile_controller.dart';
 import 'package:project/screens/settings/profile/view/profile_detail.dart';
@@ -13,6 +14,8 @@ class ProfileScreen extends BaseStatefulWidget {
 
 class _ProfileScreenState extends BaseState<ProfileScreen> {
   bool _obscurePassword = true;
+  bool _isAvatarHovered = false;
+  bool _isEditBtnHovered = false;
 
   @override
   void initState() {
@@ -26,21 +29,21 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-  backgroundColor: Colors.transparent,
-  elevation: 0,
-  foregroundColor: Colors.white, // ทำให้ปุ่มและไอคอนเป็นสีขาวทั้งหมด
-  leading: IconButton(
-    icon: const Icon(Icons.arrow_back, color: Colors.white), // ปุ่มกลับสีขาว
-    onPressed: () => Navigator.of(context).pop(), // กลับหน้าก่อนหน้า
-  ),
-  title: const Text(
-    'My Profile',
-    style: TextStyle(
-      fontWeight: FontWeight.bold,
-      color: Colors.white, // สีของข้อความหัวข้อเป็นสีขาว
-    ),
-  ),
-),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'My Profile',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -52,7 +55,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
 
           // overlay สีดำโปร่งแสง เพื่อเพิ่มความสดของรูป
           Container(
-            color: Colors.black.withOpacity(0.15), // ปรับให้โปร่งใส ไม่บังมากเกินไป
+            color: Colors.black.withOpacity(0.15),
           ),
 
           // เพิ่ม SingleChildScrollView เพื่อให้เลื่อนดูได้ พร้อมเว้นระยะห่างจาก appbar
@@ -62,7 +65,16 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
               builder: (context, ref, _) {
                 final profileAsync = ref.watch(profileControllerProvider);
                 return profileAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () => const Center(
+                    child: SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 6,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                      ),
+                    ),
+                  ),
                   error: (e, st) => Center(child: Text('Error: $e')),
                   data: (user) {
                     return Center(
@@ -70,39 +82,53 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                         padding: const EdgeInsets.all(32),
                         constraints: const BoxConstraints(maxWidth: 900),
                         child: Card(
-                          elevation: 8,
+                          elevation: 16,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          color: Colors.white,
                           child: Padding(
                             padding: const EdgeInsets.all(32),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // รูปโปรไฟล์
-                                Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      colors: [Colors.blue.shade200, Colors.blue.shade600],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: Colors.black26,
-                                        blurRadius: 10,
-                                        offset: Offset(0, 4),
+                                // รูปโปรไฟล์ + เอฟเฟกต์
+                                MouseRegion(
+                                  onEnter: (_) => setState(() => _isAvatarHovered = true),
+                                  onExit: (_) => setState(() => _isAvatarHovered = false),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                    transform: _isAvatarHovered
+                                        ? (Matrix4.identity()..scale(1.08))
+                                        : Matrix4.identity(),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [Colors.blue.shade200, Colors.blue.shade600],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
                                       ),
-                                    ],
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 70,
-                                    backgroundColor: Colors.white,
-                                    backgroundImage: user.image != null && user.image!.isNotEmpty
-                                        ? NetworkImage(user.image!)
-                                        : null,
-                                    child: (user.image == null || user.image!.isEmpty)
-                                        ? const Icon(Icons.person, size: 70, color: Colors.grey)
-                                        : null,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color.fromARGB(255, 89, 149, 251).withOpacity(_isAvatarHovered ? 0.7 : 0.3),
+                                          blurRadius: _isAvatarHovered ? 32 : 16,
+                                          spreadRadius: _isAvatarHovered ? 8 : 2,
+                                        ),
+                                      ],
+                                      border: Border.all(
+                                        color: _isAvatarHovered ? Colors.white : Colors.transparent,
+                                        width: 3,
+                                      ),
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 70,
+                                      backgroundColor: Colors.white,
+                                      backgroundImage: user.image != null && user.image!.isNotEmpty
+                                          ? NetworkImage(user.image!)
+                                          : null,
+                                      child: (user.image == null || user.image!.isEmpty)
+                                          ? const Icon(Icons.person, size: 70, color: Colors.grey)
+                                          : null,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 48),
@@ -122,25 +148,35 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                           ),
-                                          ElevatedButton.icon(
-                                            onPressed: () {
-                                              Navigator.of(context)
-                                                  .push(MaterialPageRoute(
-                                                    builder: (context) => EditProfileScreen(user: user),
-                                                  ))
-                                                  .then((updated) {
-                                                if (updated == true) {
-                                                  ref.read(profileControllerProvider.notifier).fetchProfile();
-                                                }
-                                              });
-                                            },
-                                            icon: const Icon(Icons.edit, size: 16),
-                                            label: const Text('แก้ไขข้อมูล'),
-                                            style: ElevatedButton.styleFrom(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                              shape: const StadiumBorder(),
-                                              backgroundColor: Colors.blueAccent,
-                                              foregroundColor: Colors.white,
+                                          MouseRegion(
+                                            onEnter: (_) => setState(() => _isEditBtnHovered = true),
+                                            onExit: (_) => setState(() => _isEditBtnHovered = false),
+                                            child: AnimatedScale(
+                                              scale: _isEditBtnHovered ? 1.08 : 1.0,
+                                              duration: const Duration(milliseconds: 180),
+                                              child: ElevatedButton.icon(
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .push(MaterialPageRoute(
+                                                        builder: (context) => EditProfileScreen(user: user),
+                                                      ))
+                                                      .then((updated) {
+                                                    if (updated == true) {
+                                                      ref.read(profileControllerProvider.notifier).fetchProfile();
+                                                    }
+                                                  });
+                                                },
+                                                icon: const Icon(Icons.edit, size: 16),
+                                                label: const Text('แก้ไขข้อมูล'),
+                                                style: ElevatedButton.styleFrom(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                  shape: const StadiumBorder(),
+                                                  backgroundColor: _isEditBtnHovered ? Colors.blue.shade700 : Colors.blueAccent,
+                                                  foregroundColor: Colors.white,
+                                                  elevation: _isEditBtnHovered ? 8 : 2,
+                                                  shadowColor: Colors.blueAccent,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ],
