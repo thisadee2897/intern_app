@@ -19,7 +19,7 @@ class _SettingScreenState extends ConsumerState<SettingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
