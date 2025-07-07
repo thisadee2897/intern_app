@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/components/export.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
+import 'package:project/utils/extension/async_value_sliver_extension.dart';
 
 class ProjectScreen extends BaseStatefulWidget {
   const ProjectScreen({super.key});
@@ -18,7 +18,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
     final categoryAsyncValue = ref.watch(categoryListProvider(selectedWorkspaceId));
-    final allProjectsAsyncValue = ref.watch(projectListByCategoryProvider('0'));
+    // final allProjectsAsyncValue = ref.watch(projectListByCategoryProvider('0'));
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -26,7 +26,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text('Projects', style: TextStyle(color: Color.fromARGB(255, 94, 92, 92), fontWeight: FontWeight.bold)),
-
         centerTitle: false,
       ),
       body: Container(
@@ -37,29 +36,28 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
             opacity: 0.5,
           ),
         ),
-        child: categoryAsyncValue.when(
-          data: (categories) {
+        child: categoryAsyncValue.appWhen(
+          dataBuilder: (categories) {
             if (categories.isEmpty) {
               return const Center(child: Text('ไม่พบหมวดหมู่โปรเจค'));
             }
-
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
                 const SizedBox(height: 40), // ระยะห่าง
                 /// All Categories Section
-                _buildCategoryTile(
-                  context,
-                  title: 'โปรเจคทั้งหมด (All Categories)',
-                  icon: Icons.folder_special,
-                  isExpanded: categoryExpansionState['0'] ?? false,
-                  onExpansionChanged: (expanded) {
-                    setState(() {
-                      categoryExpansionState['0'] = expanded;
-                    });
-                  },
-                  projectsAsync: allProjectsAsyncValue,
-                ),
+                // _buildCategoryTile(
+                //   context,
+                //   title: 'โปรเจคทั้งหมด (All Categories)',
+                //   icon: Icons.folder_special,
+                //   isExpanded: categoryExpansionState['0'] ?? false,
+                //   onExpansionChanged: (expanded) {
+                //     setState(() {
+                //       categoryExpansionState['0'] = expanded;
+                //     });
+                //   },
+                //   projectsAsync: allProjectsAsyncValue,
+                // ),
 
                 /// Category Sections
                 ...categories.map((category) {
@@ -70,7 +68,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
 
                   return _buildCategoryTile(
                     context,
-                    title: '$categoryName ($categoryId)',
+                    title: "$categoryName (${projectAsyncValue.value?.length})",
                     icon: Icons.folder,
                     isExpanded: isExpanded,
                     onExpansionChanged: (expanded) {
@@ -80,12 +78,10 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                     },
                     projectsAsync: projectAsyncValue,
                   );
-                }).toList(),
+                }),
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('เกิดข้อผิดพลาด: $error')),
         ),
       ),
     );
@@ -105,13 +101,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
         color: const Color.fromARGB(59, 255, 255, 255),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color.fromARGB(107, 68, 137, 255), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(158, 68, 137, 255).withOpacity(0.15),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: const Color.fromARGB(158, 68, 137, 255).withOpacity(0.15), blurRadius: 6, offset: const Offset(0, 3))],
       ),
       child: ExpansionTile(
         leading: Icon(icon, color: Colors.blueAccent),
@@ -124,10 +114,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
           projectsAsync.when(
             data: (projects) {
               if (projects.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('ไม่มีโปรเจคในหมวดหมู่นี้'),
-                );
+                return const Padding(padding: EdgeInsets.all(8.0), child: Text('ไม่มีโปรเจคในหมวดหมู่นี้'));
               }
 
               return GridView.builder(
@@ -147,14 +134,8 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                 },
               );
             },
-            loading: () => const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (error, _) => Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text('โหลดโปรเจคล้มเหลว: $error'),
-            ),
+            loading: () => const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())),
+            error: (error, _) => Padding(padding: const EdgeInsets.all(16), child: Text('โหลดโปรเจคล้มเหลว: $error')),
           ),
         ],
       ),
@@ -169,9 +150,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: InkWell(
-          onTap: () {
-            // TODO: เปิดรายละเอียดโปรเจค
-          },
+          onTap: () {},
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -183,21 +162,12 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                     child: Container(
                       color: const Color.fromARGB(248, 230, 232, 232),
                       alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        size: 60,
-                        color: Color.fromARGB(246, 100, 99, 99),
-                      ),
+                      child: const Icon(Icons.image_not_supported, size: 60, color: Color.fromARGB(246, 100, 99, 99)),
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  project.name ?? '-',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text(project.name ?? '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
                 Text('ID: ${project.id}', style: const TextStyle(fontSize: 14)),
               ],

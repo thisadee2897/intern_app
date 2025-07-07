@@ -13,14 +13,7 @@ class DocumentationScreen extends StatelessWidget {
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1500),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                HeaderSection(),
-                SizedBox(height: 45),
-                DocCardGrid(),
-              ],
-            ),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: const [HeaderSection(), SizedBox(height: 45), DocCardGrid()]),
           ),
         ),
       ),
@@ -35,20 +28,10 @@ class HeaderSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 160),
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 234, 234, 234),
-        borderRadius: BorderRadius.circular(0),
-      ),
+      decoration: BoxDecoration(color: const Color.fromARGB(255, 234, 234, 234), borderRadius: BorderRadius.circular(0)),
       child: Column(
         children: [
-          const Text(
-            '6amMart Documentation',
-            style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.w500,
-              color: Color.fromARGB(255, 26, 45, 71),
-            ),
-          ),
+          const Text('6amMart Documentation', style: TextStyle(fontSize: 40, fontWeight: FontWeight.w500, color: Color.fromARGB(255, 26, 45, 71))),
           const SizedBox(height: 30),
           Container(
             constraints: const BoxConstraints(maxWidth: 900),
@@ -59,23 +42,14 @@ class HeaderSection extends StatelessWidget {
                 filled: true,
                 fillColor: Colors.white,
                 hoverColor: Colors.transparent,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 16,
-                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(9),
-                  borderSide: const BorderSide(
-                    color: Color.fromARGB(255, 120, 120, 150),
-                    width: 0.3,
-                  ),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 120, 120, 150), width: 0.3),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(9),
-                  borderSide: const BorderSide(
-                    color: Color.fromARGB(255, 120, 120, 150),
-                    width: 0.3,
-                  ),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 120, 120, 150), width: 0.3),
                 ),
               ),
             ),
@@ -100,15 +74,7 @@ final List<Map<String, dynamic>> docCards = const [
   {
     'title': 'Admin Application Configuration',
     'count': 7,
-    'items': [
-      'Prerequisite',
-      'Environment Configuration',
-      'Installation',
-      'Mandatory Setup',
-      'Customizations',
-      '3rd Party Setup',
-      'Rental Module addon',
-    ],
+    'items': ['Prerequisite', 'Environment Configuration', 'Installation', 'Mandatory Setup', 'Customizations', '3rd Party Setup', 'Rental Module addon'],
   },
   {
     'title': 'Mobile Application & Web Configuration',
@@ -163,11 +129,7 @@ class DocCardGrid extends StatelessWidget {
           docCards.map((card) {
             return StaggeredGridTile.fit(
               crossAxisCellCount: 1,
-              child: DocCard(
-                title: card['title'] as String,
-                count: card['count'] as int,
-                items: List<String>.from(card['items']),
-              ),
+              child: DocCard(title: card['title'] as String, count: card['count'] as int, items: List<String>.from(card['items'])),
             );
           }).toList(),
     );
@@ -191,21 +153,13 @@ class DocCard extends StatelessWidget {
   final int count;
   final List<String> items;
 
-  const DocCard({
-    super.key,
-    required this.title,
-    required this.count,
-    required this.items,
-  });
+  const DocCard({super.key, required this.title, required this.count, required this.items});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,23 +173,10 @@ class DocCard extends StatelessWidget {
                   child: Row(
                     children: [
                       const SizedBox(width: 8),
-                      Image.asset(
-                        'assets/images/66.png', 
-                        width: 45,
-                        height: 45,
-                      ),
+                      Image.asset('assets/images/66.png', width: 45, height: 45),
 
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
-                            color: Color.fromARGB(255, 11, 139, 64),
-                          ),
-                        ),
-                      ),
+                      Expanded(child: Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Color.fromARGB(255, 11, 139, 64)))),
                     ],
                   ),
                 ),
@@ -243,30 +184,14 @@ class DocCard extends StatelessWidget {
                 CircleAvatar(
                   backgroundColor: Color.fromARGB(255, 11, 139, 64),
                   radius: 12,
-                  child: Text(
-                    '$count',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: Text('$count', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
           ),
 
           const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: 370,
-              child: const Divider(
-                thickness: 1.5,
-                color: Color.fromARGB(255, 11, 139, 64),
-              ),
-            ),
-          ),
+          Align(alignment: Alignment.center, child: SizedBox(width: 370, child: const Divider(thickness: 1.5, color: Color.fromARGB(255, 11, 139, 64)))),
           const SizedBox(height: 10),
           ListView.builder(
             shrinkWrap: true,
@@ -305,7 +230,7 @@ class _HoverableListItemState extends State<HoverableListItem> {
             const Icon(
               Icons.article_outlined, // icon item
               size: 18,
-              color: const Color.fromARGB(221, 52, 50, 80),
+              color: Color.fromARGB(221, 52, 50, 80),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -314,10 +239,7 @@ class _HoverableListItemState extends State<HoverableListItem> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color:
-                      isHovered
-                          ? Color.fromARGB(255, 11, 139, 64)
-                          : const Color.fromARGB(221, 52, 50, 80),
+                  color: isHovered ? Color.fromARGB(255, 11, 139, 64) : const Color.fromARGB(221, 52, 50, 80),
                 ),
               ),
             ),

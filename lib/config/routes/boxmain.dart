@@ -70,7 +70,9 @@ class _ScaffoldWithAppbarState extends ConsumerState<ScaffoldWithAppbar> {
                         ref.goFromPath(Routes.login);
                       } catch (e, stx) {
                         print(stx);
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
+                        }
                       }
                     },
                   ),

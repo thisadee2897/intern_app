@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:ui';
 import 'package:project/components/export.dart';
 import 'package:project/screens/settings/profile/provider/controller/profile_controller.dart';
 import 'package:project/screens/settings/profile/view/profile_detail.dart';

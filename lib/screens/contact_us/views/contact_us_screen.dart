@@ -316,7 +316,7 @@ class _ContactItem extends StatelessWidget {
   final IconData icon;
   final String text;
 
-  const _ContactItem({required this.icon, required this.text, super.key});
+  const _ContactItem({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {

@@ -25,9 +25,7 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
           // จัดกึ่งกลางเนื้อหาทั้งหมด
           child: ConstrainedBox(
             // กำหนดขนาดสูงสุดของเนื้อหา
-            constraints: const BoxConstraints(
-              maxWidth: 1200,
-            ), // ไม่ให้กว้างเกิน 1200
+            constraints: const BoxConstraints(maxWidth: 1200), // ไม่ให้กว้างเกิน 1200
             child: Column(
               // วางเนื้อหาในแนวตั้ง
               crossAxisAlignment: CrossAxisAlignment.start, // ชิดซ้าย
@@ -38,11 +36,7 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                     const SelectableText(
                       // ข้อความหัวข้อที่สามารถก๊อปปี้ได้
                       'Update',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 11, 12, 14),
-                      ),
+                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 11, 12, 14)),
                     ),
                     const Spacer(), // ดันให้ปุ่มและช่องค้นหาไปชิดขวา
                     SizedBox(
@@ -51,14 +45,9 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                       child: TextField(
                         // ช่องค้นหา
                         decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           filled: true,
-                          fillColor: const Color(
-                            0xfff5fff8,
-                          ), // สีพื้นหลังของช่องค้นหา
+                          fillColor: const Color(0xfff5fff8), // สีพื้นหลังของช่องค้นหา
                           hintText: 'Search...', // ข้อความแนะนำ
                           enabledBorder: OutlineInputBorder(
                             // เส้นขอบปกติ
@@ -68,34 +57,21 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                           focusedBorder: OutlineInputBorder(
                             // เส้นขอบเมื่อคลิก
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.green,
-                              width: 2,
-                            ),
+                            borderSide: const BorderSide(color: Colors.green, width: 2),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      width: 12,
-                    ), // ระยะห่างระหว่างช่องค้นหากับปุ่ม
+                    const SizedBox(width: 12), // ระยะห่างระหว่างช่องค้นหากับปุ่ม
                     ElevatedButton(
                       // ปุ่มค้นหา
                       onPressed: () {}, // ตอนนี้ยังไม่มีฟังก์ชันทำงาน
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green, // สีพื้นหลังปุ่ม
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text(
-                        'Search',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
+                      child: const Text('Search', style: TextStyle(fontSize: 16, color: Colors.white)),
                     ),
                   ],
                 ),
@@ -118,23 +94,14 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                                 (context, error, stackTrace) => Container(
                                   color: Colors.grey.shade300,
                                   height: 300,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.broken_image,
-                                      size: 48,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
+                                  child: const Center(child: Icon(Icons.broken_image, size: 48, color: Colors.grey)),
                                 ),
                           ),
-                          const SizedBox(
-                            height: 24,
-                          ), // เว้นช่องว่างก่อน card ข่าว
+                          const SizedBox(height: 24), // เว้นช่องว่างก่อน card ข่าว
                           newsCard(
                             // ใช้ widget newsCard ที่ประกาศไว้ข้างล่าง
                             version: '2.7',
-                            title:
-                                '6amMart v2.7: Cashback to Wallet & Extra Packaging Charge',
+                            title: '6amMart v2.7: Cashback to Wallet & Extra Packaging Charge',
                             date: 'April 9, 2025',
                             content:
                                 'The 6amMart team brings another exciting news for its existing and new users with the release of version 2.7. The new version brings a fresh wave of features designed specifically to level up the multi vendor delivery business experience. This update is packed with improvements for everyone involved – admins, stores, and customers alike. So ...',
@@ -148,21 +115,14 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                                 (context, error, stackTrace) => Container(
                                   color: Colors.grey.shade300,
                                   height: 300,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.broken_image,
-                                      size: 48,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
+                                  child: const Center(child: Icon(Icons.broken_image, size: 48, color: Colors.grey)),
                                 ),
                           ),
                           const SizedBox(height: 24),
                           newsCard(
                             // ข่าว v2.8
                             version: '2.8',
-                            title:
-                                '6amMart v2.8: Subscription Model & 3rd Party Storage',
+                            title: '6amMart v2.8: Subscription Model & 3rd Party Storage',
                             date: 'April 9, 2025',
                             content:
                                 'Great news for all 6amMart users! The team 6amMart announces the release of version 2.8, packed with exciting new features designed to enhance your eCommerce experience. This update brings advantages to all the stakeholders of the system – especially the store owners and customers. The new updates offer greater flexibility, improved customer interaction, and efficient  ...',
@@ -176,21 +136,14 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                                 (context, error, stackTrace) => Container(
                                   color: Colors.grey.shade300,
                                   height: 300,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.broken_image,
-                                      size: 48,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
+                                  child: const Center(child: Icon(Icons.broken_image, size: 48, color: Colors.grey)),
                                 ),
                           ),
                           const SizedBox(height: 24),
                           newsCard(
                             // ข่าวเกี่ยวกับ Car Rental Module
                             version: '',
-                            title:
-                                'Introducing 6amMart’s Latest Launch: Car Rental Module Addon',
+                            title: 'Introducing 6amMart’s Latest Launch: Car Rental Module Addon',
                             date: 'March 8, 2025',
                             content:
                                 'Team 6amMart has officially launched the 6amMart Car Rental Module Addon! This innovative addition comes with powerful features designed to enhance the car rental business. Take a closer look at the exciting new functionalities 6amMart introduced for the rental module  Let’s take a detailed look at these- System Addon Customers receive the addon as a ...',
@@ -208,42 +161,17 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                           const SelectableText(
                             // หัวข้อ Recent Posts
                             'Recent Posts',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromARGB(255, 6, 6, 7),
-                            ),
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 6, 6, 7)),
                           ),
                           const SizedBox(height: 12),
                           ...[
                             // ใช้ spread operator เพื่อ map รายการโพสต์เป็น widget
+                            {'title': '8 Best Car Rental Software Solutions for 2025', 'date': 'May 26, 2025', 'image': 'assets/images/2.webp'},
+                            {'title': 'eCommerce Inventory Management: Best Techniques & Practices', 'date': 'May 8, 2025', 'image': 'assets/images/3.webp'},
+                            {'title': 'Discover the Best Zid Alternatives for eCommerce Success', 'date': 'May 5, 2025', 'image': 'assets/images/4.webp'},
+                            {'title': 'How to Start a Car Rental Business: Step-by-Step Guide', 'date': 'March 20, 2025', 'image': 'assets/images/7.webp'},
                             {
-                              'title':
-                                  '8 Best Car Rental Software Solutions for 2025',
-                              'date': 'May 26, 2025',
-                              'image': 'assets/images/2.webp',
-                            },
-                            {
-                              'title':
-                                  'eCommerce Inventory Management: Best Techniques & Practices',
-                              'date': 'May 8, 2025',
-                              'image': 'assets/images/3.webp',
-                            },
-                            {
-                              'title':
-                                  'Discover the Best Zid Alternatives for eCommerce Success',
-                              'date': 'May 5, 2025',
-                              'image': 'assets/images/4.webp',
-                            },
-                            {
-                              'title':
-                                  'How to Start a Car Rental Business: Step-by-Step Guide',
-                              'date': 'March 20, 2025',
-                              'image': 'assets/images/7.webp',
-                            },
-                            {
-                              'title':
-                                  'Introducing 6amMart’s Latest Launch: Car Rental Module Addon',
+                              'title': 'Introducing 6amMart’s Latest Launch: Car Rental Module Addon',
                               'date': 'February 27, 2025',
                               'image': 'assets/images/8.webp',
                             },
@@ -252,17 +180,13 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                             (post) => StatefulBuilder(
                               // ใช้ StatefulBuilder เพื่อจัดการการ hover แต่ละรายการ
                               builder: (context, setState) {
-                                bool isHovering = false; // สถานะ hover
+                                // bool isHovering = false; // สถานะ hover
                                 return MouseRegion(
                                   cursor: SystemMouseCursors.click,
-                                  onEnter:
-                                      (_) => setState(() => isHovering = true),
-                                  onExit:
-                                      (_) => setState(() => isHovering = false),
+                                  // onEnter: (_) => setState(() => isHovering = true),
+                                  // onExit: (_) => setState(() => isHovering = false),
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
                                     child: Row(
                                       children: [
                                         Image.asset(
@@ -272,51 +196,30 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                                           height: 60,
                                           fit: BoxFit.cover,
                                           errorBuilder:
-                                              (
-                                                context,
-                                                error,
-                                                stackTrace,
-                                              ) => Container(
+                                              (context, error, stackTrace) => Container(
                                                 width: 60,
                                                 height: 60,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.grey.shade300,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: const Icon(
-                                                  Icons.broken_image,
-                                                ),
+                                                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(8)),
+                                                child: const Icon(Icons.broken_image),
                                               ),
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           // ข้อความประกอบ
                                           child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 post['title']!,
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 14,
-                                                  decoration:
-                                                      isHovering
-                                                          ? TextDecoration
-                                                              .underline
-                                                          : TextDecoration.none,
+                                                  decoration: TextDecoration.none,
                                                   color: Colors.black,
                                                 ),
                                               ),
                                               const SizedBox(height: 4),
-                                              Text(
-                                                post['date']!,
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
+                                              Text(post['date']!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                                             ],
                                           ),
                                         ),
@@ -331,11 +234,7 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                           const SelectableText(
                             // หัวข้อ Categories
                             'Categories',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromARGB(255, 8, 9, 10),
-                            ),
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 8, 9, 10)),
                           ),
                           const SizedBox(height: 12),
                           Wrap(
@@ -355,40 +254,23 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                           const SelectableText(
                             // หัวข้อ Subscribe
                             'Subscribe',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromARGB(255, 4, 5, 5),
-                            ),
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 4, 5, 5)),
                           ),
                           const SizedBox(height: 12),
                           TextField(
                             // ช่องกรอกชื่อ
-                            decoration: InputDecoration(
-                              labelText: 'Your Name*',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
+                            decoration: InputDecoration(labelText: 'Your Name*', border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
                           ),
                           const SizedBox(height: 12),
                           TextField(
                             // ช่องกรอกอีเมล
-                            decoration: InputDecoration(
-                              labelText: 'Your Email*',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
+                            decoration: InputDecoration(labelText: 'Your Email*', border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
                           ),
                           const SizedBox(height: 12),
                           Container(
                             // กล่อง checkbox "I'm not a robot"
                             padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                            decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8)),
                             child: Row(
                               children: [
                                 Checkbox(
@@ -403,9 +285,7 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                                 const SizedBox(width: 8),
                                 const Text("I'm not a robot"),
                                 const Spacer(),
-                                const FlutterLogo(
-                                  size: 24,
-                                ), // เพิ่มโลโก้เพื่อความสวยงาม
+                                const FlutterLogo(size: 24), // เพิ่มโลโก้เพื่อความสวยงาม
                               ],
                             ),
                           ),
@@ -416,22 +296,11 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                             child: ElevatedButton(
                               onPressed: () {}, // ยังไม่มีฟังก์ชัน
                               style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
                                 backgroundColor: Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
-                              child: const Text(
-                                'Submit',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
+                              child: const Text('Submit', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                             ),
                           ),
                         ],
@@ -456,9 +325,7 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
   }) {
     return Container(
       // กล่องห่อข่าว
-      constraints: const BoxConstraints(
-        maxWidth: 700,
-      ), // กำหนดขนาดไม่ให้กว้างเกิน 700
+      constraints: const BoxConstraints(maxWidth: 700), // กำหนดขนาดไม่ให้กว้างเกิน 700
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, // จัดข้อความชิดซ้าย
         children: [
@@ -471,10 +338,7 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
             ),
             child: const Text(
               'Update', // ข้อความหัวข้อหมวดหมู่
-              style: TextStyle(
-                color: Color(0xff001F5B),
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: Color(0xff001F5B), fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 12), // เว้นช่องว่างก่อนหัวข้อ
@@ -489,16 +353,10 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
             children: [
               const SelectableText(
                 'by Editorial Team', // ผู้เขียนข่าว
-                style: TextStyle(
-                  color: Colors.teal,
-                  decoration: TextDecoration.underline,
-                ),
+                style: TextStyle(color: Colors.teal, decoration: TextDecoration.underline),
               ),
               const SizedBox(width: 12),
-              SelectableText(
-                date,
-                style: const TextStyle(color: Colors.grey),
-              ), // วันที่
+              SelectableText(date, style: const TextStyle(color: Colors.grey)), // วันที่
             ],
           ),
           const SizedBox(height: 16),
@@ -542,10 +400,7 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
           side: const BorderSide(color: Colors.green), // เส้นขอบสีเขียว
         ),
         labelStyle: TextStyle(
-          color:
-              hoveredCategory == label
-                  ? Colors.green.shade700
-                  : Colors.green, // สีตัวอักษรเมื่อ hover
+          color: hoveredCategory == label ? Colors.green.shade700 : Colors.green, // สีตัวอักษรเมื่อ hover
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),

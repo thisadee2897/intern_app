@@ -59,30 +59,16 @@ class _EditProfileScreenState extends BaseState<EditProfileScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'My Profile',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.of(context).pop()),
+        title: const Text('My Profile', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
       ),
       body: Stack(
         fit: StackFit.expand,
         children: [
           // พื้นหลังรูปภาพ
-          Image.network(
-            'https://images.pexels.com/photos/314726/pexels-photo-314726.jpeg',
-            fit: BoxFit.cover,
-          ),
+          Image.network('https://images.pexels.com/photos/314726/pexels-photo-314726.jpeg', fit: BoxFit.cover),
           // overlay สีดำโปร่งแสง
-          Container(
-            color: Colors.black.withOpacity(0.15),
-          ),
+          Container(color: Colors.black.withOpacity(0.15)),
           // ฟอร์มโปรไฟล์
           Center(
             child: Container(
@@ -111,53 +97,28 @@ class _EditProfileScreenState extends BaseState<EditProfileScreen> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blueAccent.withOpacity(0.3),
-                                  blurRadius: 18,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 3,
-                              ),
+                              boxShadow: [BoxShadow(color: Colors.blueAccent.withOpacity(0.3), blurRadius: 18, spreadRadius: 2)],
+                              border: Border.all(color: Colors.white, width: 3),
                             ),
                             child: CircleAvatar(
                               radius: 50,
                               backgroundColor: Colors.white,
-                              backgroundImage: imageController.text.isNotEmpty
-                                  ? NetworkImage(imageController.text)
-                                  : null,
-                              child: imageController.text.isEmpty
-                                  ? const Icon(Icons.person, size: 50, color: Colors.grey)
-                                  : null,
+                              backgroundImage: imageController.text.isNotEmpty ? NetworkImage(imageController.text) : null,
+                              child: imageController.text.isEmpty ? const Icon(Icons.person, size: 50, color: Colors.grey) : null,
                             ),
                           ),
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          'แก้ไขข้อมูลส่วนตัว',
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 10, 15, 20)),
-                        ),
+                        Text('แก้ไขข้อมูลส่วนตัว', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 10, 15, 20))),
                         const SizedBox(height: 24),
                         // Name
-                        TextField(
-                          controller: nameController,
-                          decoration: _inputDecoration('Name', Icons.person),
-                        ),
+                        TextField(controller: nameController, decoration: _inputDecoration('Name', Icons.person)),
                         const SizedBox(height: 20),
                         // Email
-                        TextField(
-                          controller: emailController,
-                          decoration: _inputDecoration('Email', Icons.email),
-                        ),
+                        TextField(controller: emailController, decoration: _inputDecoration('Email', Icons.email)),
                         const SizedBox(height: 20),
                         // Phone
-                        TextField(
-                          controller: phoneController,
-                          decoration: _inputDecoration('Phone', Icons.phone),
-                        ),
+                        TextField(controller: phoneController, decoration: _inputDecoration('Phone', Icons.phone)),
                         const SizedBox(height: 20),
                         // รูป preview (ใหญ่)
                         if (imageController.text.isNotEmpty)
@@ -165,13 +126,7 @@ class _EditProfileScreenState extends BaseState<EditProfileScreen> {
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 8,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
+                              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: Image.network(
@@ -179,22 +134,16 @@ class _EditProfileScreenState extends BaseState<EditProfileScreen> {
                               height: 150,
                               width: double.infinity,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                height: 150,
-                                color: Colors.grey[200],
-                                child: const Center(child: Text('Invalid image URL')),
-                              ),
+                              errorBuilder:
+                                  (context, error, stackTrace) =>
+                                      Container(height: 150, color: Colors.grey[200], child: const Center(child: Text('Invalid image URL'))),
                             ),
                           ),
                         // Image URL toggle
                         Row(
                           children: [
                             Expanded(
-                              child: TextField(
-                                controller: imageController,
-                                enabled: isEditingImage,
-                                decoration: _inputDecoration('Image URL', Icons.image),
-                              ),
+                              child: TextField(controller: imageController, enabled: isEditingImage, decoration: _inputDecoration('Image URL', Icons.image)),
                             ),
                             IconButton(
                               icon: const Icon(Icons.close),
@@ -240,33 +189,28 @@ class _EditProfileScreenState extends BaseState<EditProfileScreen> {
                                   elevation: 8,
                                   shadowColor: Colors.blueAccent,
                                 ),
-                                onPressed: isLoading
-                                    ? null
-                                    : () async {
-                                        if (nameController.text.trim().isEmpty ||
-                                            emailController.text.trim().isEmpty) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('กรุณากรอกชื่อและอีเมล'),
-                                              backgroundColor: Colors.redAccent,
-                                            ),
+                                onPressed:
+                                    isLoading
+                                        ? null
+                                        : () async {
+                                          if (nameController.text.trim().isEmpty || emailController.text.trim().isEmpty) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(const SnackBar(content: Text('กรุณากรอกชื่อและอีเมล'), backgroundColor: Colors.redAccent));
+                                            return;
+                                          }
+                                          final updatedUser = widget.user.copyWith(
+                                            name: nameController.text,
+                                            email: emailController.text,
+                                            phoneNumber: phoneController.text,
+                                            image: imageController.text,
                                           );
-                                          return;
-                                        }
-                                        final updatedUser = widget.user.copyWith(
-                                          name: nameController.text,
-                                          email: emailController.text,
-                                          phoneNumber: phoneController.text,
-                                          image: imageController.text,
-                                        );
-                                        await ref
-                                            .read(profileControllerProvider.notifier)
-                                            .updateProfile(updatedUser);
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Profile updated successfully')),
-                                        );
-                                        Navigator.pop(context, true);
-                                      },
+                                          await ref.read(profileControllerProvider.notifier).updateProfile(updatedUser);
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile updated successfully')));
+                                            Navigator.pop(context, true);
+                                          }
+                                        },
                               ),
                             ),
                           ),
