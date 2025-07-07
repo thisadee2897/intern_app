@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
+import 'package:project/config/routes/route_config.dart';
+import 'package:project/config/routes/route_helper.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
@@ -150,7 +152,9 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            ref.goSubPath(Routes.projectDetail);
+          },
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
