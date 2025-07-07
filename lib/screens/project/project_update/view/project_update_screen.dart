@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:project/components/export.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_update/provider/controllers/project_updateController.dart';
 
-class ProjectUpdateScreen extends ConsumerStatefulWidget {
+class ProjectUpdateScreen extends BaseStatefulWidget {
   final dynamic project;
   const ProjectUpdateScreen({super.key, required this.project});
 
@@ -11,30 +12,15 @@ class ProjectUpdateScreen extends ConsumerStatefulWidget {
   ConsumerState<ProjectUpdateScreen> createState() => _ProjectUpdateScreenState();
 }
 
-class _ProjectUpdateScreenState extends ConsumerState<ProjectUpdateScreen> {
+class _ProjectUpdateScreenState extends BaseState<ProjectUpdateScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _keyController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
   String? _selectedCategoryId;
-  String? _selectedLeadId;
-
-  final List<Map<String, String>> leadList = [
-    {'id': '1', 'name': 'Administrator'},
-    {'id': '2', 'name': 'Nattapong'},
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.project["categoryId"] != null) {
-      _selectedCategoryId = widget.project["categoryId"].toString();
-    }
-    if (widget.project["leadId"] != null) {
-      _selectedLeadId = widget.project["leadId"].toString();
-    }
-  }
+  final String _defaultLeadId = '1';
+  bool _isHovering = false; // เพิ่มสำหรับ hover effect
 
   @override
   void dispose() {
@@ -53,91 +39,201 @@ class _ProjectUpdateScreenState extends ConsumerState<ProjectUpdateScreen> {
       'key': _keyController.text.trim(),
       'description': _descriptionController.text.trim(),
       'project_category_id': _selectedCategoryId,
-      'lead_id': _selectedLeadId,
+      'lead_id': _defaultLeadId,
     };
 
     await ref.read(projectUpdateControllerProvider.notifier).submitProjectHD(body: body);
-    if (mounted) Navigator.of(context).pop(true);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ บันทึกข้อมูลเรียบร้อย'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(bottom: 24, left: 24, right: 24),
+        ),
+      );
+      Navigator.of(context).pop(true);
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
     final state = ref.watch(projectUpdateControllerProvider);
-    final categoryAsyncValue = ref.watch(categoryListProvider('1')); // Workspace ID (ใส่ตามจริง)
+    final categoryAsyncValue = ref.watch(categoryListProvider('1'));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('อัปเดตโปรเจกต์')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'ชื่อโปรเจกต์'),
-                validator: (value) => value == null || value.isEmpty ? 'กรุณากรอกชื่อโปรเจกต์' : null,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text('อัปเดตโปรเจกต์',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.network(
+            'https://images.pexels.com/photos/314726/pexels-photo-314726.jpeg',
+            fit: BoxFit.cover,
+          ),
+          Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              padding: const EdgeInsets.all(32.0),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blueAccent.withOpacity(0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _keyController,
-                decoration: const InputDecoration(labelText: 'รหัสโปรเจกต์ (key)'),
-                validator: (value) => value == null || value.isEmpty ? 'กรุณากรอกรหัสโปรเจกต์' : null,
-              ),
-              const SizedBox(height: 16),
-
-              // 🔽 Category dropdown
-              categoryAsyncValue.when(
-                data: (categories) {
-                  return DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: 'หมวดหมู่'),
-                    value: _selectedCategoryId,
-                    items: categories.map((cat) {
-                      return DropdownMenuItem<String>(
-                        value: cat.id,
-                        child: Text(cat.name ?? '-'),
-                      );
-                    }).toList(),
-                    onChanged: (value) => setState(() => _selectedCategoryId = value),
-                    validator: (value) => value == null ? 'กรุณาเลือกหมวดหมู่' : null,
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Text('โหลดหมวดหมู่ล้มเหลว: $error'),
-              ),
-
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'หัวหน้าโปรเจกต์'),
-                value: _selectedLeadId,
-                items: leadList.map((user) {
-                  return DropdownMenuItem<String>(
-                    value: user['id'],
-                    child: Text(user['name']!),
-                  );
-                }).toList(),
-                onChanged: (value) => setState(() => _selectedLeadId = value),
-                validator: (value) => value == null ? 'กรุณาเลือกหัวหน้าโปรเจกต์' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'คำอธิบาย'),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 24),
-              state.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Text('เกิดข้อผิดพลาด: $e', style: const TextStyle(color: Colors.red)),
-                data: (_) => ElevatedButton(
-                  onPressed: _submit,
-                  child: const Text('บันทึกข้อมูล'),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'รายละเอียดโปรเจกต์',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'ชื่อโปรเจกต์',
+                        prefixIcon: const Icon(Icons.title, color: Colors.black),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        filled: true,
+                        fillColor: const Color(0xFFF6F8FB),
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'กรุณากรอกชื่อโปรเจกต์'
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _keyController,
+                      decoration: InputDecoration(
+                        labelText: 'รหัสโปรเจกต์ (key)',
+                        prefixIcon: const Icon(Icons.vpn_key, color: Colors.black),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        filled: true,
+                        fillColor: const Color(0xFFF6F8FB),
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'กรุณากรอกรหัสโปรเจกต์'
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    categoryAsyncValue.when(
+                      data: (categories) {
+                        return DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'หมวดหมู่',
+                            prefixIcon: const Icon(Icons.category, color: Colors.black),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            filled: true,
+                            fillColor: const Color(0xFFF6F8FB),
+                          ),
+                          value: _selectedCategoryId,
+                          items: categories.map<DropdownMenuItem<String>>((cat) {
+                            return DropdownMenuItem<String>(
+                              value: cat.id,
+                              child: Text(cat.name ?? '-'),
+                            );
+                          }).toList(),
+                          onChanged: (value) => setState(() => _selectedCategoryId = value),
+                          validator: (value) =>
+                              value == null ? 'กรุณาเลือกหมวดหมู่' : null,
+                        );
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, _) =>
+                          Text('โหลดหมวดหมู่ล้มเหลว: $error'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _descriptionController,
+                      decoration: InputDecoration(
+                        labelText: 'คำอธิบาย',
+                        prefixIcon: const Icon(Icons.description, color: Colors.black),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        filled: true,
+                        fillColor: const Color(0xFFF6F8FB),
+                      ),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 28),
+                    state.when(
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Text(
+                          'เกิดข้อผิดพลาด: $e',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      data: (_) => MouseRegion(
+                        onEnter: (_) => setState(() => _isHovering = true),
+                        onExit: (_) => setState(() => _isHovering = false),
+                        child: AnimatedScale(
+                          duration: const Duration(milliseconds: 200),
+                          scale: _isHovering ? 1.03 : 1.0,
+                          child: ElevatedButton.icon(
+                            onPressed: _submit,
+                            icon: const Icon(Icons.save, color: Colors.white),
+                            label: const Text(
+                              'บันทึกข้อมูล',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              textStyle: const TextStyle(fontSize: 16),
+                              elevation: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
+  }
+
+  @override
+  Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
+    return Center(child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge));
+  }
+
+  @override
+  Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
+    return Center(child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge));
   }
 }

@@ -14,6 +14,7 @@ class ProjectScreen extends BaseStatefulWidget {
 class _ProjectScreenState extends BaseState<ProjectScreen> {
   String selectedWorkspaceId = '1';
   Map<String, bool> categoryExpansionState = {};
+  String _hoveredCategoryId = ''; // สำหรับ hover effect ปุ่ม
 
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
@@ -23,13 +24,13 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Projects', style: TextStyle(color: Color.fromARGB(255, 94, 92, 92), fontWeight: FontWeight.bold)),
+        title: const Text('Projects', style: TextStyle(color: Color.fromARGB(255, 4, 4, 4), fontWeight: FontWeight.bold)),
         centerTitle: false,
       ),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: NetworkImage('https://i.pinimg.com/736x/8e/a5/3a/8ea53ad02e66cc60ec4240478ed4c9cb.jpg'),
+            image: NetworkImage('https://images.pexels.com/photos/314726/pexels-photo-314726.jpeg'),
             fit: BoxFit.cover,
             opacity: 0.5,
           ),
@@ -88,24 +89,33 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
         title: Row(
           children: [
             Expanded(child: Text('$categoryName (${projectsAsync.value?.length ?? 0})', style: const TextStyle(fontWeight: FontWeight.bold))),
-            ElevatedButton.icon(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => ProjectUpdateScreen(project: {"categoryId": categoryId})),
-                );
-                if (result == true) {
-                  ref.invalidate(projectListByCategoryProvider(categoryId));
-                  ref.invalidate(categoryListProvider(selectedWorkspaceId)); // สำคัญ: ดึง category ใหม่ด้วยถ้ามีการเพิ่ม
-                  setState(() {}); // รีเฟรชหน้าจอ
-                }
-              },
-              icon: const Icon(Icons.edit, size: 16),
-              label: const Text("Update", style: TextStyle(fontSize: 12)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                minimumSize: const Size(10, 32),
+            MouseRegion(
+              onEnter: (_) => setState(() => _hoveredCategoryId = categoryId),
+              onExit: (_) => setState(() => _hoveredCategoryId = ''),
+              child: AnimatedScale(
+                scale: _hoveredCategoryId == categoryId ? 1.05 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ProjectUpdateScreen(project: {"categoryId": categoryId})),
+                    );
+                    if (result == true) {
+                      ref.invalidate(projectListByCategoryProvider(categoryId));
+                      ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                      setState(() {});
+                    }
+                  },
+                  icon: const Icon(Icons.edit, size: 16, color: Colors.white),
+                  label: const Text("Update", style: TextStyle(fontSize: 12, color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    minimumSize: const Size(10, 32),
+                  ),
+                ),
               ),
             ),
           ],
