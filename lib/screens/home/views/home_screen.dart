@@ -12,15 +12,37 @@ class HomeScreen extends BaseStatefulWidget {
 }
 
 class _HomeScreenState extends BaseState<HomeScreen> {
+
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
     return Consumer(
       builder: (context, ref, child) {
         final workspaceState = ref.watch(workspaceProvider);
 
-        return Scaffold(
-          appBar: AppBar(title: const Text('Workspaces')),
-          backgroundColor: const Color.fromARGB(255, 55, 57, 62),
+        return Stack(
+        children: [
+          // ✅ รูปพื้นหลังเต็มหน้าจอ
+          Positioned.fill(
+            child: Image.network(
+              'https://i.pinimg.com/736x/8e/a5/3a/8ea53ad02e66cc60ec4240478ed4c9cb.jpg', // <-- ใส่ลิงก์รูป
+              fit: BoxFit.cover,        // ให้รูปเต็มจอ
+            ),
+          ),
+
+        Scaffold(
+          backgroundColor: Colors.transparent, // พื้นหลังโปร่งใส
+          appBar: AppBar(
+            title: const Text(
+              'Workspaces',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 27, 27, 27),
+        ),
+        ),
+        backgroundColor: const Color.fromARGB(255, 176, 197, 245),
+          ),
+      
           body: workspaceState.when(
             data: (workspaces) {
               if (workspaces.isEmpty) {
@@ -46,6 +68,8 @@ class _HomeScreenState extends BaseState<HomeScreen> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(child: Text('เกิดข้อผิดพลาด: $error')),
           ),
+        ),
+        ],
         );
       },
     );
