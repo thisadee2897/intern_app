@@ -20,7 +20,22 @@ class _ProjectUpdateScreenState extends BaseState<ProjectUpdateScreen> {
 
   String? _selectedCategoryId;
   final String _defaultLeadId = '1';
-  bool _isHovering = false; // เพิ่มสำหรับ hover effect
+  bool _isHovering = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final project = widget.project;
+
+    // ถ้ามี id แสดงว่าเป็นการแก้ไข
+    if (project['id'] != null && project['id'] != '0') {
+      _nameController.text = project['name'] ?? '';
+      _keyController.text = project['key'] ?? '';
+      _descriptionController.text = project['description'] ?? '';
+      _selectedCategoryId = project['project_category_id'];
+    }
+  }
 
   @override
   void dispose() {
@@ -33,8 +48,10 @@ class _ProjectUpdateScreenState extends BaseState<ProjectUpdateScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final isEdit = widget.project['id'] != null && widget.project['id'] != '0';
+
     final body = {
-      'id': "0",
+      'id': isEdit ? widget.project['id'].toString() : "0",
       'name': _nameController.text.trim(),
       'key': _keyController.text.trim(),
       'description': _descriptionController.text.trim(),

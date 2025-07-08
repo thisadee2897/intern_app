@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; 
 import 'package:project/components/export.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
+import 'package:project/screens/project/project_update/view/project_edit_screen.dart';
 import 'package:project/screens/project/project_update/view/project_update_screen.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 
@@ -14,7 +15,7 @@ class ProjectScreen extends BaseStatefulWidget {
 class _ProjectScreenState extends BaseState<ProjectScreen> {
   String selectedWorkspaceId = '1';
   Map<String, bool> categoryExpansionState = {};
-  String _hoveredCategoryId = ''; // สำหรับ hover effect ปุ่ม
+  String _hoveredCategoryId = '';
 
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
@@ -170,6 +171,32 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                 Text(project.name ?? '-', style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
                 Text("ID: ${project.id}", style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProjectEditScreen(project: project), // เปลี่ยนตรงนี้เรียกหน้าแก้ไข
+                        ),
+                      );
+                      if (result == true) {
+                        ref.invalidate(projectListByCategoryProvider(project.categoryId ?? ''));
+                        ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                        setState(() {});
+                      }
+                    },
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: const Text('แก้ไข', style: TextStyle(fontSize: 12)),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      backgroundColor: const Color.fromARGB(255, 210, 204, 229),
+                      minimumSize: const Size(10, 32),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
