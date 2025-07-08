@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
+import 'package:project/screens/project/category/views/category_form_screen.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
@@ -29,7 +30,29 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
         elevation: 0,
         title: const Text('Projects', style: TextStyle(color: Color.fromARGB(255, 94, 92, 92), fontWeight: FontWeight.bold)),
         centerTitle: false,
+
+// เพิ่มปุ่มสำหรับเพิ่มโปรเจคใหม่
+      actions: [
+  IconButton(
+    icon: const Icon(Icons.add),
+    tooltip: 'เพิ่มหมวดหมู่',
+    onPressed: () async {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CategoryFormScreen()),
+      );
+
+      // รีเฟรชรายการหมวดหมู่ถ้ามีการเปลี่ยนแปลง
+      if (result == true) {
+        ref.invalidate(categoryListProvider(selectedWorkspaceId));
+      }
+    },
+  ),
+],
+
+
       ),
+      
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
