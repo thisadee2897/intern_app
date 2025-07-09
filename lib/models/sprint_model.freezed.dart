@@ -23,7 +23,7 @@ mixin _$SprintModel {
   @JsonKey(name: 'table_name')
   String? get tableName => throw _privateConstructorUsedError;
   @JsonKey(name: 'id')
-  num? get id => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'name')
   String? get name => throw _privateConstructorUsedError;
   @JsonKey(name: 'duration')
@@ -69,7 +69,7 @@ abstract class $SprintModelCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'table_name') String? tableName,
-      @JsonKey(name: 'id') num? id,
+      @JsonKey(name: 'id') String? id,
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'duration') num? duration,
       @JsonKey(name: 'satart_date') String? satartDate,
@@ -128,7 +128,7 @@ class _$SprintModelCopyWithImpl<$Res, $Val extends SprintModel>
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as num?,
+              as String?,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -237,7 +237,7 @@ abstract class _$$SprintModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'table_name') String? tableName,
-      @JsonKey(name: 'id') num? id,
+      @JsonKey(name: 'id') String? id,
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'duration') num? duration,
       @JsonKey(name: 'satart_date') String? satartDate,
@@ -297,7 +297,7 @@ class __$$SprintModelImplCopyWithImpl<$Res>
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as num?,
+              as String?,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -382,7 +382,7 @@ class _$SprintModelImpl implements _SprintModel {
   final String? tableName;
   @override
   @JsonKey(name: 'id')
-  final num? id;
+  final String? id;
   @override
   @JsonKey(name: 'name')
   final String? name;
@@ -499,7 +499,7 @@ class _$SprintModelImpl implements _SprintModel {
 abstract class _SprintModel implements SprintModel {
   const factory _SprintModel(
       {@JsonKey(name: 'table_name') final String? tableName,
-      @JsonKey(name: 'id') final num? id,
+      @JsonKey(name: 'id') final String? id,
       @JsonKey(name: 'name') final String? name,
       @JsonKey(name: 'duration') final num? duration,
       @JsonKey(name: 'satart_date') final String? satartDate,
@@ -522,7 +522,7 @@ abstract class _SprintModel implements SprintModel {
   String? get tableName;
   @override
   @JsonKey(name: 'id')
-  num? get id;
+  String? get id;
   @override
   @JsonKey(name: 'name')
   String? get name;

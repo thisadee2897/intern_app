@@ -10,7 +10,7 @@ part 'sprint_model.g.dart';
 class SprintModel with _$SprintModel {
   const factory SprintModel({
   @JsonKey(name: 'table_name') String? tableName,
-  @JsonKey(name: 'id') num? id,
+  @JsonKey(name: 'id') String? id,
   @JsonKey(name: 'name') String? name,
   @JsonKey(name: 'duration') num? duration,
   @JsonKey(name: 'satart_date') String? satartDate,
