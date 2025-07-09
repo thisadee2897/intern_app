@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';  
 import 'package:project/components/export.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
@@ -100,7 +100,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                   onPressed: () async {
                     final result = await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => ProjectUpdateScreen(project: {"categoryId": categoryId})),
+                      MaterialPageRoute(builder: (_) => ProjectUpdateScreen(project: {"project_category_id": categoryId})),
                     );
                     if (result == true) {
                       ref.invalidate(projectListByCategoryProvider(categoryId));
@@ -179,7 +179,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ProjectEditScreen(project: project), // เปลี่ยนตรงนี้เรียกหน้าแก้ไข
+                          builder: (_) => ProjectEditScreen(project: project),
                         ),
                       );
                       if (result == true) {

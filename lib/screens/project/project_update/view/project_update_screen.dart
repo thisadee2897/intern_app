@@ -27,13 +27,13 @@ class _ProjectUpdateScreenState extends BaseState<ProjectUpdateScreen> {
     super.initState();
 
     final project = widget.project;
-
-    // ถ้ามี id แสดงว่าเป็นการแก้ไข
     if (project['id'] != null && project['id'] != '0') {
       _nameController.text = project['name'] ?? '';
       _keyController.text = project['key'] ?? '';
       _descriptionController.text = project['description'] ?? '';
-      _selectedCategoryId = project['project_category_id'];
+      _selectedCategoryId = project['project_category_id'] ?? project['categoryId'];
+    } else {
+      _selectedCategoryId = project['categoryId']; // สำหรับกรณีเพิ่มใหม่
     }
   }
 
@@ -71,7 +71,7 @@ class _ProjectUpdateScreenState extends BaseState<ProjectUpdateScreen> {
           margin: EdgeInsets.only(bottom: 24, left: 24, right: 24),
         ),
       );
-      Navigator.of(context).pop(true);
+      Navigator.of(context).pop(true); // ✅ ส่งค่า true เพื่อบอกว่า update แล้ว
     }
   }
 
@@ -246,11 +246,11 @@ class _ProjectUpdateScreenState extends BaseState<ProjectUpdateScreen> {
 
   @override
   Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge));
+    return const Center(child: Text('Tablet View'));
   }
 
   @override
   Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge));
+    return const Center(child: Text('Mobile View'));
   }
 }
