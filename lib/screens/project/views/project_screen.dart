@@ -75,7 +75,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: NetworkImage('https://i.pinimg.com/736x/8e/a5/3a/8ea53ad02e66cc60ec4240478ed4c9cb.jpg'),
+            image: NetworkImage('https://images.pexels.com/photos/314726/pexels-photo-314726.jpeg'),
             fit: BoxFit.cover,
             opacity: 0.5,
           ),
