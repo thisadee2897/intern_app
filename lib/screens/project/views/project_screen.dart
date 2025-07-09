@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
-import 'package:project/screens/project/category/views/category_form_screen.dart';
+import 'package:project/screens/project/category/views/category_add_screen.dart';
+import 'package:project/screens/project/category/views/category_edit_screen.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
@@ -31,24 +32,42 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
         title: const Text('Projects', style: TextStyle(color: Color.fromARGB(255, 94, 92, 92), fontWeight: FontWeight.bold)),
         centerTitle: false,
 
-// เพิ่มปุ่มสำหรับเพิ่มโปรเจคใหม่
-      actions: [
+// เพิ่มปุ่มสำหรับเพิ่มและแก้ไขหมวดหมู่
+    actions: [
   IconButton(
     icon: const Icon(Icons.add),
     tooltip: 'เพิ่มหมวดหมู่',
     onPressed: () async {
       final result = await Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const CategoryFormScreen()),
+        MaterialPageRoute(
+          builder: (_) => CategoryAddScreen(workspaceId: selectedWorkspaceId),
+        ),
       );
 
-      // รีเฟรชรายการหมวดหมู่ถ้ามีการเปลี่ยนแปลง
+      if (result == true) {
+        ref.invalidate(categoryListProvider(selectedWorkspaceId));
+      }
+    },
+  ),
+  IconButton(
+    icon: const Icon(Icons.edit),
+    tooltip: 'แก้ไขหมวดหมู่',
+    onPressed: () async {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CategoryEditScreen(workspaceId: selectedWorkspaceId),
+        ),
+      );
+
       if (result == true) {
         ref.invalidate(categoryListProvider(selectedWorkspaceId));
       }
     },
   ),
 ],
+
 
 
       ),
