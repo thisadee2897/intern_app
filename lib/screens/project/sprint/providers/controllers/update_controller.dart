@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/components/export.dart';
@@ -11,6 +13,7 @@ class InsertOrUpdateSprintApi {
   InsertOrUpdateSprintApi({required this.ref});
 
   Future<SprintModel> put({required Map<String, dynamic> body}) async {
+    print(jsonEncode(body));
     try {
       final response = await ref.read(apiClientProvider).put(_path, data: body);
       Map<String, dynamic> datas = Map<String, dynamic>.from(response.data);

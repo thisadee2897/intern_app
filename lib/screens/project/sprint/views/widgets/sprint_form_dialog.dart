@@ -5,39 +5,39 @@ import 'package:project/models/sprint_model.dart';
 import 'package:project/screens/project/sprint/providers/controllers/update_controller.dart';
 import 'package:project/screens/project/sprint/providers/controllers/project_controller.dart';
 
-// ฟังก์ชันที่ใช้แสดง Dialog สำหรับสร้างหรือแก้ไข Sprint
 Future<void> showSprintFormDialog(
   BuildContext context,
   WidgetRef ref,
   ProjectHDModel project, [
   SprintModel? sprint,
 ]) async {
-  // สร้าง GlobalKey สำหรับ validate form
   final _formKey = GlobalKey<FormState>();
+
   final _nameController = TextEditingController(text: sprint?.name ?? '');
   final _goalController = TextEditingController(text: sprint?.goal ?? '');
   final _durationController = TextEditingController(
     text: sprint?.duration?.toString() ?? '',
   );
 
-  // รอ showDialog จบ (async)
   await showDialog(
     context: context,
     builder:
         (_) => AlertDialog(
-          // กำหนด title ตามโหมด (สร้างหรือแก้ไข)
           title: Text(sprint == null ? 'Create Sprint' : 'Edit Sprint'),
           content: Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextFormField(style: const TextStyle(fontSize: 16),
+                TextFormField(
+                  style: const TextStyle(fontSize: 16),
                   controller: _nameController,
                   decoration: const InputDecoration(
                     labelText: 'Sprint Name',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
                     ),
+                  ),
                   validator:
                       (value) =>
                           value == null || value.isEmpty
@@ -50,23 +50,26 @@ Future<void> showSprintFormDialog(
                   controller: _goalController,
                   decoration: const InputDecoration(
                     labelText: 'Goal',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
                     ),
+                  ),
                 ),
-                const SizedBox(height: 16), 
+                const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _durationController,
                   decoration: const InputDecoration(
                     labelText: 'Duration (days)',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    ),
                   ),
                   keyboardType: TextInputType.number,
                 ),
               ],
             ),
           ),
-          // ปุ่มด้านล่างของ dialog
           actions: [
             TextButton(
               onPressed: () {
@@ -79,47 +82,57 @@ Future<void> showSprintFormDialog(
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('No'), // เพิ่ม child
+                            child: const Text('No'),
                           ),
                           TextButton(
                             onPressed: () {
                               Navigator.of(context).pop();
                               Navigator.of(context).pop();
                             },
-                            child: const Text('Yes'), // เพิ่ม child
+                            child: const Text('Yes'),
                           ),
                         ],
                       ),
                 );
               },
-              child: const Text('Cancel'), // เพิ่ม child
+              child: const Text('Cancel'),
             ),
-
             ElevatedButton(
               onPressed: () async {
-                // ถ้าฟอร์ม validate ผ่าน
                 if (_formKey.currentState!.validate()) {
-                  // เตรียม body ส่งไป API
                   final body = {
-                    'id': sprint?.id ?? '', // ถ้าไม่มี id แปลว่าสร้างใหม่
-                    'project_id': project.id, // id โปรเจกต์
-                    'name': _nameController.text.trim(), // ตัด space
+                    if (sprint != null &&
+                        sprint.id != null &&
+                        sprint.id!.isNotEmpty)
+                      'id': sprint.id,
+                    'name': _nameController.text.trim(),
                     'goal': _goalController.text.trim(),
                     'duration':
                         int.tryParse(_durationController.text.trim()) ?? 14,
-                  };
-                  
+                    'start_date': null,
+                    'end_date': null,
 
-                  // เรียก update controller
+                    'completed': sprint?.completed ?? false,
+                    'active': sprint?.active ?? true,
+                    'startting': sprint?.startting ?? false,
+                    'project_hd_id': project.id ?? '',
+                    'hd_id': "1",
+                  };
+
+                  // DEBUG LOG
+                  print('======== DEBUG LOG ========');
+                  print('Body to send: $body');
+                  print('===========================');
+
                   await ref
                       .read(updateSprintControllerProvider.notifier)
                       .updateSprint(body: body);
 
-                  // อ่าน state หลัง update
                   final state = ref.read(updateSprintControllerProvider);
                   state.whenOrNull(
-                    data: (_) async {
-                      // แสดง dialog ยืนยัน
+                    data: (sprintResponse) async {
+                      print('API Response Success: $sprintResponse');
+
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder:
@@ -146,11 +159,12 @@ Future<void> showSprintFormDialog(
                       if (confirm == true) {
                         ref
                             .read(sprintByProjectControllerProvider.notifier)
-                            .getSprints(project.id.toString());
-                        Navigator.of(context).pop(); // ปิด dialog form
+                            .getSprints(project.id ?? '');
+                        Navigator.of(context).pop();
                       }
                     },
                     error: (e, _) {
+                      print('API Error: $e');
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Failed to save sprint: $e')),
                       );
@@ -164,7 +178,6 @@ Future<void> showSprintFormDialog(
         ),
   );
 
-  // clear controller หลังปิด
   _nameController.dispose();
   _goalController.dispose();
   _durationController.dispose();
