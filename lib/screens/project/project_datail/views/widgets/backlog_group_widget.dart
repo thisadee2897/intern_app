@@ -2,12 +2,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:project/models/project_h_d_model.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
+import 'package:project/screens/project/sprint/views/project_sprint_screen.dart';
 import 'package:project/utils/extension/context_extension.dart';
 
 class BacklogGroupWidget extends StatelessWidget {
   bool isExpanded;
-  BacklogGroupWidget({super.key, this.isExpanded = false});
+  BacklogGroupWidget({super.key,
+    this.isExpanded = false,
+    });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +44,22 @@ class BacklogGroupWidget extends StatelessWidget {
                   CountWorkTypeWidget(title: 'in review', count: '0 of 0', color: Colors.deepOrange),
                   CountWorkTypeWidget(title: 'done', count: '0 of 0', color: Colors.lightGreenAccent),
                   // Create sprint button
-                  OutlinedButton(onPressed: () {}, child: Text("Create Sprint")),
+                  //OutlinedButton(onPressed: () {}, child: Text("Create Sprint")),
+                  // แก้ไขใหม่
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  ProjectSprintScreen(project: ProjectHDModel(id: 1.toString(), name: 'Project Name')
+                                  ),
+                        ),
+                      );
+                    },
+                    child: Text("Create Sprint"),
+                  ),
+                  // ถึงนี่
                 ],
               ),
             ],
