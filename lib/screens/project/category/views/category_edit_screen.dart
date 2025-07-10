@@ -52,8 +52,9 @@ class _CategoryEditScreenState extends BaseState<CategoryEditScreen> {
                         title: Text(cat.name ?? '-', style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(cat.description ?? ''),
                         trailing: Icon(
-                          cat.active == true ? Icons.check_circle : Icons.cancel,
-                          color: cat.active == true ? Colors.green : Colors.red,
+                          cat.active == true ? Icons.toggle_on : Icons.toggle_off,
+                          color: cat.active == true ? Colors.blue : Colors.grey,
+                          size: 50,
                         ),
                         onTap: () async {
                           final result = await Navigator.push(
