@@ -36,50 +36,80 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     ref.invalidate(projectListByCategoryProvider(''));
   }
 
-  @override
-  Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
+  Widget _buildBody(BuildContext context, SizingInformation sizingInformation) {
     final categoryAsyncValue = ref.watch(categoryListProvider(selectedWorkspaceId));
+    EdgeInsets padding = const EdgeInsets.all(16);
+    double topSpace = 40;
+    if (sizingInformation.isMobile) {
+      padding = const EdgeInsets.symmetric(horizontal: 4, vertical: 4);
+      topSpace = 16;
+    } else if (sizingInformation.isTablet) {
+      padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 8);
+      topSpace = 24;
+    }
+
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 240, 242, 245),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Projects', style: TextStyle(color: Color.fromARGB(255, 4, 4, 4), fontWeight: FontWeight.bold)),
+        backgroundColor: const Color.fromARGB(255, 96, 164, 253),
+        title: const Text(
+          'Projects',
+          style: TextStyle(color: Color.fromARGB(255, 4, 4, 4), fontWeight: FontWeight.bold),
+        ),
         centerTitle: false,
-        // เพิ่มปุ่มสำหรับเพิ่มและแก้ไขหมวดหมู่
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), tooltip: 'รีเฟรชข้อมูล', onPressed: onRefresh),
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'เพิ่มหมวดหมู่',
-            onPressed: () async {
-              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryAddScreen(workspaceId: selectedWorkspaceId)));
-
-              if (result == true) {
-                ref.invalidate(categoryListProvider(selectedWorkspaceId));
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.black),
+            onSelected: (value) async {
+              if (value == 'refresh') {
+                await onRefresh();
+              } else if (value == 'add') {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => CategoryAddScreen(workspaceId: selectedWorkspaceId)),
+                );
+                if (result == true) {
+                  ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                }
+              } else if (value == 'edit') {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => CategoryEditScreen(workspaceId: selectedWorkspaceId)),
+                );
+                if (result == true) {
+                  ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                }
               }
             },
-
-            // refesh data button
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit),
-            tooltip: 'แก้ไขหมวดหมู่',
-            onPressed: () async {
-              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryEditScreen(workspaceId: selectedWorkspaceId)));
-
-              if (result == true) {
-                ref.invalidate(categoryListProvider(selectedWorkspaceId));
-              }
-            },
+            itemBuilder: (context) => [
+              const PopupMenuItem<String>(
+                value: 'refresh',
+                child: ListTile(
+                  leading: Icon(Icons.refresh),
+                  title: Text('รีเฟรชข้อมูล'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'add',
+                child: ListTile(
+                  leading: Icon(Icons.add),
+                  title: Text('เพิ่มหมวดหมู่'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'edit',
+                child: ListTile(
+                  leading: Icon(Icons.edit),
+                  title: Text('แก้ไขหมวดหมู่'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
-
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(image: NetworkImage('https://images.pexels.com/photos/314726/pexels-photo-314726.jpeg'), fit: BoxFit.cover, opacity: 0.5),
-        ),
+        color: Colors.white,
         child: RefreshIndicator(
           onRefresh: () async {
             await onRefresh();
@@ -88,9 +118,9 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
             dataBuilder: (categories) {
               if (categories.isEmpty) return const Center(child: Text('ไม่พบหมวดหมู่โปรเจค'));
               return ListView(
-                padding: const EdgeInsets.all(16),
+                padding: padding,
                 children: [
-                  const SizedBox(height: 40),
+                  SizedBox(height: topSpace),
                   ...categories.map((category) {
                     final categoryId = category.id ?? '0';
                     final categoryName = category.name ?? '-';
@@ -125,20 +155,27 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(59, 255, 255, 255),
+        color: const Color.fromARGB(255, 255, 255, 255),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color.fromARGB(107, 68, 137, 255), width: 2),
-        boxShadow: [BoxShadow(color: const Color.fromARGB(158, 68, 137, 255).withOpacity(0.15), blurRadius: 6, offset: const Offset(0, 3))],
+        border: Border.all(color: const Color.fromARGB(255, 247, 247, 248), width: 2),
+        boxShadow: [BoxShadow(color: const Color.fromARGB(171, 232, 232, 233).withOpacity(0.15), blurRadius: 6, offset: const Offset(0, 3))],
       ),
       child: ExpansionTile(
-        leading: const Icon(Icons.folder, color: Colors.blueAccent),
-        backgroundColor: const Color.fromARGB(119, 204, 233, 247),
-        collapsedBackgroundColor: const Color.fromARGB(62, 255, 255, 255),
+        controlAffinity: ListTileControlAffinity.leading,
+        backgroundColor: Colors.white,
+        collapsedBackgroundColor: Colors.white,
         initiallyExpanded: isExpanded,
         onExpansionChanged: onExpansionChanged,
         title: Row(
           children: [
-            Expanded(child: Text('$categoryName (${projectsAsync.value?.length ?? 0})', style: const TextStyle(fontWeight: FontWeight.bold))),
+            const Icon(Icons.folder, color: Colors.blueAccent),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '$categoryName (${projectsAsync.value?.length ?? 0})',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
             MouseRegion(
               onEnter: (_) => setState(() => _hoveredCategoryId = categoryId),
               onExit: (_) => setState(() => _hoveredCategoryId = ''),
@@ -161,7 +198,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                   label: const Text("Add", style: TextStyle(fontSize: 12, color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     minimumSize: const Size(10, 32),
                   ),
@@ -174,19 +210,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
           projectsAsync.when(
             data: (projects) {
               if (projects.isEmpty) return const Padding(padding: EdgeInsets.all(8.0), child: Text('ไม่มีโปรเจคในหมวดหมู่นี้'));
-              return GridView.builder(
-                padding: const EdgeInsets.all(8),
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 1 / 1.3,
-                ),
-                itemCount: projects.length,
-                itemBuilder: (context, index) => _buildProjectCard(projects[index]),
-              );
+              return Column(children: projects.map((project) => _buildProjectItem(project)).toList());
             },
             loading: () => const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())),
             error: (error, _) => Padding(padding: const EdgeInsets.all(16), child: Text('โหลดโปรเจคล้มเหลว: $error')),
@@ -196,76 +220,58 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     );
   }
 
-  Widget _buildProjectCard(ProjectHDModel project) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildProjectItem(ProjectHDModel project) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+      ),
+      child: Row(
         children: [
+          const Icon(Icons.folder, color: Colors.blueAccent),
+          const SizedBox(width: 12),
           Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Container(
-                width: double.infinity,
-                color: const Color.fromARGB(248, 230, 232, 232),
-                alignment: Alignment.center,
-                child: const Icon(Icons.image_not_supported, size: 60, color: Color.fromARGB(246, 100, 99, 99)),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            flex: 3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
               children: [
-                Text(project.name ?? '-', style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 4),
-                Text("ID: ${project.id}", style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    spacing: 10,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditScreen(project: project)));
-                          if (result == true) {
-                            ref.invalidate(projectListByCategoryProvider(project.categoryId ?? ''));
-                            ref.invalidate(categoryListProvider(selectedWorkspaceId));
-                            setState(() {});
-                          }
-                        },
-                        icon: const Icon(Icons.edit, size: 16),
-                        label: const Text('แก้ไข', style: TextStyle(fontSize: 12)),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          backgroundColor: const Color.fromARGB(255, 210, 204, 229),
-                          minimumSize: const Size(10, 32),
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          ref.read(selectProjectIdProvider.notifier).state = project.id;
-                          ref.goSubPath(Routes.projectDetail);
-                        },
-                        icon: const Icon(Icons.open_in_new, size: 16),
-                        label: const Text('เปิด', style: TextStyle(fontSize: 12)),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          backgroundColor: const Color.fromARGB(255, 210, 204, 229),
-                          minimumSize: const Size(10, 32),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                Text(project.name ?? '-', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('ID: ${project.id}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
               ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.edit, size: 16),
+            label: const Text('แก้ไข', style: TextStyle(fontSize: 12)),
+            onPressed: () async {
+              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditScreen(project: project)));
+              if (result == true) {
+                ref.invalidate(projectListByCategoryProvider(project.categoryId ?? ''));
+                ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                setState(() {});
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD2CCE5),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              minimumSize: const Size(10, 32),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.open_in_new, size: 16),
+            label: const Text('เปิด', style: TextStyle(fontSize: 12)),
+            onPressed: () {
+              ref.read(selectProjectIdProvider.notifier).state = project.id;
+              ref.goSubPath(Routes.projectDetail);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD2CCE5),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              minimumSize: const Size(10, 32),
             ),
           ),
         ],
@@ -274,8 +280,17 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
   }
 
   @override
-  Widget buildTablet(BuildContext context, SizingInformation sizingInformation) => const SizedBox();
+  Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
+    return _buildBody(context, sizingInformation);
+  }
 
   @override
-  Widget buildMobile(BuildContext context, SizingInformation sizingInformation) => const SizedBox();
+  Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
+    return _buildBody(context, sizingInformation);
+  }
+
+  @override
+  Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
+    return _buildBody(context, sizingInformation);
+  }
 }
