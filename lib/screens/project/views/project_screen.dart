@@ -158,7 +158,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                     }
                   },
                   icon: const Icon(Icons.edit, size: 16, color: Colors.white),
-                  label: const Text("Update", style: TextStyle(fontSize: 12, color: Colors.white)),
+                  label: const Text("Add", style: TextStyle(fontSize: 12, color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
                     foregroundColor: Colors.white,
