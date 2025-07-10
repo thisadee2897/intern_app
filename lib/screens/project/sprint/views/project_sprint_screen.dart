@@ -89,3 +89,88 @@ class _ProjectSprintScreenState extends ConsumerState<ProjectSprintScreen> {
     );
   }
 }
+
+
+
+
+
+
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:project/models/project_h_d_model.dart';
+// import 'package:project/models/sprint_model.dart';
+// import 'package:project/screens/project/sprint/views/widgets/sprint_list_item.dart';
+// import 'package:project/screens/project/sprint/views/widgets/sprint_form_dialog.dart';
+// import 'package:project/screens/project/sprint/providers/controllers/sprint_by_project_controller.dart';
+
+// class ProjectSprintScreen extends ConsumerStatefulWidget {
+//   final ProjectHDModel project;
+
+//   const ProjectSprintScreen({super.key, required this.project});
+
+//   @override
+//   ConsumerState<ProjectSprintScreen> createState() =>
+//       _ProjectSprintScreenState();
+// }
+
+// class _ProjectSprintScreenState extends ConsumerState<ProjectSprintScreen> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       ref
+//           .read(sprintByProjectControllerProvider.notifier)
+//           .getSprints(widget.project.id ?? '');
+//     });
+//   }
+
+//   void _openSprintForm({SprintModel? sprint}) async {
+//     if (sprint == null) {
+//       await showCreateSprintDialog(context, ref, widget.project);
+//     } else {
+//       await showEditSprintDialog(context, ref, widget.project, sprint);
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final sprintState = ref.watch(sprintByProjectControllerProvider);
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text(
+//           'Sprints of ${widget.project.name}',
+//           style: const TextStyle(
+//             color: Color.fromARGB(255, 24, 87, 118),
+//             fontSize: 22,
+//           ),
+//         ),
+//       ),
+//       body: sprintState.when(
+//         data: (sprints) {
+//           if (sprints.isEmpty) {
+//             return const Center(child: Text('No sprints found.'));
+//           }
+//           return ListView.builder(
+//             itemCount: sprints.length,
+//             itemBuilder: (context, index) {
+//               final sprint = sprints[index];
+//               return SprintListItem(
+//                 sprint: sprint,
+//                 onEdit: () => _openSprintForm(sprint: sprint),
+//               );
+//             },
+//           );
+//         },
+//         loading: () => const Center(child: CircularProgressIndicator()),
+//         error: (err, _) => Center(child: Text('Error: $err')),
+//       ),
+//       floatingActionButton: FloatingActionButton(
+//         onPressed: () => _openSprintForm(),
+//         tooltip: 'Create Sprint',
+//         child: const Icon(Icons.add),
+//       ),
+//     );
+//   }
+// }

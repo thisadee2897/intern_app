@@ -100,29 +100,34 @@ Future<void> showSprintFormDialog(
             ElevatedButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
+                  final projectId = project.id;
+                  if (projectId == null || projectId.isEmpty) {
+                    throw Exception('Project ID is empty');
+                  }
+
                   final body = {
+                    // ถ้าเป็นแก้ไข sprint ให้ส่ง id ด้วย
                     if (sprint != null &&
                         sprint.id != null &&
                         sprint.id!.isNotEmpty)
                       'id': sprint.id,
+
                     'name': _nameController.text.trim(),
                     'goal': _goalController.text.trim(),
                     'duration':
                         int.tryParse(_durationController.text.trim()) ?? 14,
                     'start_date': null,
                     'end_date': null,
-
                     'completed': sprint?.completed ?? false,
                     'active': sprint?.active ?? true,
                     'startting': sprint?.startting ?? false,
-                    'project_hd_id': project.id ?? '',
+                    'project_hd_id': project.id?.toString() ?? '',
                     'hd_id': "1",
                   };
 
-                  // DEBUG LOG
-                  print('======== DEBUG LOG ========');
-                  print('Body to send: $body');
-                  print('===========================');
+                  print('===== BODY TO SEND =====');
+                  print(body);
+                  print('========================');
 
                   await ref
                       .read(updateSprintControllerProvider.notifier)
@@ -182,3 +187,246 @@ Future<void> showSprintFormDialog(
   _goalController.dispose();
   _durationController.dispose();
 }
+
+
+
+
+
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:project/models/project_h_d_model.dart';
+// import 'package:project/models/sprint_model.dart';
+// import 'package:project/screens/project/sprint/providers/controllers/sprint_by_project_controller.dart';
+// import 'package:project/screens/project/sprint/providers/controllers/sprint_create_controller.dart';
+// import 'package:project/screens/project/sprint/providers/controllers/sprint_update_controller.dart';
+
+// /// ✅ ฟอร์มสร้าง Sprint ใหม่
+// Future<void> showCreateSprintDialog(
+//   BuildContext context,
+//   WidgetRef ref,
+//   ProjectHDModel project,
+// ) async {
+//   final formKey = GlobalKey<FormState>();
+//   final nameController = TextEditingController();
+//   final goalController = TextEditingController();
+//   final durationController = TextEditingController();
+
+//   await showDialog(
+//     context: context,
+//     builder: (_) => AlertDialog(
+//       title: const Text('Create Sprint'),
+//       content: Form(
+//         key: formKey,
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             /// Sprint Name
+//             TextFormField(
+//               controller: nameController,
+//               decoration: const InputDecoration(labelText: 'Sprint Name'),
+//               validator: (value) =>
+//                   value == null || value.isEmpty ? 'Please enter name' : null,
+//             ),
+//             const SizedBox(height: 8),
+
+//             /// Goal
+//             TextFormField(
+//               controller: goalController,
+//               decoration: const InputDecoration(labelText: 'Goal'),
+//             ),
+//             const SizedBox(height: 8),
+
+//             /// Duration
+//             TextFormField(
+//               controller: durationController,
+//               decoration: const InputDecoration(labelText: 'Duration (days)'),
+//               keyboardType: TextInputType.number,
+//             ),
+//           ],
+//         ),
+//       ),
+//       actions: [
+//         /// ✅ ปุ่ม Cancel
+//         TextButton(
+//           onPressed: () {
+//             Navigator.of(context).pop();
+//           },
+//           child: const Text('Cancel'),
+//         ),
+
+//         /// ✅ ปุ่ม Save
+//         ElevatedButton(
+//           onPressed: () async {
+//             if (formKey.currentState!.validate()) {
+//               final body = {
+//                 'table_name': 'project_hd',
+//                 'name': nameController.text.trim(),
+//                 'goal': goalController.text.trim(),
+//                 'duration': int.tryParse(durationController.text.trim()) ?? 14,
+//                 'start_date': null,
+//                 'end_date': null,
+//                 'completed': false,
+//                 'active': true,
+//                 'startting': false,
+//                 'project_hd': {
+//                   'id': project.id,
+//                   'name': project.name,
+//                 },
+//               };
+
+//               await ref
+//                   .read(sprintCreateControllerProvider.notifier)
+//                   .createSprint(body: body);
+
+//               // ✅ โหลด Sprint ใหม่ หลังสร้างสำเร็จ
+//               await ref
+//                   .read(sprintByProjectControllerProvider.notifier)
+//                   .getSprints(project.id ?? '');
+
+//               Navigator.of(context).pop(); // ปิด dialog
+//             }
+//           },
+//           child: const Text('Save'),
+//         ),
+//       ],
+//     ),
+//   );
+
+//   nameController.dispose();
+//   goalController.dispose();
+//   durationController.dispose();
+// }
+
+// /// ✅ ฟอร์มแก้ไข Sprint
+// Future<void> showEditSprintDialog(
+//   BuildContext context,
+//   WidgetRef ref,
+//   ProjectHDModel project,
+//   SprintModel sprint,
+// ) async {
+//   final formKey = GlobalKey<FormState>();
+//   final nameController = TextEditingController(text: sprint.name);
+//   final goalController = TextEditingController(text: sprint.goal);
+//   final durationController =
+//       TextEditingController(text: sprint.duration?.toString());
+
+//   await showDialog(
+//     context: context,
+//     builder: (_) => AlertDialog(
+//       title: const Text('Edit Sprint'),
+//       content: Form(
+//         key: formKey,
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             /// Sprint Name
+//             TextFormField(
+//               controller: nameController,
+//               decoration: const InputDecoration(labelText: 'Sprint Name'),
+//               validator: (value) =>
+//                   value == null || value.isEmpty ? 'Please enter name' : null,
+//             ),
+//             const SizedBox(height: 8),
+
+//             /// Goal
+//             TextFormField(
+//               controller: goalController,
+//               decoration: const InputDecoration(labelText: 'Goal'),
+//             ),
+//             const SizedBox(height: 8),
+
+//             /// Duration
+//             TextFormField(
+//               controller: durationController,
+//               decoration: const InputDecoration(labelText: 'Duration (days)'),
+//               keyboardType: TextInputType.number,
+//             ),
+//           ],
+//         ),
+//       ),
+//       actions: [
+//         /// ✅ ปุ่ม Cancel พร้อม Confirm
+//         TextButton(
+//           onPressed: () async {
+//             final confirm = await showDialog<bool>(
+//               context: context,
+//               builder: (context) => AlertDialog(
+//                 title: const Text('Confirm Cancel'),
+//                 content: const Text('Are you sure you want to cancel?'),
+//                 actions: [
+//                   TextButton(
+//                     onPressed: () => Navigator.of(context).pop(false),
+//                     child: const Text('No'),
+//                   ),
+//                   TextButton(
+//                     onPressed: () => Navigator.of(context).pop(true),
+//                     child: const Text('Yes'),
+//                   ),
+//                 ],
+//               ),
+//             );
+
+//             if (confirm == true) {
+//               Navigator.of(context).pop(); // ปิด dialog หลัก
+//             }
+//           },
+//           child: const Text('Cancel'),
+//         ),
+
+//         /// ✅ ปุ่ม Update
+//         ElevatedButton(
+//           onPressed: () async {
+//             if (formKey.currentState!.validate()) {
+//               final body = {
+//                 'table_name': 'project_hd',
+//                 'id': sprint.id,
+//                 'name': nameController.text.trim(),
+//                 'goal': goalController.text.trim(),
+//                 'duration': int.tryParse(durationController.text.trim()) ?? 14,
+//                 'start_date': sprint.satartDate,
+//                 'end_date': sprint.endDate,
+//                 'completed': sprint.completed ?? false,
+//                 'active': sprint.active ?? true,
+//                 'startting': sprint.startting ?? false,
+//                 'project_hd': {
+//                   'id': project.id,
+//                   'name': project.name,
+//                 },
+//               };
+
+//               await ref
+//                   .read(updateControllerProvider.notifier)
+//                   .updateSprint(body: body);
+
+//               // ✅ โหลด Sprint ใหม่ หลังแก้ไขสำเร็จ
+//               await ref
+//                   .read(sprintByProjectControllerProvider.notifier)
+//                   .getSprints(project.id ?? '');
+
+//               Navigator.of(context).pop(); // ปิด dialog หลัก
+//             }
+//           },
+//           child: const Text('Update'),
+//         ),
+//       ],
+//     ),
+//   );
+
+//   nameController.dispose();
+//   goalController.dispose();
+//   durationController.dispose();
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
