@@ -9,7 +9,7 @@ part of 'sprint_model.dart';
 _$SprintModelImpl _$$SprintModelImplFromJson(Map<String, dynamic> json) =>
     _$SprintModelImpl(
       tableName: json['table_name'] as String?,
-      id: json['id'] as num?,
+      id: json['id'] as String?,
       name: json['name'] as String?,
       duration: json['duration'] as num?,
       satartDate: json['satart_date'] as String?,
