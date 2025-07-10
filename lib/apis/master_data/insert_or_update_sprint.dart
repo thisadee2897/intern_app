@@ -7,9 +7,9 @@ class InsertOrUpdateSprintApi {
   final Ref ref;
   final String _path = 'project_data/insert_or_update_sprint';
   InsertOrUpdateSprintApi({required this.ref});
-  Future<SprintModel> put({required Map<String, dynamic> body}) async {
+  Future<SprintModel> post({required Map<String, dynamic> body}) async {
     try {
-      Response response = await ref.read(apiClientProvider).put(_path, data: body);
+      Response response = await ref.read(apiClientProvider).post(_path, data: body);
       Map<String, dynamic> datas = Map<String, dynamic>.from(response.data);
       return SprintModel.fromJson(datas);
     } catch (e) {

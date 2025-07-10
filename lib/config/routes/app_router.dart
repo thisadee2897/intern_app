@@ -26,7 +26,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     redirect: (context, state) async {
       //ถ้า Token ไม่มีให้ไปหน้า Login
-      String? token = ref.read(localStorageServiceProvider).userToken;
+      String? token = await ref.read(localStorageServiceProvider).getToken();
       var currentPath = state.fullPath;
       if (token == null || token.isEmpty) {
         return Routes.login;
@@ -96,12 +96,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: Routes.setting,
                 pageBuilder: (context, state) => NoTransitionPage(child: SettingScreen()),
-                routes: [
-                  GoRoute(
-                    path: 'profile',
-                    pageBuilder: (context, state) => NoTransitionPage(child: ProfileScreen()),
-                  ),
-                ],
+                routes: [GoRoute(path: 'profile', pageBuilder: (context, state) => NoTransitionPage(child: ProfileScreen()))],
                 //   GoRoute(
                 //     path: Routes.appointmentDetail,
                 //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),

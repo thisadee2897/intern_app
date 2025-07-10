@@ -2,16 +2,28 @@
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:project/models/project_h_d_model.dart';
+
+import 'package:project/models/sprint_model.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
-import 'package:project/screens/project/sprint/views/project_sprint_screen.dart';
+import 'package:project/screens/project/sprint/views/widgets/insert_update_sprint.dart';
 import 'package:project/utils/extension/context_extension.dart';
 
-class BacklogGroupWidget extends StatelessWidget {
+class BacklogGroupWidget extends StatefulWidget {
   bool isExpanded;
-  BacklogGroupWidget({super.key,
-    this.isExpanded = false,
-    });
+  SprintModel? item;
+  BacklogGroupWidget({super.key, this.isExpanded = false, this.item});
+
+  @override
+  State<BacklogGroupWidget> createState() => _BacklogGroupWidgetState();
+}
+
+class _BacklogGroupWidgetState extends State<BacklogGroupWidget> {
+  bool isExpanding = false;
+  @override
+  void initState() {
+    isExpanding = widget.isExpanded;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +41,14 @@ class BacklogGroupWidget extends StatelessWidget {
               Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.chevron_right_sharp, color: Colors.grey[700]),
+                    icon: isExpanding ? Icon(Icons.expand_less) : Icon(Icons.expand_more),
                     onPressed: () {
-                      // Handle back navigation
+                      setState(() {
+                        isExpanding = !isExpanding;
+                      });
                     },
                   ),
-                  Text("Title (1 work item)", style: Theme.of(context).textTheme.titleLarge),
+                  Text(widget.item?.name ?? 'Backlog', style: Theme.of(context).textTheme.titleLarge),
                 ],
               ),
               Row(
@@ -48,12 +62,10 @@ class BacklogGroupWidget extends StatelessWidget {
                   // แก้ไขใหม่
                   OutlinedButton(
                     onPressed: () {
-                      Navigator.of(context).push(
+                      Navigator.push(
+                        context,
                         MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  ProjectSprintScreen(project: ProjectHDModel(id: 1.toString(), name: 'Project Name')
-                                  ),
+                          builder: (context) => const InsertUpdateSprint(), // sprint = null
                         ),
                       );
                     },
@@ -65,7 +77,7 @@ class BacklogGroupWidget extends StatelessWidget {
             ],
           ),
           // lsit items
-          if (isExpanded)
+          if (widget.isExpanded)
             ListView.builder(
               itemCount: 5,
               shrinkWrap: true,
@@ -85,9 +97,10 @@ class BacklogGroupWidget extends StatelessWidget {
                           isDense: true,
                           decoration: InputDecoration(isDense: true, border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 10)),
                           value: 'Todo',
-                          items: <String>['Todo', 'In Progress', 'In Review', 'Done'].map((String value) {
-                            return DropdownMenuItem<String>(value: value, child: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis));
-                          }).toList(),
+                          items:
+                              <String>['Todo', 'In Progress', 'In Review', 'Done'].map((String value) {
+                                return DropdownMenuItem<String>(value: value, child: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis));
+                              }).toList(),
                           onChanged: (String? newValue) {
                             // Handle status change
                           },

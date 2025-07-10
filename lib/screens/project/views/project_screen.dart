@@ -1,11 +1,15 @@
-import 'package:flutter/material.dart';  
+import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
+import 'package:project/config/routes/route_config.dart';
+import 'package:project/config/routes/route_helper.dart';
+import 'package:project/models/project_h_d_model.dart';
 import 'package:project/screens/project/category/views/category_add_screen.dart';
 import 'package:project/screens/project/category/views/category_edit_screen.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
 import 'package:project/screens/project/project_update/view/project_edit_screen.dart';
 import 'package:project/screens/project/project_update/view/project_update_screen.dart';
+import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 
 class ProjectScreen extends BaseStatefulWidget {
@@ -20,6 +24,19 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
   String _hoveredCategoryId = '';
 
   @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(categoryListProvider(selectedWorkspaceId));
+    });
+    super.initState();
+  }
+
+  onRefresh() async {
+    ref.invalidate(categoryListProvider(selectedWorkspaceId));
+    ref.invalidate(projectListByCategoryProvider(''));
+  }
+
+  @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
     final categoryAsyncValue = ref.watch(categoryListProvider(selectedWorkspaceId));
     return Scaffold(
@@ -29,79 +46,69 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
         elevation: 0,
         title: const Text('Projects', style: TextStyle(color: Color.fromARGB(255, 4, 4, 4), fontWeight: FontWeight.bold)),
         centerTitle: false,
+        // เพิ่มปุ่มสำหรับเพิ่มและแก้ไขหมวดหมู่
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), tooltip: 'รีเฟรชข้อมูล', onPressed: onRefresh),
+          IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: 'เพิ่มหมวดหมู่',
+            onPressed: () async {
+              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryAddScreen(workspaceId: selectedWorkspaceId)));
 
-// เพิ่มปุ่มสำหรับเพิ่มและแก้ไขหมวดหมู่
-    actions: [
-  IconButton(
-    icon: const Icon(Icons.add),
-    tooltip: 'เพิ่มหมวดหมู่',
-    onPressed: () async {
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CategoryAddScreen(workspaceId: selectedWorkspaceId),
-        ),
-      );
+              if (result == true) {
+                ref.invalidate(categoryListProvider(selectedWorkspaceId));
+              }
+            },
 
-      if (result == true) {
-        ref.invalidate(categoryListProvider(selectedWorkspaceId));
-      }
-    },
-  ),
-  IconButton(
-    icon: const Icon(Icons.edit),
-    tooltip: 'แก้ไขหมวดหมู่',
-    onPressed: () async {
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CategoryEditScreen(workspaceId: selectedWorkspaceId),
-        ),
-      );
+            // refesh data button
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: 'แก้ไขหมวดหมู่',
+            onPressed: () async {
+              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryEditScreen(workspaceId: selectedWorkspaceId)));
 
-      if (result == true) {
-        ref.invalidate(categoryListProvider(selectedWorkspaceId));
-      }
-    },
-  ),
-],
-
-
-
+              if (result == true) {
+                ref.invalidate(categoryListProvider(selectedWorkspaceId));
+              }
+            },
+          ),
+        ],
       ),
-      
+
       body: Container(
         decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage('https://images.pexels.com/photos/314726/pexels-photo-314726.jpeg'),
-            fit: BoxFit.cover,
-            opacity: 0.5,
-          ),
+          image: DecorationImage(image: NetworkImage('https://images.pexels.com/photos/314726/pexels-photo-314726.jpeg'), fit: BoxFit.cover, opacity: 0.5),
         ),
-        child: categoryAsyncValue.appWhen(
-          dataBuilder: (categories) {
-            if (categories.isEmpty) return const Center(child: Text('ไม่พบหมวดหมู่โปรเจค'));
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                const SizedBox(height: 40),
-                ...categories.map((category) {
-                  final categoryId = category.id ?? '0';
-                  final categoryName = category.name ?? '-';
-                  final isExpanded = categoryExpansionState[categoryId] ?? false;
-                  final projectAsyncValue = ref.watch(projectListByCategoryProvider(categoryId));
-                  return _buildCategoryTile(
-                    context,
-                    categoryName: categoryName,
-                    categoryId: categoryId,
-                    isExpanded: isExpanded,
-                    onExpansionChanged: (expanded) => setState(() => categoryExpansionState[categoryId] = expanded),
-                    projectsAsync: projectAsyncValue,
-                  );
-                }),
-              ],
-            );
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await onRefresh();
           },
+          child: categoryAsyncValue.appWhen(
+            dataBuilder: (categories) {
+              if (categories.isEmpty) return const Center(child: Text('ไม่พบหมวดหมู่โปรเจค'));
+              return ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  const SizedBox(height: 40),
+                  ...categories.map((category) {
+                    final categoryId = category.id ?? '0';
+                    final categoryName = category.name ?? '-';
+                    final isExpanded = categoryExpansionState[categoryId] ?? false;
+                    final projectAsyncValue = ref.watch(projectListByCategoryProvider(categoryId));
+                    return _buildCategoryTile(
+                      context,
+                      categoryName: categoryName,
+                      categoryId: categoryId,
+                      isExpanded: isExpanded,
+                      onExpansionChanged: (expanded) => setState(() => categoryExpansionState[categoryId] = expanded),
+                      projectsAsync: projectAsyncValue,
+                    );
+                  }),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -113,7 +120,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     required String categoryId,
     required bool isExpanded,
     required ValueChanged<bool> onExpansionChanged,
-    required AsyncValue<List<dynamic>> projectsAsync,
+    required AsyncValue<List<ProjectHDModel>> projectsAsync,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -172,7 +179,10 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 1 / 1.3,
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 1 / 1.3,
                 ),
                 itemCount: projects.length,
                 itemBuilder: (context, index) => _buildProjectCard(projects[index]),
@@ -186,7 +196,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     );
   }
 
-  Widget _buildProjectCard(dynamic project) {
+  Widget _buildProjectCard(ProjectHDModel project) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -209,34 +219,50 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
               children: [
                 Text(project.name ?? '-', style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
                 Text("ID: ${project.id}", style: const TextStyle(fontSize: 14)),
                 const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ProjectEditScreen(project: project),
+                SizedBox(
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    spacing: 10,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditScreen(project: project)));
+                          if (result == true) {
+                            ref.invalidate(projectListByCategoryProvider(project.categoryId ?? ''));
+                            ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                            setState(() {});
+                          }
+                        },
+                        icon: const Icon(Icons.edit, size: 16),
+                        label: const Text('แก้ไข', style: TextStyle(fontSize: 12)),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          backgroundColor: const Color.fromARGB(255, 210, 204, 229),
+                          minimumSize: const Size(10, 32),
                         ),
-                      );
-                      if (result == true) {
-                        ref.invalidate(projectListByCategoryProvider(project.categoryId ?? ''));
-                        ref.invalidate(categoryListProvider(selectedWorkspaceId));
-                        setState(() {});
-                      }
-                    },
-                    icon: const Icon(Icons.edit, size: 16),
-                    label: const Text('แก้ไข', style: TextStyle(fontSize: 12)),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      backgroundColor: const Color.fromARGB(255, 210, 204, 229),
-                      minimumSize: const Size(10, 32),
-                    ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          ref.read(selectProjectIdProvider.notifier).state = project.id;
+                          ref.goSubPath(Routes.projectDetail);
+                        },
+                        icon: const Icon(Icons.open_in_new, size: 16),
+                        label: const Text('เปิด', style: TextStyle(fontSize: 12)),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          backgroundColor: const Color.fromARGB(255, 210, 204, 229),
+                          minimumSize: const Size(10, 32),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
