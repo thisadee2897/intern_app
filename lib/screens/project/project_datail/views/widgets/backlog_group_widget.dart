@@ -1,5 +1,3 @@
-// backlog_group_widget.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/sprint_model.dart';
@@ -77,8 +75,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> {
                   if (!isSmallScreen)
                     Flexible(
                       child: Wrap(
-                        spacing: 5,
-                        runSpacing: 5,
+                        spacing: 4,
+                        runSpacing: 4,
                         alignment: WrapAlignment.end,
                         children: _buildCountersAndButton(),
                       ),
@@ -90,8 +88,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> {
                 Padding(
                   padding: const EdgeInsets.only(top: 10.0),
                   child: Wrap(
-                    spacing: 5,
-                    runSpacing: 5,
+                    spacing: 4,
+                    runSpacing: 4,
                     children: _buildCountersAndButton(),
                   ),
                 ),
@@ -102,67 +100,100 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
-                    return ListTile(
-                      leading: Icon(
-                        Icons.check_circle_outline,
-                        color: context.primaryColor,
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 5,
+                        horizontal: 10,
                       ),
-                      title: Text("Work Item ${index + 1}"),
-                      trailing: SizedBox(
-                        width: isSmallScreen ? constraints.maxWidth * 0.5 : 300,
-                        child: Wrap(
-                          alignment: WrapAlignment.end,
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: [
-                            SizedBox(
-                              width: 120,
-                              child: DropdownButtonFormField(
-                                isDense: true,
-                                decoration: const InputDecoration(
-                                  isDense: true,
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 10,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: 18,
+                                color: context.primaryColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  "Work Item ${index + 1}",
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 13 : 15,
+                                    fontWeight: FontWeight.w500,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                value: 'Todo',
-                                items:
-                                    <String>[
-                                      'Todo',
-                                      'In Progress',
-                                      'In Review',
-                                      'Done',
-                                    ].map((value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      );
-                                    }).toList(),
-                                onChanged: (newValue) {},
                               ),
-                            ),
-                            CircleAvatar(
-                              radius: 12,
-                              backgroundColor: Colors.grey[300],
-                              child: const Icon(
-                                Icons.person_outline,
-                                size: 16,
-                                color: Colors.grey,
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              // Dropdown
+                              Expanded(
+                                flex: 5,
+                                child: DropdownButtonFormField(
+                                  isDense: true,
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    border: OutlineInputBorder(),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                      vertical: 3,
+                                    ),
+                                  ),
+                                  value: 'Todo',
+                                  items:
+                                      [
+                                        'Todo',
+                                        'In Progress',
+                                        'In Review',
+                                        'Done',
+                                      ].map((value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: isSmallScreen ? 10 : 12,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                  onChanged: (newValue) {},
+                                ),
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.more_vert,
-                                color: Colors.grey,
+                              const SizedBox(width: 6),
+
+                              // Avatar
+                              CircleAvatar(
+                                radius: isSmallScreen ? 11 : 12,
+                                backgroundColor: Colors.grey[300],
+                                child: Icon(
+                                  Icons.person_outline,
+                                  size: isSmallScreen ? 13 : 14,
+                                  color: Colors.grey,
+                                ),
                               ),
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
+                              const SizedBox(width: 6),
+
+                              // More icon
+                              IconButton(
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                icon: Icon(
+                                  Icons.more_vert,
+                                  size: isSmallScreen ? 20 : 20,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () {},
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -198,7 +229,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> {
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.blue,
           side: BorderSide(color: Colors.blue),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         ),
         onPressed: () {
           Navigator.push(
@@ -214,7 +245,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> {
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.red,
           side: BorderSide(color: Colors.red),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         ),
         onPressed:
             widget.item == null

@@ -15,7 +15,7 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
   TextEditingController durationController = TextEditingController();
   TextEditingController goalController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  
+
   @override
   void initState() {
     super.initState();
@@ -39,10 +39,13 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
   }
 
   @override
-  Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
+  Widget buildDesktop(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     final insertUpdateState = ref.watch(insertUpdateSprintProvider);
     final selectedProjectId = ref.watch(selectProjectIdProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -93,7 +96,12 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: const Color.fromARGB(255, 24, 87, 118).withOpacity(0.1),
+                                    color: const Color.fromARGB(
+                                      255,
+                                      24,
+                                      87,
+                                      118,
+                                    ).withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: const Icon(
@@ -105,21 +113,29 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        widget.sprint == null ? 'สร้าง Sprint ใหม่' : 'แก้ไข Sprint',
+                                        widget.sprint == null
+                                            ? 'สร้าง Sprint ใหม่'
+                                            : 'แก้ไข Sprint',
                                         style: const TextStyle(
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold,
-                                          color: Color.fromARGB(255, 24, 87, 118),
+                                          color: Color.fromARGB(
+                                            255,
+                                            24,
+                                            87,
+                                            118,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        widget.sprint == null 
-                                          ? 'เพิ่มสปรินต์ใหม่เพื่อจัดการงานในโปรเจกต์' 
-                                          : 'แก้ไขข้อมูล Sprint ที่มีอยู่',
+                                        widget.sprint == null
+                                            ? 'เพิ่มสปรินต์ใหม่เพื่อจัดการงานในโปรเจกต์'
+                                            : 'แก้ไขข้อมูล Sprint ที่มีอยู่',
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: Colors.grey[600],
@@ -131,7 +147,7 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                               ],
                             ),
                             const SizedBox(height: 32),
-                            
+
                             // Sprint Name Field
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,10 +164,13 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                                 TextFormField(
                                   controller: nameController,
                                   decoration: InputDecoration(
-                                    hintText: 'กรอกชื่อ Sprint เช่น "Sprint 1A"',
+                                    hintText:
+                                        'กรอกชื่อ Sprint เช่น "Sprint 1A"',
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                      borderSide: BorderSide(
+                                        color: Colors.grey[300]!,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -177,7 +196,7 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                               ],
                             ),
                             const SizedBox(height: 24),
-                            
+
                             // Duration Field
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +217,9 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                                     hintText: 'กรอกจำนวนวัน เช่น 14',
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                      borderSide: BorderSide(
+                                        color: Colors.grey[300]!,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -229,7 +250,7 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                               ],
                             ),
                             const SizedBox(height: 24),
-                            
+
                             // Goal Field
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,10 +268,13 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                                   controller: goalController,
                                   maxLines: 3,
                                   decoration: InputDecoration(
-                                    hintText: 'กรอกเป้าหมายของ Sprint เช่น "Complete initial setup"',
+                                    hintText:
+                                        'กรอกเป้าหมายของ Sprint เช่น "Complete initial setup"',
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                      borderSide: BorderSide(
+                                        color: Colors.grey[300]!,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -273,7 +297,7 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                               ],
                             ),
                             const SizedBox(height: 32),
-                            
+
                             // Info Section
                             Container(
                               padding: const EdgeInsets.all(16),
@@ -281,7 +305,12 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                                 color: const Color.fromARGB(255, 229, 246, 253),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: const Color.fromARGB(255, 24, 87, 118).withOpacity(0.2),
+                                  color: const Color.fromARGB(
+                                    255,
+                                    24,
+                                    87,
+                                    118,
+                                  ).withOpacity(0.2),
                                 ),
                               ),
                               child: Row(
@@ -293,13 +322,19 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Text(
                                           'ข้อมูลเพิ่มเติม',
                                           style: TextStyle(
                                             fontWeight: FontWeight.w600,
-                                            color: Color.fromARGB(255, 24, 87, 118),
+                                            color: Color.fromARGB(
+                                              255,
+                                              24,
+                                              87,
+                                              118,
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 4),
@@ -324,7 +359,7 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                     ),
                   ),
                 ),
-                
+
                 // Action Buttons
                 const SizedBox(height: 24),
                 Row(
@@ -350,24 +385,37 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: insertUpdateState.isLoading ? null : _handleSubmit,
-                        icon: insertUpdateState.isLoading
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
+                        onPressed:
+                            insertUpdateState.isLoading ? null : _handleSubmit,
+                        icon:
+                            insertUpdateState.isLoading
+                                ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                : Icon(
+                                  widget.sprint == null
+                                      ? Icons.add
+                                      : Icons.update,
                                 ),
-                              )
-                            : Icon(widget.sprint == null ? Icons.add : Icons.update),
                         label: Text(
                           insertUpdateState.isLoading
                               ? 'กำลังบันทึก...'
-                              : (widget.sprint == null ? 'เพิ่ม Sprint' : 'อัปเดต Sprint'),
+                              : (widget.sprint == null
+                                  ? 'เพิ่ม Sprint'
+                                  : 'อัปเดต Sprint'),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 24, 87, 118),
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            24,
+                            87,
+                            118,
+                          ),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -397,23 +445,25 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
     }
 
     try {
-      await ref.read(insertUpdateSprintProvider.notifier).insertOrUpdateSprint(
-        id: widget.sprint?.id ?? "0", // ถ้าเป็นการเพิ่มใหม่ให้ id = "0"
-        name: nameController.text.trim(),
-        duration: int.parse(durationController.text.trim()),
-        goal: goalController.text.trim(),
-        projectHdId: selectedProjectId,
-        hdId: "1", // ค่าคงที่ตามที่ระบุ
-      );
+      await ref
+          .read(insertUpdateSprintProvider.notifier)
+          .insertOrUpdateSprint(
+            id: widget.sprint?.id ?? "0", // ถ้าเป็นการเพิ่มใหม่ให้ id = "0"
+            name: nameController.text.trim(),
+            duration: int.parse(durationController.text.trim()),
+            goal: goalController.text.trim(),
+            projectHdId: selectedProjectId,
+            hdId: "1", // ค่าคงที่ตามที่ระบุ
+          );
 
       final state = ref.read(insertUpdateSprintProvider);
       state.whenOrNull(
         data: (sprint) {
           if (sprint != null) {
             _showSuccessSnackBar(
-              widget.sprint == null 
-                ? 'เพิ่ม Sprint เรียบร้อยแล้ว' 
-                : 'อัปเดต Sprint เรียบร้อยแล้ว'
+              widget.sprint == null
+                  ? 'เพิ่ม Sprint เรียบร้อยแล้ว'
+                  : 'อัปเดต Sprint เรียบร้อยแล้ว',
             );
             Navigator.of(context).pop(true); // ส่งค่า true เพื่อแจ้งว่าสำเร็จ
           }
@@ -461,297 +511,21 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
     );
   }
 
-
-
   @override
-  Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
-  //return Center(child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge));
-  return buildDesktop(context, sizingInformation);
-    
+  Widget buildTablet(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
+    //return Center(child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge));
+    return buildDesktop(context, sizingInformation);
   }
 
-
-
-
-
   @override
-  Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
-  //return Center(child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge));
-  return buildDesktop(context, sizingInformation);
-    
+  Widget buildMobile(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
+    //return Center(child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge));
+    return buildDesktop(context, sizingInformation);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import 'package:flutter/material.dart';
-// import 'package:project/components/export.dart';
-// import 'package:project/models/sprint_model.dart';
-// import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
-
-// class InsertUpdateSprint extends BaseStatefulWidget {
-//   final SprintModel? sprint;
-
-//   const InsertUpdateSprint({super.key, this.sprint});
-
-//   @override
-//   BaseState<InsertUpdateSprint> createState() => _InsertUpdateSprintState();
-// }
-
-// class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
-//   final formKey = GlobalKey<FormState>();
-//   final nameController = TextEditingController();
-//   final durationController = TextEditingController();
-//   final goalController = TextEditingController();
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     if (widget.sprint != null) {
-//       nameController.text = widget.sprint!.name ?? '';
-//       durationController.text = widget.sprint!.duration?.toString() ?? '14';
-//       goalController.text = widget.sprint!.goal ?? '';
-//     } else {
-//       durationController.text = '14';
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     nameController.dispose();
-//     durationController.dispose();
-//     goalController.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
-//     return _buildForm(context);
-//   }
-
-//   @override
-//   Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
-//     return _buildForm(context);
-//   }
-
-//   @override
-//   Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
-//     return _buildForm(context);
-//   }
-
-//   Widget _buildForm(BuildContext context) {
-//     final insertUpdateState = ref.watch(insertUpdateSprintProvider);
-
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(widget.sprint == null ? 'เพิ่ม Sprint ใหม่' : 'แก้ไข Sprint'),
-//       ),
-//       body: SafeArea(
-//         child: Padding(
-//           padding: const EdgeInsets.all(16),
-//           child: Column(
-//             children: [
-//               Expanded(
-//                 child: SingleChildScrollView(
-//                   child: Form(
-//                     key: formKey,
-//                     child: Column(
-//                       children: [
-//                         _buildTextField(
-//                           controller: nameController,
-//                           label: 'ชื่อ Sprint *',
-//                           hint: 'เช่น Sprint 1A',
-//                           icon: Icons.title,
-//                           validator: (value) {
-//                             if (value == null || value.isEmpty) {
-//                               return 'กรุณากรอกชื่อ Sprint';
-//                             }
-//                             return null;
-//                           },
-//                         ),
-//                         const SizedBox(height: 16),
-//                         _buildTextField(
-//                           controller: durationController,
-//                           label: 'ระยะเวลา (วัน) *',
-//                           hint: '14',
-//                           icon: Icons.timer,
-//                           keyboardType: TextInputType.number,
-//                           validator: (value) {
-//                             if (value == null || value.isEmpty) {
-//                               return 'กรุณากรอกระยะเวลา';
-//                             }
-//                             if (int.tryParse(value) == null || int.parse(value) <= 0) {
-//                               return 'กรุณากรอกเป็นจำนวนวัน';
-//                             }
-//                             return null;
-//                           },
-//                         ),
-//                         const SizedBox(height: 16),
-//                         _buildTextField(
-//                           controller: goalController,
-//                           label: 'เป้าหมาย',
-//                           hint: 'Complete initial setup',
-//                           icon: Icons.flag,
-//                           maxLines: 3,
-//                         ),
-//                         const SizedBox(height: 24),
-//                         Row(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           children: [
-//                             const Icon(Icons.info_outline),
-//                             const SizedBox(width: 8),
-//                             Expanded(
-//                               child: Text(
-//                                 'วันเริ่มต้นและสิ้นสุดจะถูกกำหนดเมื่อเริ่ม Sprint\n'
-//                                 'สถานะเริ่มต้นจะเป็น "ยังไม่เริ่ม"',
-//                                 style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//               const SizedBox(height: 16),
-//               Wrap(
-//                 spacing: 12,
-//                 runSpacing: 12,
-//                 children: [
-//                   SizedBox(
-//                     width: double.infinity,
-//                     child: OutlinedButton.icon(
-//                       onPressed: () => Navigator.of(context).pop(),
-//                       icon: const Icon(Icons.cancel),
-//                       label: const Text('ยกเลิก'),
-//                     ),
-//                   ),
-//                   SizedBox(
-//                     width: double.infinity,
-//                     child: ElevatedButton.icon(
-//                       onPressed: insertUpdateState.isLoading ? null : _handleSubmit,
-//                       icon: insertUpdateState.isLoading
-//                           ? const SizedBox(
-//                               width: 16,
-//                               height: 16,
-//                               child: CircularProgressIndicator(
-//                                 color: Colors.white,
-//                                 strokeWidth: 2,
-//                               ),
-//                             )
-//                           : Icon(widget.sprint == null ? Icons.add : Icons.update),
-//                       label: Text(insertUpdateState.isLoading
-//                           ? 'กำลังบันทึก...'
-//                           : widget.sprint == null
-//                               ? 'เพิ่ม Sprint'
-//                               : 'อัปเดต Sprint'),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildTextField({
-//     required TextEditingController controller,
-//     required String label,
-//     required String hint,
-//     required IconData icon,
-//     int maxLines = 1,
-//     TextInputType keyboardType = TextInputType.text,
-//     String? Function(String?)? validator,
-//   }) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-//         const SizedBox(height: 8),
-//         TextFormField(
-//           controller: controller,
-//           keyboardType: keyboardType,
-//           maxLines: maxLines,
-//           validator: validator,
-//           decoration: InputDecoration(
-//             hintText: hint,
-//             prefixIcon: Icon(icon),
-//             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-
-//   void _handleSubmit() async {
-//     if (!formKey.currentState!.validate()) return;
-
-//     final selectedProjectId = ref.read(selectProjectIdProvider);
-//     if (selectedProjectId == null || selectedProjectId.isEmpty) {
-//       _showErrorSnackBar('ไม่พบ Project ID กรุณาเลือกโปรเจกต์ก่อน');
-//       return;
-//     }
-
-//     await ref.read(insertUpdateSprintProvider.notifier).insertOrUpdateSprint(
-//           id: widget.sprint?.id ?? "0",
-//           name: nameController.text.trim(),
-//           duration: int.parse(durationController.text.trim()),
-//           goal: goalController.text.trim(),
-//           projectHdId: selectedProjectId,
-//           hdId: "1",
-//         );
-
-//     final state = ref.read(insertUpdateSprintProvider);
-//     state.whenOrNull(
-//       data: (_) {
-//         _showSuccessSnackBar(widget.sprint == null
-//             ? 'เพิ่ม Sprint เรียบร้อยแล้ว'
-//             : 'อัปเดต Sprint เรียบร้อยแล้ว');
-//         Navigator.of(context).pop(true);
-//       },
-//       error: (error, _) {
-//         _showErrorSnackBar('เกิดข้อผิดพลาด: $error');
-//       },
-//     );
-//   }
-
-//   void _showSuccessSnackBar(String message) {
-//     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-//       content: Row(
-//         children: [
-//           const Icon(Icons.check_circle, color: Colors.white),
-//           const SizedBox(width: 8),
-//           Text(message),
-//         ],
-//       ),
-//       backgroundColor: Colors.green,
-//     ));
-//   }
-
-//   void _showErrorSnackBar(String message) {
-//     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-//       content: Row(
-//         children: [
-//           const Icon(Icons.error, color: Colors.white),
-//           const SizedBox(width: 8),
-//           Text(message),
-//         ],
-//       ),
-//       backgroundColor: Colors.red,
-//     ));
-//   }
-// }

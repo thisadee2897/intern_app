@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'widgets/export.dart';
+import 'package:project/utils/extension/context_extension.dart'; // ถ้ายังไม่มี ให้สร้าง extension context
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
   const ProjectDetailScreen({super.key});
@@ -13,6 +14,8 @@ class ProjectDetailScreen extends ConsumerStatefulWidget {
 class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
+
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -20,16 +23,19 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
         appBar: AppBar(
           title: const Text('Project Detail'),
           shape: Border(
-            bottom: BorderSide(
-              color: Colors.grey.shade300,
-              width: 1.0,
-            ),
+            bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
           ),
           bottom: TabBar(
-            isScrollable: true, // ✅ ทำให้เลื่อน Tab ได้เมื่อจอแคบ
+            //isScrollable: true,
             indicatorColor: Theme.of(context).colorScheme.primary,
             labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Colors.grey,
+            labelStyle: TextStyle(
+              fontSize: isMobile ? 12 : 14,
+            ), // ปรับขนาดตัวอักษรตามขนาดจอ
+            unselectedLabelStyle: TextStyle(
+              fontSize: isMobile ? 10 : 12,
+            ), // ปรับขนาดตัวอักษรสำหรับแท็บที่ไม่ถูกเลือก
             tabs: const [
               Tab(
                 icon: Icon(Icons.dashboard, size: 15),
@@ -65,5 +71,3 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
     );
   }
 }
-
-
