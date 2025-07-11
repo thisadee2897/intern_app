@@ -1,19 +1,25 @@
+// backlog_group_widget.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
+import 'package:project/screens/project/sprint/views/delete_sprint_dialog.dart';
+import 'package:project/screens/project/sprint/views/delete_sprint_screen.dart'; // ใช้งานได้ ถ้าต้องการขึ้นหน้า Delete Sprint
 import 'package:project/screens/project/sprint/views/widgets/insert_update_sprint.dart';
+import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/context_extension.dart';
 
-class BacklogGroupWidget extends StatefulWidget {
+class BacklogGroupWidget extends ConsumerStatefulWidget {
   final bool isExpanded;
   final SprintModel? item;
   const BacklogGroupWidget({super.key, this.isExpanded = false, this.item});
 
   @override
-  State<BacklogGroupWidget> createState() => _BacklogGroupWidgetState();
+  ConsumerState<BacklogGroupWidget> createState() => _BacklogGroupWidgetState();
 }
 
-class _BacklogGroupWidgetState extends State<BacklogGroupWidget> {
+class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> {
   bool isExpanding = false;
 
   @override
@@ -102,7 +108,6 @@ class _BacklogGroupWidgetState extends State<BacklogGroupWidget> {
                         color: context.primaryColor,
                       ),
                       title: Text("Work Item ${index + 1}"),
-
                       trailing: SizedBox(
                         width: isSmallScreen ? constraints.maxWidth * 0.5 : 300,
                         child: Wrap(
@@ -124,21 +129,19 @@ class _BacklogGroupWidgetState extends State<BacklogGroupWidget> {
                                 value: 'Todo',
                                 items:
                                     <String>[
-                                          'Todo',
-                                          'In Progress',
-                                          'In Review',
-                                          'Done',
-                                        ]
-                                        .map(
-                                          (value) => DropdownMenuItem<String>(
-                                            value: value,
-                                            child: Text(
-                                              value,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
+                                      'Todo',
+                                      'In Progress',
+                                      'In Review',
+                                      'Done',
+                                    ].map((value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      );
+                                    }).toList(),
                                 onChanged: (newValue) {},
                               ),
                             ),
@@ -189,7 +192,14 @@ class _BacklogGroupWidgetState extends State<BacklogGroupWidget> {
         count: '0 of 0',
         color: Colors.lightGreenAccent,
       ),
+
+      Row(crossAxisAlignment: CrossAxisAlignment.end),
       OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.blue,
+          side: BorderSide(color: Colors.blue),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        ),
         onPressed: () {
           Navigator.push(
             context,
@@ -197,6 +207,44 @@ class _BacklogGroupWidgetState extends State<BacklogGroupWidget> {
           );
         },
         child: const Text("Create Sprint"),
+      ),
+
+      //  ปุ่ม Delete Sprint
+      OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.red,
+          side: BorderSide(color: Colors.red),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        ),
+        onPressed:
+            widget.item == null
+                ? null
+                : () async {
+                  final isDeleted = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => DeleteSprintDialog(
+                            // ถ้าใช้ DeleteSprintScreen ก็เปลี่ยนเป็น DeleteSprintScreen
+                            sprintId: widget.item!.id ?? '',
+                            sprintName: widget.item!.name ?? '',
+                          ),
+                    ),
+                  );
+
+                  if (isDeleted == true) {
+                    // invalidate และ get() ใหม่ เพื่อให้ Sprint list หายจริง
+                    ref.invalidate(sprintProvider);
+                    await ref.read(sprintProvider.notifier).get();
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('ลบ Sprint สำเร็จ')),
+                      );
+                    }
+                  }
+                },
+        child: const Text("Delete Sprint"),
       ),
     ];
   }
