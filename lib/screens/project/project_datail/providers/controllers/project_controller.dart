@@ -39,3 +39,4 @@ final projectListProvider = FutureProvider<List<ProjectHDModel>>((ref) async {
 final projectListByCategoryProvider = FutureProvider.family<List<ProjectHDModel>, String>((ref, categoryId) async {
   return await ref.read(projectControllerProvider).getProjects(categoryId: categoryId);
 });
+
