@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
-import 'package:project/screens/project/sprint/views/delete_sprint_dialog.dart';
-import 'package:project/screens/project/sprint/views/delete_sprint_screen.dart'; // ใช้งานได้ ถ้าต้องการขึ้นหน้า Delete Sprint
 import 'package:project/screens/project/sprint/views/widgets/insert_update_sprint.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/context_extension.dart';
@@ -205,6 +203,113 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> {
     );
   }
 
+
+
+
+  // แสดงชื่อ Create, Update Sprint ที่ปุ่มกดใช้ชุดนี้
+
+  //   List<Widget> _buildCountersAndButton() {
+  //   return [
+
+  //       CountWorkTypeWidget(title: 'todo', count: '0 of 0'),
+  //       CountWorkTypeWidget(
+  //         title: 'in progress',
+  //         count: '0 of 0',
+  //         color: Colors.lightBlue,
+  //       ),
+  //       CountWorkTypeWidget(
+  //         title: 'in review',
+  //         count: '0 of 0',
+  //         color: Colors.deepOrange,
+  //       ),
+  //       CountWorkTypeWidget(
+  //         title: 'done',
+  //         count: '0 of 0',
+  //         color: Colors.lightGreenAccent,
+  //       ),
+
+  //     // ---- ✅ ปุ่ม CREATE SPRINT ----
+  //     OutlinedButton.icon(
+  //       icon: const Icon(Icons.add),
+  //       label: const Text("Create Sprint"),
+  //       onPressed: () {
+  //         Navigator.push(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => const InsertUpdateSprint(),
+  //           ),
+  //         );
+  //       },
+  //       style: OutlinedButton.styleFrom(
+  //         foregroundColor: Colors.blue,
+  //         side: const BorderSide(color: Colors.blue),
+  //       ),
+  //     ),
+
+  //     // ---- ✅ ปุ่ม EDIT SPRINT ----
+  //     if (widget.item != null)
+  //       OutlinedButton.icon(
+  //         icon: const Icon(Icons.edit),
+  //         label: const Text("Edit Sprint"),
+  //         onPressed: () {
+  //           Navigator.push(
+  //             context,
+  //             MaterialPageRoute(
+  //               builder: (context) =>
+  //                   InsertUpdateSprint(sprint: widget.item),
+  //             ),
+  //           );
+  //         },
+  //         style: OutlinedButton.styleFrom(
+  //           foregroundColor: Colors.orange,
+  //           side: const BorderSide(color: Colors.orange),
+  //         ),
+  //       ),
+
+  //     // ---- ✅ ปุ่ม DELETE SPRINT ----
+  //     IconButton(
+  //       icon: const Icon(Icons.delete_outline, color: Colors.red),
+  //       tooltip: 'Delete Sprint',
+  //       onPressed: widget.item == null
+  //           ? null
+  //           : () async {
+  //               final confirm = await showDialog<bool>(
+  //                 context: context,
+  //                 builder: (context) => AlertDialog(
+  //                   title: const Text('ยืนยันการลบ'),
+  //                   content: Text(
+  //                       'คุณต้องการลบ Sprint "${widget.item!.name}" ใช่หรือไม่?'),
+  //                   actions: [
+  //                     TextButton(
+  //                         onPressed: () => Navigator.pop(context, false),
+  //                         child: const Text('ยกเลิก')),
+  //                     ElevatedButton(
+  //                         onPressed: () => Navigator.pop(context, true),
+  //                         child: const Text('ลบ')),
+  //                   ],
+  //                 ),
+  //               );
+
+  //               if (confirm == true) {
+  //                 await ref
+  //                     .read(sprintProvider.notifier)
+  //                     .delete(widget.item!.id!);
+  //                 ref.invalidate(sprintProvider);
+  //                 await ref.read(sprintProvider.notifier).get();
+
+  //                 if (context.mounted) {
+  //                   ScaffoldMessenger.of(context).showSnackBar(
+  //                     const SnackBar(
+  //                         content: Text('ลบ Sprint สำเร็จ')),
+  //                   );
+  //                 }
+  //               }
+  //             },
+  //     ),
+  //   ];
+  // }
+
+  // แสดงแค่ icon โชว์ชื่อปุ่มเวลาเมาส์ไปโดน
   List<Widget> _buildCountersAndButton() {
     return [
       CountWorkTypeWidget(title: 'todo', count: '0 of 0'),
@@ -224,58 +329,87 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> {
         color: Colors.lightGreenAccent,
       ),
 
-      Row(crossAxisAlignment: CrossAxisAlignment.end),
-      OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.blue,
-          side: BorderSide(color: Colors.blue),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      //  ปุ่ม CREATE SPRINT (IconButton + Tooltip)
+      Tooltip(
+        message: 'Create Sprint',
+        child: IconButton(
+          icon: const Icon(Icons.add, color: Colors.blue),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const InsertUpdateSprint(),
+              ),
+            );
+          },
         ),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const InsertUpdateSprint()),
-          );
-        },
-        child: const Text("Create Sprint"),
       ),
 
-      //  ปุ่ม Delete Sprint
-      OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.red,
-          side: BorderSide(color: Colors.red),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      //  ปุ่ม EDIT SPRINT (IconButton + Tooltip)
+      if (widget.item != null)
+        Tooltip(
+          message: 'Edit Sprint',
+          child: IconButton(
+            icon: const Icon(Icons.edit, color: Colors.orange),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => InsertUpdateSprint(sprint: widget.item),
+                ),
+              );
+            },
+          ),
         ),
-        onPressed:
-            widget.item == null
-                ? null
-                : () async {
-                  final isDeleted = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
+
+      // ✅ ปุ่ม DELETE SPRINT (IconButton + Tooltip) -- คุณมีแล้ว
+      Tooltip(
+        message: 'Delete Sprint',
+        child: IconButton(
+          icon: const Icon(Icons.delete_outline, color: Colors.red),
+          onPressed:
+              widget.item == null
+                  ? null
+                  : () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
                       builder:
-                          (context) => DeleteSprintDialog(
-                            // ถ้าใช้ DeleteSprintScreen ก็เปลี่ยนเป็น DeleteSprintScreen
-                            sprintId: widget.item!.id ?? '',
-                            sprintName: widget.item!.name ?? '',
+                          (context) => AlertDialog(
+                            title: const Text('ยืนยันการลบ'),
+                            content: Text(
+                              'คุณต้องการลบ Sprint "${widget.item!.name}" ใช่หรือไม่?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('ยกเลิก'),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('ลบ'),
+                              ),
+                            ],
                           ),
-                    ),
-                  );
+                    );
 
-                  if (isDeleted == true) {
-                    // invalidate และ get() ใหม่ เพื่อให้ Sprint list หายจริง
-                    ref.invalidate(sprintProvider);
-                    await ref.read(sprintProvider.notifier).get();
+                    if (confirm == true) {
+                      await ref
+                          .read(sprintProvider.notifier)
+                          .delete(widget.item!.id!);
+                      ref.invalidate(sprintProvider);
+                      await ref.read(sprintProvider.notifier).get();
 
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('ลบ Sprint สำเร็จ')),
-                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('ลบ Sprint สำเร็จ')),
+                        );
+                      }
                     }
-                  }
-                },
-        child: const Text("Delete Sprint"),
+                  },
+        ),
       ),
     ];
   }

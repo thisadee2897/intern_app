@@ -1,7 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'widgets/export.dart';
-import 'package:project/utils/extension/context_extension.dart'; // ถ้ายังไม่มี ให้สร้าง extension context
+// import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart'; // อย่าลืม import SprintProvider ด้วย
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
   const ProjectDetailScreen({super.key});
@@ -12,6 +13,9 @@ class ProjectDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
+
+
+
   @override
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
@@ -25,17 +29,31 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
           shape: Border(
             bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
           ),
+
+          // ถ้าตรงการปุ่ม icon ถังขยะบน AppBar ให้จัดการ Sprint ทั้งหมดจัดการได้ที่ตรงนี้
+          actions: [ 
+            // IconButton(
+            //   icon: const Icon(Icons.delete),
+            //   tooltip: 'Delete Sprint',
+            //   onPressed: () {
+            //     // สมมติทดสอบส่งค่า sprintId/sprintName จริงได้ตามโปรเจ็กต์
+            //     _showDeleteSprintDialog(
+            //       sprintId: '1',
+            //       sprintName: 'Sprint 1',
+            //     );
+            //   },
+            // ),
+          ],
           bottom: TabBar(
-            //isScrollable: true,
             indicatorColor: Theme.of(context).colorScheme.primary,
             labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Colors.grey,
             labelStyle: TextStyle(
               fontSize: isMobile ? 12 : 14,
-            ), // ปรับขนาดตัวอักษรตามขนาดจอ
+            ),
             unselectedLabelStyle: TextStyle(
               fontSize: isMobile ? 10 : 12,
-            ), // ปรับขนาดตัวอักษรสำหรับแท็บที่ไม่ถูกเลือก
+            ),
             tabs: const [
               Tab(
                 icon: Icon(Icons.dashboard, size: 15),
