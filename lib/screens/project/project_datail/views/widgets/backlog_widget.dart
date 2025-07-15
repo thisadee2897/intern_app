@@ -44,7 +44,8 @@ class _BacklogWidgetState extends BaseState<BacklogWidget> {
                 itemCount: datas.length + 1,
                 itemBuilder: (context, index) {
                   if (index == datas.length) {
-                    return BacklogGroupWidget(isExpanded: true);
+                    // ส่ง item: null เพื่อแสดง backlog group (ไม่มี sprint)
+                    return BacklogGroupWidget(isExpanded: true, item: null);
                   } else {
                     SprintModel item = datas[index];
                     return BacklogGroupWidget(item: item);
@@ -54,11 +55,11 @@ class _BacklogWidgetState extends BaseState<BacklogWidget> {
             },
             error:
                 (err, stx) => Center(
-                  child: Text(
-                    'Error: ${err.toString()}',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ),
+                      child: Text(
+                        'Error: ${err.toString()}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
             loading: () => const Center(child: CircularProgressIndicator()),
           ),
         );

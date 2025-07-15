@@ -9,7 +9,7 @@ import 'package:project/models/user_model.dart';
 
 part 'task_model.freezed.dart';
 part 'task_model.g.dart';
-
+ 
 @freezed
 class TaskModel with _$TaskModel {
   const factory TaskModel({
