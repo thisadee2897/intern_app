@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:project/models/task_model.dart';
-import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/priority_controller.dart';
@@ -40,8 +39,6 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   void initState() {
     super.initState();
     final t = widget.task;
-    final user = ref.read(loginProvider).value?.user; // ✅ ดึง user จาก loginProvider
-
     if (t != null) {
       nameController.text = t.name ?? '';
       descriptionController.text = t.description ?? '';
@@ -51,7 +48,6 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       selectedAssignee = t.assignedTo?.id?.toString();
       startDateTime = t.taskStartDate != null ? DateTime.tryParse(t.taskStartDate!) : null;
       endDateTime = t.taskEndDate != null ? DateTime.tryParse(t.taskEndDate!) : null;
-      isActive = t.active ?? true;
 
       if (startDateTime != null) {
         startDateTimeController.text = DateFormat('yyyy-MM-dd').format(startDateTime!);
@@ -59,8 +55,8 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       if (endDateTime != null) {
         endDateTimeController.text = DateFormat('yyyy-MM-dd').format(endDateTime!);
       }
-    } else {
-      selectedAssignee = user?.id?.toString(); // ✅ default ผู้รับผิดชอบเป็นคนล็อกอิน
+
+      isActive = t.active ?? true;
     }
   }
 
@@ -99,7 +95,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         "task_assigned_to": selectedAssignee ?? "1",
         "task_start_date": startDateTime?.toIso8601String(),
         "task_end_date": endDateTime?.toIso8601String(),
-        "task_is_active": isActive,
+        "task_is_active": isActive, // ✅ แก้ตรงนี้ให้ถูกต้องตาม API
       };
 
       try {
@@ -221,6 +217,17 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                     ),
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (e, _) => Text('Error: $e'),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: selectedAssignee,
+                    decoration: inputDecoration('ผู้รับผิดชอบ', Icons.person),
+                    items: const [
+                      DropdownMenuItem(value: '1', child: Text('Admin')),
+                      DropdownMenuItem(value: '2', child: Text('User A')),
+                      DropdownMenuItem(value: '3', child: Text('User B')),
+                    ],
+                    onChanged: (val) => setState(() => selectedAssignee = val),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
