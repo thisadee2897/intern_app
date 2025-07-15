@@ -2,10 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/apis/project_data/get_sprint_by_project.dart';
 import 'package:project/apis/master_data/insert_or_update_sprint.dart';
 import 'package:project/models/sprint_model.dart';
+import 'package:project/screens/project/sprint/providers/apis/delete_sprint_api.dart';
 
+// -------------------  SprintNotifier -------------------
 class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
   SprintNotifier(this.ref) : super(const AsyncValue.loading());
   final Ref ref;
+
   Future<void> get() async {
     String? id = ref.read(selectProjectIdProvider);
     if (id == null) {
@@ -13,13 +16,32 @@ class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
     } else {
       state = const AsyncValue.loading();
       state = await AsyncValue.guard(() async {
-        List<SprintModel> response = await ref.read(apiSprintByProject).get(projectId: id);
+        List<SprintModel> response =
+            await ref.read(apiSprintByProject).get(projectId: id);
         return response;
       });
     }
   }
+
+  //  เพิ่ม delete method
+  Future<void> delete(String sprintId) async {
+    try {
+      // เรียก API ลบ
+      await ref.read(apiDeleteSprint).delete(sprintId: sprintId);
+
+      // ลบจาก state local ด้วย
+      state.whenData((list) {
+        final updatedList =
+            list.where((sprint) => sprint.id != sprintId).toList();
+        state = AsyncValue.data(updatedList);
+      });
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
 }
 
+// -------------------  Insert/Update Notifier -------------------
 class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel?>> {
   InsertUpdateSprintNotifier(this.ref) : super(const AsyncValue.data(null));
   final Ref ref;
@@ -49,11 +71,12 @@ class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel?>>
         "hd_id": projectHdId,
       };
 
-      final result = await ref.read(apiInsertOrUpdateSprint).post(body: body);
+      final result =
+          await ref.read(apiInsertOrUpdateSprint).post(body: body);
       state = AsyncValue.data(result);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
-    } finally {}
+    }
   }
 
   void clearState() {
@@ -61,6 +84,17 @@ class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel?>>
   }
 }
 
-final sprintProvider = StateNotifierProvider<SprintNotifier, AsyncValue<List<SprintModel>>>((ref) => SprintNotifier(ref));
-final insertUpdateSprintProvider = StateNotifierProvider<InsertUpdateSprintNotifier, AsyncValue<SprintModel?>>((ref) => InsertUpdateSprintNotifier(ref));
-final selectProjectIdProvider = StateProvider<String?>((ref) => null);
+// -------------------  Providers -------------------
+final sprintProvider = StateNotifierProvider<SprintNotifier, AsyncValue<List<SprintModel>>>(
+  (ref) => SprintNotifier(ref),
+);
+
+final insertUpdateSprintProvider = 
+    StateNotifierProvider<InsertUpdateSprintNotifier, AsyncValue<SprintModel?>>( 
+  (ref) => InsertUpdateSprintNotifier(ref), 
+);
+
+final selectProjectIdProvider = StateProvider<String?>((ref) => null); //  Provider สำหรับเลือก Project ID
+
+// final apiDeleteSprint = Provider((ref) => DeleteSprintApi()); //  Provider สำหรับ API ลบ
+final apiDeleteSprint = Provider<DeleteSprintApi>((ref) => DeleteSprintApi(ref: ref));
