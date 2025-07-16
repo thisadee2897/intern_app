@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';  
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/task_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/delete_comment_controller.dart';
@@ -25,9 +25,9 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
   Future<void> _submitComment() async {
     final text = _commentController.text.trim();
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณากรอกข้อความก่อนส่ง')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('กรุณากรอกข้อความก่อนส่ง')));
       return;
     }
 
@@ -36,12 +36,14 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
       "project_hd_id": widget.task.projectHd?.id ?? "",
       "master_type_of_work_id": widget.task.typeOfWork?.id ?? "",
       "comment": [
-        {"insert": text}
+        {"insert": text},
       ],
       "task_id": widget.task.id ?? "",
     };
 
-    await ref.read(insertCommentTaskControllerProvider.notifier).submit(body: body);
+    await ref
+        .read(insertCommentTaskControllerProvider.notifier)
+        .submit(body: body);
 
     final state = ref.read(insertCommentTaskControllerProvider);
     state.when(
@@ -55,9 +57,9 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
       },
       loading: () {},
       error: (e, _) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
       },
     );
   }
@@ -65,38 +67,44 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
   @override
   Widget build(BuildContext context) {
     // ✅ ฟังผลลบ comment ที่นี่
-    ref.listen<DeleteCommentTaskState>(
-      deleteCommentTaskControllerProvider,
-      (previous, next) {
-        if (!mounted) return;
+    ref.listen<DeleteCommentTaskState>(deleteCommentTaskControllerProvider, (
+      previous,
+      next,
+    ) {
+      if (!mounted) return;
 
-        if (next.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('ลบความคิดเห็นไม่สำเร็จ: ${next.error}')),
-          );
-        } else if (next.message != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(next.message!)),
-          );
-          ref.invalidate(getCommentTaskControllerProvider(widget.task.id ?? ""));
-        }
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ลบความคิดเห็นไม่สำเร็จ: ${next.error}')),
+        );
+      } else if (next.message != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.message!)));
+        ref.invalidate(getCommentTaskControllerProvider(widget.task.id ?? ""));
+      }
 
-        // ✅ รีเซ็ต state หลังใช้งาน
-        if (next.error != null || next.message != null) {
-          Future.delayed(const Duration(milliseconds: 300), () {
-            if (mounted) {
-              ref.read(deleteCommentTaskControllerProvider.notifier).state = DeleteCommentTaskState();
-            }
-          });
-        }
-      },
+      // ✅ รีเซ็ต state หลังใช้งาน
+      if (next.error != null || next.message != null) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            ref.read(deleteCommentTaskControllerProvider.notifier).state =
+                DeleteCommentTaskState();
+          }
+        });
+      }
+    });
+
+    final comments = ref.watch(
+      getCommentTaskControllerProvider(widget.task.id ?? ""),
     );
-
-    final comments = ref.watch(getCommentTaskControllerProvider(widget.task.id ?? ""));
     final insertState = ref.watch(insertCommentTaskControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text('ความคิดเห็น - ${widget.task.name ?? ""}')),
+      appBar: AppBar(
+        title: Text('ความคิดเห็น - ${widget.task.name ?? ""}'),
+        backgroundColor: Color.fromARGB(255, 92, 179, 250),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -108,35 +116,65 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
                     itemBuilder: (_, i) {
                       final item = list[i];
                       final commentJson = item['comment_json'];
-                      final commentText = getPlainTextFromCommentJson(commentJson);
+                      final commentText = getPlainTextFromCommentJson(
+                        commentJson,
+                      );
                       final createdAt = item['created_at'] ?? '';
                       final createdBy = item['create_by']?['name'] ?? '-';
 
-                      return ListTile(
-                        title: Text(commentText),
-                        subtitle: Text('โดย $createdBy\n$createdAt'),
-                        isThreeLine: true,
-                        leading: const Icon(Icons.comment),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            final confirmed = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('ยืนยันการลบ'),
-                                content: const Text('ต้องการลบความคิดเห็นนี้ใช่หรือไม่?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context, false),
-                                    child: const Text('ยกเลิก'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context, true),
-                                    child: const Text('ลบ'),
-                                  ),
-                                ],
-                              ),
-                            );
+                      return Card(
+  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  elevation: 2,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  child: ListTile(
+    contentPadding: const EdgeInsets.all(12),
+    leading: CircleAvatar(
+      backgroundColor: const Color.fromARGB(255, 92, 172, 250),
+      child: Text(
+        createdBy.isNotEmpty ? createdBy[0] : '?',
+        style: const TextStyle(color: Colors.black),
+      ),
+    ),
+    title: Text(
+      commentText,
+      style: const TextStyle(fontSize: 16),
+    ),
+    subtitle: Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'โดย $createdBy',
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          Text(
+            createdAt,
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+        ],
+      ),
+    ),
+    trailing: IconButton(
+      icon: const Icon(Icons.delete_outline, color: Colors.red),
+      onPressed: () async {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('ยืนยันการลบ'),
+            content: const Text('ต้องการลบความคิดเห็นนี้ใช่หรือไม่?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('ยกเลิก'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('ลบ'),
+              ),
+            ],
+          ),
+        );
 
                             if (confirmed == true) {
                               final activityIdCandidates = [
@@ -149,7 +187,8 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
 
                               String? activityId;
                               for (final candidate in activityIdCandidates) {
-                                if (candidate != null && candidate.toString().isNotEmpty) {
+                                if (candidate != null &&
+                                    candidate.toString().isNotEmpty) {
                                   activityId = candidate.toString();
                                   break;
                                 }
@@ -157,22 +196,32 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
 
                               if (activityId == null || activityId.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('ไม่พบรหัสความคิดเห็นสำหรับลบ')),
+                                  const SnackBar(
+                                    content: Text(
+                                      'ไม่พบรหัสความคิดเห็นสำหรับลบ',
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
 
                               await ref
-                                  .read(deleteCommentTaskControllerProvider.notifier)
+                                  .read(
+                                    deleteCommentTaskControllerProvider
+                                        .notifier,
+                                  )
                                   .deleteComment(activityId);
                             }
                           },
+                        ),
                         ),
                       );
                     },
                   );
                 } else {
-                  return const Center(child: Text('ข้อมูล comment ไม่ใช่ List'));
+                  return const Center(
+                    child: Text('ข้อมูล comment ไม่ใช่ List'),
+                  );
                 }
               },
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -180,32 +229,42 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
             ),
           ),
           const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            color: Colors.white,
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _commentController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'พิมพ์ความคิดเห็น...',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                     minLines: 1,
-                    maxLines: 5,
+                    maxLines: 4,
                   ),
                 ),
+                const SizedBox(width: 8),
                 insertState.isLoading
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: _submitComment,
+                    : CircleAvatar(
+                        backgroundColor: const Color.fromARGB(255, 92, 172, 250),
+                        child: IconButton(
+                          icon: const Icon(Icons.send, color: Colors.white),
+                          onPressed: _submitComment,
+                        ),
                       ),
               ],
             ),
