@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';  
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/task_model.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/delete_comment_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/get_comment_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_comment_task_controller.dart';
 
@@ -31,7 +32,7 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
     }
 
     final body = {
-      "activity_id": "0", // ✅ ปรับตามข้อมูลจริงถ้ามี
+      "activity_id": "0",
       "project_hd_id": widget.task.projectHd?.id ?? "",
       "master_type_of_work_id": widget.task.typeOfWork?.id ?? "",
       "comment": [
@@ -46,10 +47,7 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
     state.when(
       data: (message) async {
         _commentController.clear();
-
-        // ✅ แนะนำหน่วงเวลาเล็กน้อยเพื่อให้ API บันทึกก่อน
         await Future.delayed(const Duration(milliseconds: 500));
-
         ref.invalidate(getCommentTaskControllerProvider(widget.task.id ?? ""));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message ?? "เพิ่มความคิดเห็นสำเร็จ")),
@@ -66,7 +64,34 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('== Watching comments for task_id: ${widget.task.id}');
+    // ✅ ฟังผลลบ comment ที่นี่
+    ref.listen<DeleteCommentTaskState>(
+      deleteCommentTaskControllerProvider,
+      (previous, next) {
+        if (!mounted) return;
+
+        if (next.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('ลบความคิดเห็นไม่สำเร็จ: ${next.error}')),
+          );
+        } else if (next.message != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(next.message!)),
+          );
+          ref.invalidate(getCommentTaskControllerProvider(widget.task.id ?? ""));
+        }
+
+        // ✅ รีเซ็ต state หลังใช้งาน
+        if (next.error != null || next.message != null) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              ref.read(deleteCommentTaskControllerProvider.notifier).state = DeleteCommentTaskState();
+            }
+          });
+        }
+      },
+    );
+
     final comments = ref.watch(getCommentTaskControllerProvider(widget.task.id ?? ""));
     final insertState = ref.watch(insertCommentTaskControllerProvider);
 
@@ -92,6 +117,57 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
                         subtitle: Text('โดย $createdBy\n$createdAt'),
                         isThreeLine: true,
                         leading: const Icon(Icons.comment),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('ยืนยันการลบ'),
+                                content: const Text('ต้องการลบความคิดเห็นนี้ใช่หรือไม่?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, false),
+                                    child: const Text('ยกเลิก'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, true),
+                                    child: const Text('ลบ'),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (confirmed == true) {
+                              final activityIdCandidates = [
+                                item['activity_id'],
+                                item['id'],
+                                item['comment_id'],
+                                item['task']?['id'],
+                                item['project']?['id'],
+                              ];
+
+                              String? activityId;
+                              for (final candidate in activityIdCandidates) {
+                                if (candidate != null && candidate.toString().isNotEmpty) {
+                                  activityId = candidate.toString();
+                                  break;
+                                }
+                              }
+
+                              if (activityId == null || activityId.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('ไม่พบรหัสความคิดเห็นสำหรับลบ')),
+                                );
+                                return;
+                              }
+
+                              await ref
+                                  .read(deleteCommentTaskControllerProvider.notifier)
+                                  .deleteComment(activityId);
+                            }
+                          },
+                        ),
                       );
                     },
                   );
