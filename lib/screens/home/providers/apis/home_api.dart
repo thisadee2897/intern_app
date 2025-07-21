@@ -48,14 +48,37 @@ class GetWorkspaceByUserApi {
   final String _path = 'master_data/get_workspace_by_user';
   GetWorkspaceByUserApi({required this.ref});
   Future<List<WorkspaceModel>> get() async {
-    try {
-      Response response = await ref.read(apiClientProvider).get(_path);
-      List<Map<String, dynamic>> datas = List<Map<String, dynamic>>.from(response.data);
-      return datas.map((data) => WorkspaceModel.fromJson(data)).toList();
-    } catch (e) {
-      rethrow;
-    }
+     print('GetWorkspaceByUserApi.get() called');  // <-- เพิ่มบรรทัดนี้ดู
+  try {
+    Response response = await ref.read(apiClientProvider).get(_path);
+
+    final List<dynamic> rawList = response.data;
+
+    final converted = rawList.map((data) {
+      final json = Map<String, dynamic>.from(data);
+
+     // debug print เช็คชนิดของทุก field ใน json
+      json.forEach((key, value) {
+        if (value != null) {
+          print('Field "$key" has type ${value.runtimeType} with value: $value');
+        }
+      });
+
+       // ตัวอย่างแปลง id ให้เป็น String ถ้ายังไม่ใช่
+      if (json['id'] != null && json['id'] is! String) {
+        print('Convert "id" from ${json['id'].runtimeType} to String');
+        json['id'] = json['id'].toString();
+      }
+
+      return WorkspaceModel.fromJson(json);
+    }).toList();
+
+    return converted;
+  } catch (e) {
+    rethrow;
   }
+}
+
 }
 
 final apiGetWorkspaceByUser = Provider<GetWorkspaceByUserApi>((ref) => GetWorkspaceByUserApi(ref: ref));
