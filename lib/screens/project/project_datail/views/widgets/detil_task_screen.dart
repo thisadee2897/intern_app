@@ -99,10 +99,99 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
     final comments = ref.watch(getCommentTaskControllerProvider(widget.task.id ?? ""));
     final insertState = ref.watch(insertCommentTaskControllerProvider);
 
+    // --- Auto-grow logic for QuillEditor ---
+    double _getEditorHeight() {
+      // วัด plain text จาก document
+      final plainText = _controller.document.toPlainText();
+      final span = TextSpan(text: plainText, style: Theme.of(context).textTheme.bodyMedium);
+      final tp = TextPainter(
+        text: span,
+        maxLines: 20,
+        textDirection: TextDirection.ltr,
+      );
+      tp.layout(maxWidth: MediaQuery.of(context).size.width - 32); // padding 16*2
+      double minHeight = 80;
+      double maxHeight = 220;
+      double contentHeight = tp.size.height + 32; // padding + toolbar
+      if (contentHeight < minHeight) return minHeight;
+      if (contentHeight > maxHeight) return maxHeight;
+      return contentHeight;
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text('ความคิดเห็น - ${widget.task.name ?? ""}')),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Column(
+              children: [
+                QuillSimpleToolbar(controller: _controller),
+                const SizedBox(height: 5),
+                StreamBuilder(
+                  stream: _controller.document.changes,
+                  builder: (context, snapshot) {
+                    double _getEditorHeight() {
+                      final plainText = _controller.document.toPlainText();
+                      final span = TextSpan(text: plainText, style: Theme.of(context).textTheme.bodyMedium);
+                      final tp = TextPainter(
+                        text: span,
+                        maxLines: 20,
+                        textDirection: TextDirection.ltr,
+                      );
+                      tp.layout(maxWidth: MediaQuery.of(context).size.width - 32);
+                      double minHeight = 80;
+                      double maxHeight = 220;
+                      double contentHeight = tp.size.height + 32;
+                      if (contentHeight < minHeight) return minHeight;
+                      if (contentHeight > maxHeight) return maxHeight;
+                      return contentHeight;
+                    }
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 120),
+                      curve: Curves.ease,
+                      height: _getEditorHeight(),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: QuillEditor(
+                        controller: _controller,
+                        focusNode: _editorFocusNode,
+                        scrollController: _editorScrollController,
+                        config: QuillEditorConfig(
+                          placeholder: 'พิมพ์ความคิดเห็น...',
+                          padding: const EdgeInsets.all(6),
+                          embedBuilders: [],
+                          scrollable: true,
+                          expands: false,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: insertState.isLoading
+                      ? const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : ElevatedButton.icon(
+                          onPressed: _submitComment,
+                          icon: const Icon(Icons.send),
+                          label: const Text('ส่ง'),
+                        ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
           Expanded(
             child: comments.when(
               data: (list) {
@@ -223,53 +312,6 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Error: $e')),
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Column(
-              children: [
-                QuillSimpleToolbar(controller: _controller),
-                const SizedBox(height: 5),
-                Container(
-                  height: 80,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: QuillEditor(
-                    controller: _controller,
-                    focusNode: _editorFocusNode,
-                    scrollController: _editorScrollController,
-                    config: QuillEditorConfig(
-                      placeholder: 'พิมพ์ความคิดเห็น...',
-                      padding: const EdgeInsets.all(6),
-                      embedBuilders: [],
-                      scrollable: true,
-                      expands: false,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: insertState.isLoading
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        )
-                      : ElevatedButton.icon(
-                          onPressed: _submitComment,
-                          icon: const Icon(Icons.send),
-                          label: const Text('ส่ง'),
-                        ),
-                ),
-              ],
             ),
           ),
         ],
