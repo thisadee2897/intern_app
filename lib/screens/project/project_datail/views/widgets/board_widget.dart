@@ -12,7 +12,7 @@ class BoardWidget extends BaseStatefulWidget {
 class _BoardWidgetState extends BaseState<BoardWidget> {
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
-    return CommentTaskScreen();
+    return CommentTaskScreen(projectId: '1',);
     // return Container(color: Colors.amber[50], child: Center(child: Text('Desktop View', style: Theme.of(context).textTheme.titleLarge)));
   }
 
