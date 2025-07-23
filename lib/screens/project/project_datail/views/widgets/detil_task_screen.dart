@@ -53,6 +53,7 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
         _controller.clear();
         await Future.delayed(const Duration(milliseconds: 500));
         ref.invalidate(getCommentTaskControllerProvider(widget.task.id ?? ""));
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message ?? "เพิ่มความคิดเห็นสำเร็จ")),
         );
