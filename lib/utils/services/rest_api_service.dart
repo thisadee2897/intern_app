@@ -1,7 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:go_router/go_router.dart';
 import 'package:project/components/export.dart';
+import 'package:project/config/routes/route_config.dart';
+import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 
 import 'local_storage_service.dart';
+
 const prod = 'https://inturn2025-815084861775.asia-southeast1.run.app/';
 // const prod = 'http://127.0.0.1:8000/';
 // const imageCheckIn = 'https://techcaresolution-ssl.com/oho-hrm/';
@@ -53,8 +57,9 @@ class ApiInterceptor extends Interceptor {
           message: err.response?.data['detail'] ?? 'Unauthorized',
         ),
       );
-      // ref.read(localStorageServiceProvider).deleteToken();
-      // ref.read(isLoginFromOtherProvider.notifier).state = true;
+      ref.read(localStorageServiceProvider).deleteToken();
+      ref.read(localStorageServiceProvider).clear();
+      ref.read(logoutProvider.future);
       return;
     } else if (err.response?.statusCode == 404) {
       //404 หมายถึงไม่พบข้อมูล
