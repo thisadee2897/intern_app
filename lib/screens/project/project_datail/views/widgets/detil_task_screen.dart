@@ -100,23 +100,23 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
     final insertState = ref.watch(insertCommentTaskControllerProvider);
 
     // --- Auto-grow logic for QuillEditor ---
-    double _getEditorHeight() {
-      // วัด plain text จาก document
-      final plainText = _controller.document.toPlainText();
-      final span = TextSpan(text: plainText, style: Theme.of(context).textTheme.bodyMedium);
-      final tp = TextPainter(
-        text: span,
-        maxLines: 20,
-        textDirection: TextDirection.ltr,
-      );
-      tp.layout(maxWidth: MediaQuery.of(context).size.width - 32); // padding 16*2
-      double minHeight = 80;
-      double maxHeight = 220;
-      double contentHeight = tp.size.height + 32; // padding + toolbar
-      if (contentHeight < minHeight) return minHeight;
-      if (contentHeight > maxHeight) return maxHeight;
-      return contentHeight;
-    }
+    // double _getEditorHeight() {
+    //   // วัด plain text จาก document
+    //   final plainText = _controller.document.toPlainText();
+    //   final span = TextSpan(text: plainText, style: Theme.of(context).textTheme.bodyMedium);
+    //   final tp = TextPainter(
+    //     text: span,
+    //     maxLines: 20,
+    //     textDirection: TextDirection.ltr,
+    //   );
+    //   tp.layout(maxWidth: MediaQuery.of(context).size.width - 32); // padding 16*2
+    //   double minHeight = 80;
+    //   double maxHeight = 220;
+    //   double contentHeight = tp.size.height + 32; // padding + toolbar
+    //   if (contentHeight < minHeight) return minHeight;
+    //   if (contentHeight > maxHeight) return maxHeight;
+    //   return contentHeight;
+    // }
 
     return Scaffold(
       appBar: AppBar(title: Text('ความคิดเห็น - ${widget.task.name ?? ""}')),
