@@ -7,22 +7,10 @@ class DeleteCommentTaskState {
   final String? message;
   final String? error;
 
-  DeleteCommentTaskState({
-    this.isLoading = false,
-    this.message,
-    this.error,
-  });
+  DeleteCommentTaskState({this.isLoading = false, this.message, this.error});
 
-  DeleteCommentTaskState copyWith({
-    bool? isLoading,
-    String? message,
-    String? error,
-  }) {
-    return DeleteCommentTaskState(
-      isLoading: isLoading ?? this.isLoading,
-      message: message,
-      error: error,
-    );
+  DeleteCommentTaskState copyWith({bool? isLoading, String? message, String? error}) {
+    return DeleteCommentTaskState(isLoading: isLoading ?? this.isLoading, message: message, error: error);
   }
 }
 
@@ -43,8 +31,7 @@ class DeleteCommentTaskController extends StateNotifier<DeleteCommentTaskState> 
   }
 }
 
-final deleteCommentTaskControllerProvider =
-    StateNotifierProvider<DeleteCommentTaskController, DeleteCommentTaskState>((ref) {
+final deleteCommentTaskControllerProvider = StateNotifierProvider<DeleteCommentTaskController, DeleteCommentTaskState>((ref) {
   final api = ref.watch(deleteCommentTaskApiProvider);
   return DeleteCommentTaskController(api: api);
 });

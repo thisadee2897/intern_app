@@ -101,7 +101,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                                 .fetchWorkspace();
                           },
                           onDeleteWorkspace: (String id) async {
-                            if (id == null || id.isEmpty) {
+                            if (id.isEmpty) {
                               print('id is null or empty');
                               return;
                             }
