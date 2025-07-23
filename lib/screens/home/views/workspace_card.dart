@@ -7,10 +7,7 @@ import 'package:project/screens/home/views/insert_update_workspace_screen.dart';
 
 class WorkspaceCard extends ConsumerStatefulWidget {
   final WorkspaceModel workspace;
-  final VoidCallback?
-  onWorkspaceChanged; // สำหรับ refresh list หลัง update/delete
-
-  // เพิ่มนี้เข้ามา
+  final VoidCallback? onWorkspaceChanged;
   final Future<void> Function(String id)? onDeleteWorkspace;
 
   const WorkspaceCard({
@@ -29,89 +26,82 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
 
   @override
   Widget build(BuildContext context) {
-    final user =
-        widget.workspace.users != null && widget.workspace.users!.isNotEmpty
-            ? widget.workspace.users![0]
-            : null;
+    final users = widget.workspace.users ?? [];
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
       onExit: (_) => setState(() => isHovered = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
-        width: 240,
-        height: 140,
-        margin: const EdgeInsets.all(8),
+        width: 300,
+        height: 180,
+        margin: const EdgeInsets.all(4), // Card มีระยะห่างเท่าๆกันทุกด้าน
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color:
                 isHovered
-                    ? const Color.fromARGB(162, 114, 133, 227)
-                    : const Color.fromARGB(189, 220, 227, 230),
-            width: 5,
+                    ? const Color.fromARGB(255, 159, 168, 218)
+                    : Colors.grey.shade300,
+            width: 3,
           ),
           boxShadow:
               isHovered
                   ? [
                     BoxShadow(
-                      color: const Color.fromARGB(
-                        255,
-                        109,
-                        110,
-                        110,
-                      ).withOpacity(0.3),
-                      blurRadius: 11,
-                      offset: const Offset(0, 6),
+                      color: Colors.indigo.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 8),
                     ),
                   ]
-                  : [],
-          image:
-              user != null && user.image != null
-                  ? DecorationImage(
-                    image: NetworkImage(user.image!),
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.3),
-                      BlendMode.darken,
+                  : [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 8),
                     ),
+                  ],
+          gradient:
+              isHovered
+                  ? LinearGradient(
+                    colors: [
+                      const Color.fromARGB(255, 220, 224, 249),
+                      const Color.fromARGB(255, 185, 192, 243),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   )
                   : null,
-          color: const Color.fromARGB(65, 173, 215, 240),
+          color:
+              isHovered
+                  ? null
+                  : const Color.fromARGB(175, 33, 39, 123), // พื้นหลังของ Card
         ),
         child: Stack(
           children: [
-            // 🔖 Tag มุมบนซ้าย
+            //  ไอคอนตกแต่ง
             Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'Template',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
+              top: 8,
+              left: 8,
+              child: Icon(
+                Icons.dashboard_customize_rounded,
+                color: const Color.fromARGB(184, 188, 202, 235),
+                size: 35,
               ),
             ),
-
-            // ⋮ ปุ่มเมนู update / delete มุมขวาบน
+            // ปุ่มเมนู ⋮ มุมบนขวา
             Positioned(
-              top: 4,
-              right: 4,
+              top: 0,
+              right: 8,
               child: PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert, color: Colors.white),
+                icon: Icon(
+                  Icons.more_vert,
+                  color:
+                      isHovered
+                          ? const Color.fromARGB(160, 48, 63, 159)
+                          : const Color.fromARGB(184, 188, 202, 235),
+                ),
                 onSelected: (value) async {
                   if (value == 'update') {
                     final result = await Navigator.push<bool>(
@@ -123,9 +113,7 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                             ),
                       ),
                     );
-                    if (result == true) {
-                      widget.onWorkspaceChanged?.call();
-                    }
+                    if (result == true) widget.onWorkspaceChanged?.call();
                   } else if (value == 'delete') {
                     final confirmed = await showDialog<bool>(
                       context: context,
@@ -135,6 +123,7 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                             content: const Text(
                               "คุณแน่ใจหรือไม่ว่าต้องการลบ Workspace นี้?",
                             ),
+                            backgroundColor: Colors.white,
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
@@ -144,24 +133,26 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                                 onPressed: () => Navigator.pop(context, true),
                                 child: const Text("ลบ"),
                               ),
+                              
                             ],
                           ),
                     );
-
                     if (confirmed == true) {
                       try {
                         await ref
                             .read(deleteWorkspaceControllerProvider.notifier)
                             .deleteWorkspace(id: widget.workspace.id!);
-                        widget.onWorkspaceChanged?.call(); // รีโหลด list
+                        widget.onWorkspaceChanged?.call();
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('ลบ Workspace เรียบร้อย'),
+                            content: Text('Delete Workspace เรียบร้อย'),
                           ),
                         );
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('ลบ Workspace ไม่สำเร็จ: $e')),
+                          SnackBar(
+                            content: Text('delete Workspace ไม่สำเร็จ: $e'),
+                          ),
                         );
                       }
                     }
@@ -173,9 +164,9 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                         value: 'update',
                         child: Row(
                           children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 8),
-                            Text('แก้ไข Workspace'),
+                            Icon(Icons.edit, size: 15),
+                            SizedBox(width: 2),
+                            Text('edit Workspace'),
                           ],
                         ),
                       ),
@@ -183,9 +174,9 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 18),
-                            SizedBox(width: 8),
-                            Text('ลบ Workspace'),
+                            Icon(Icons.delete, size: 15),
+                            SizedBox(width: 2),
+                            Text('delete Workspace'),
                           ],
                         ),
                       ),
@@ -193,45 +184,84 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
               ),
             ),
 
-            // 📛 ชื่อ workspace ตรงกลาง
+            // ชื่อ Workspace ตรงกลาง
             Center(
               child: Text(
                 widget.workspace.name ?? '',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
+                style: TextStyle(
+                  fontSize: 30,
                   fontWeight: FontWeight.bold,
+                  color: const Color.fromARGB(255, 242, 242, 244),
+                  shadows: [
+                    Shadow(
+                      blurRadius: 3,
+                      color: Colors.indigo.shade100.withOpacity(0.7),
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
 
-            // 🧑 Avatar มุมล่างซ้าย
-            Positioned(
-              bottom: 12,
-              left: 12,
-              child: CircleAvatar(
-                radius: 14,
-                child: CachedNetworkImage(
-                  imageBuilder:
-                      (context, imageProvider) => CircleAvatar(
-                        radius: 14,
-                        backgroundImage: imageProvider,
+            // สมาชิกหลายคน (avatars) มุมล่างซ้าย
+            if (users.isNotEmpty)
+              Positioned(
+                bottom: 12,
+                left: 12,
+                child: Row(
+                  children: [
+                    ...users
+                        .take(4)
+                        .map(
+                          (user) => Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: CircleAvatar(
+                              radius: 16,
+                              backgroundColor: Colors.white,
+                              child:
+                                  user.image != null && user.image!.isNotEmpty
+                                      ? CircleAvatar(
+                                        radius: 14,
+                                        backgroundImage:
+                                            CachedNetworkImageProvider(
+                                              user.image!,
+                                            ),
+                                      )
+                                      : const CircleAvatar(
+                                        radius: 14,
+                                        backgroundColor: Colors.indigo,
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 18,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                            ),
+                          ),
+                        ),
+                    if (users.length > 4)
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.indigo.shade200,
+                        child: Text(
+                          '+${users.length - 4}',
+                          style: const TextStyle(
+                            color: Colors.indigo,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                  imageUrl: user?.image ?? '',
-                  errorWidget:
-                      (context, url, error) => const Icon(
-                        Icons.person,
-                        size: 28,
-                        color: Colors.blue,
-                      ),
+                  ],
                 ),
               ),
-            ),
           ],
         ),
       ),
     );
   }
 }
+
 

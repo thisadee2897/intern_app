@@ -15,31 +15,45 @@ class HomeScreen extends BaseStatefulWidget {
 
 class _HomeScreenState extends BaseState<HomeScreen> {
   @override
-  Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
+  Widget buildDesktop(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     return _buildScaffold(context, crossAxisCount: 3, aspectRatio: 1.8);
   }
 
   @override
-  Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
+  Widget buildTablet(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     return _buildScaffold(context, crossAxisCount: 2, aspectRatio: 1.5);
   }
 
   @override
-  Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
+  Widget buildMobile(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     return _buildScaffold(context, crossAxisCount: 1, aspectRatio: 1.2);
   }
 
-  Widget _buildScaffold(BuildContext context, {required int crossAxisCount, required double aspectRatio}) {
+  Widget _buildScaffold(
+    BuildContext context, {
+    required int crossAxisCount,
+    required double aspectRatio,
+  }) {
     return Consumer(
       builder: (context, ref, child) {
         final workspaceState = ref.watch(workspaceProvider);
 
         return Scaffold(
+          backgroundColor: Colors.white, //  backgrondColor ของแอปทั้งหน้า
           appBar: AppBar(
             title: const Text(
               'Workspaces',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 30,
                 fontWeight: FontWeight.w500,
                 color: Color.fromARGB(255, 27, 27, 27),
               ),
@@ -51,16 +65,17 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                   Icons.add,
                   color: Color.fromARGB(255, 27, 27, 27),
                 ),
-                tooltip: 'เพิ่ม Workspace',
+                tooltip: 'Insert Workspace',
                 onPressed: () async {
                   final result = await Navigator.of(context).push<bool>(
                     MaterialPageRoute(
-                      builder: (context) => InsertUpdateWorkspaceScreen(workspace: null),
+                      builder:
+                          (context) =>
+                              InsertUpdateWorkspaceScreen(workspace: null),
                     ),
                   );
-                  if (result == true) {
+                  if (mounted && result == true) {
                     await ref.read(workspaceProvider.notifier).fetchWorkspace();
-                    print('เพิ่ม Workspace เรียบร้อยและรีโหลดข้อมูลใหม่แล้ว');
                   }
                 },
               ),
@@ -86,12 +101,16 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                     return WorkspaceCard(
                       workspace: workspace,
                       onWorkspaceChanged: () async {
-                        await ref.read(workspaceProvider.notifier).fetchWorkspace();
+                        await ref
+                            .read(workspaceProvider.notifier)
+                            .fetchWorkspace();
                       },
                       onDeleteWorkspace: (String id) async {
                         if (id.isEmpty) return;
                         await ref.read(apiDeleteWorkspace).delete(id: id);
-                        await ref.read(workspaceProvider.notifier).fetchWorkspace();
+                        await ref
+                            .read(workspaceProvider.notifier)
+                            .fetchWorkspace();
                       },
                     );
                   },
@@ -104,4 +123,3 @@ class _HomeScreenState extends BaseState<HomeScreen> {
     );
   }
 }
-
