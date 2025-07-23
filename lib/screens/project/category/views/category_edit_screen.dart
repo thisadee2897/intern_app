@@ -6,7 +6,15 @@ import 'package:project/screens/project/project_datail/providers/controllers/cat
 
 class CategoryEditScreen extends BaseStatefulWidget {
   final String workspaceId;
-  const CategoryEditScreen({super.key, required this.workspaceId});
+  final String? categoryId;
+  final String? categoryName;
+
+  const CategoryEditScreen({
+    Key? key,
+    required this.workspaceId,
+    this.categoryId,
+    this.categoryName,
+  }) : super(key: key);
 
   @override
   BaseState<CategoryEditScreen> createState() => _CategoryEditScreenState();
@@ -15,6 +23,21 @@ class CategoryEditScreen extends BaseStatefulWidget {
 class _CategoryEditScreenState extends BaseState<CategoryEditScreen> {
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
+    // ถ้ามี categoryId แปลว่ามาจาก ProjectScreen -> เปิดฟอร์มแก้ไขตรง ๆ
+    if (widget.categoryId != null) {
+      final category = CategoryModel(
+        id: widget.categoryId,
+        name: widget.categoryName ?? '',
+        description: '',
+        active: true,
+      );
+      return CategoryEditFormScreen(
+        workspaceId: widget.workspaceId,
+        category: category,
+      );
+    }
+
+    // ถ้าไม่มี categoryId -> แสดงลิสต์หมวดหมู่ให้เลือกก่อน
     return Consumer(
       builder: (context, ref, child) {
         final categories = ref.watch(categoryListProvider(widget.workspaceId)).value ?? [];
@@ -82,12 +105,12 @@ class _CategoryEditScreenState extends BaseState<CategoryEditScreen> {
 
   @override
   Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge));
+    return const Center(child: Text('Tablet View'));
   }
 
   @override
   Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge));
+    return const Center(child: Text('Mobile View'));
   }
 }
 
@@ -165,11 +188,11 @@ class _CategoryEditFormScreenState extends BaseState<CategoryEditFormScreen> {
                         _buildTextField('รายละเอียด', descriptionController, Icons.description, maxLines: 3),
                         const SizedBox(height: 16),
                         SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Active'),
-                        value: isActive,
-                        onChanged: (val) => setState(() => isActive = val),
-                      ),
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Active'),
+                          value: isActive,
+                          onChanged: (val) => setState(() => isActive = val),
+                        ),
                         const SizedBox(height: 32),
                         SizedBox(
                           width: double.infinity,
@@ -195,15 +218,14 @@ class _CategoryEditFormScreenState extends BaseState<CategoryEditFormScreen> {
     );
   }
 
-  // ส่วน Tablet / Mobile ใส่ไว้เฉยๆ
   @override
   Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge));
+    return const Center(child: Text('Tablet View'));
   }
 
   @override
   Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge));
+    return const Center(child: Text('Mobile View'));
   }
 
   Widget _buildTextField(String label, TextEditingController controller, IconData icon, {FormFieldValidator<String>? validator, int maxLines = 1}) {
@@ -250,7 +272,3 @@ class _CategoryEditFormScreenState extends BaseState<CategoryEditFormScreen> {
     }
   }
 }
-
-
-
-  
