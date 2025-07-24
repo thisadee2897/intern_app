@@ -63,7 +63,8 @@ class _HomeScreenState extends BaseState<HomeScreen> {
               IconButton(
                 icon: const Icon(
                   Icons.add,
-                  color: Color.fromARGB(255, 27, 27, 27),
+                  color: Color.fromARGB(255, 16, 18, 37),
+                  
                 ),
                 tooltip: 'Insert Workspace',
                 onPressed: () async {

@@ -38,58 +38,62 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
         height: 180,
         margin: const EdgeInsets.all(4), // Card มีระยะห่างเท่าๆกันทุกด้าน
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color:
-                isHovered
-                    ? const Color.fromARGB(255, 159, 168, 218)
-                    : Colors.grey.shade300,
-            width: 3,
-          ),
-          boxShadow:
-              isHovered
-                  ? [
-                    BoxShadow(
-                      color: Colors.indigo.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                  : [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-          gradient:
-              isHovered
-                  ? LinearGradient(
-                    colors: [
-                      const Color.fromARGB(255, 220, 224, 249),
-                      const Color.fromARGB(255, 185, 192, 243),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                  : null,
-          color:
-              isHovered
-                  ? null
-                  : const Color.fromARGB(175, 33, 39, 123), // พื้นหลังของ Card
-        ),
+  borderRadius: BorderRadius.circular(20),
+  border: Border.all(
+    color: isHovered
+        ? const Color.fromARGB(255, 136, 148, 219)
+        : Colors.grey.shade300,
+    width: 3,
+  ),
+  boxShadow: [
+    BoxShadow(
+      color: isHovered
+          ? const Color.fromARGB(255, 72, 88, 177).withOpacity(0.25)
+          : Colors.grey.withOpacity(0.1),
+      blurRadius: 10,
+      offset: const Offset(0, 6),
+    ),
+  ],
+  gradient: isHovered
+      ? const LinearGradient(
+          colors: [
+            Color(0xFFDDE3FD), // สีฟ้าอ่อน
+            Color(0xFFB0BFF4), // น้ำเงินอมม่วง
+            Color(0xFF8CA8F1), // ม่วงอ่อน
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        )
+      : null,
+  color: isHovered
+      ? null
+      : const Color.fromARGB(232, 22, 14, 66), // สีน้ำเงินเข้มเมื่อไม่ hover
+),
+
         child: Stack(
           children: [
-            //  ไอคอนตกแต่ง
+            // ไอคอนตกแต่งแบบไล่สี
             Positioned(
               top: 8,
               left: 8,
-              child: Icon(
-                Icons.dashboard_customize_rounded,
-                color: const Color.fromARGB(184, 188, 202, 235),
-                size: 35,
+              child: ShaderMask(
+                shaderCallback:
+                    (bounds) => LinearGradient(
+                      colors: [
+                        const Color.fromARGB(255, 67, 143, 205),
+                        const Color.fromARGB(255, 174, 91, 197),
+                        const Color.fromARGB(255, 239, 120, 160),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(
+                      Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                    ),
+                blendMode: BlendMode.srcIn,
+                child: const Icon(Icons.dashboard_customize_rounded, size: 50),
               ),
             ),
+
             // ปุ่มเมนู ⋮ มุมบนขวา
             Positioned(
               top: 0,
@@ -133,7 +137,6 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                                 onPressed: () => Navigator.pop(context, true),
                                 child: const Text("ลบ"),
                               ),
-                              
                             ],
                           ),
                     );
@@ -164,9 +167,9 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                         value: 'update',
                         child: Row(
                           children: [
-                            Icon(Icons.edit, size: 15),
+                            Icon(Icons.edit, size: 16),
                             SizedBox(width: 2),
-                            Text('edit Workspace'),
+                            Text('edit workspace'),
                           ],
                         ),
                       ),
@@ -174,9 +177,9 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 15),
+                            Icon(Icons.delete, size: 16),
                             SizedBox(width: 2),
-                            Text('delete Workspace'),
+                            Text('delete workspace'),
                           ],
                         ),
                       ),
@@ -190,18 +193,18 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                 widget.workspace.name ?? '',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w500,
                   color: const Color.fromARGB(255, 242, 242, 244),
                   shadows: [
                     Shadow(
-                      blurRadius: 3,
-                      color: Colors.indigo.shade100.withOpacity(0.7),
+                      blurRadius: 1,
+                      color: Colors.indigo.shade100.withOpacity(0.5),
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -209,8 +212,8 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
             // สมาชิกหลายคน (avatars) มุมล่างซ้าย
             if (users.isNotEmpty)
               Positioned(
-                bottom: 12,
-                left: 12,
+                bottom: 10,
+                left: 10,
                 child: Row(
                   children: [
                     ...users
@@ -224,18 +227,18 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                               child:
                                   user.image != null && user.image!.isNotEmpty
                                       ? CircleAvatar(
-                                        radius: 14,
+                                        radius: 12,
                                         backgroundImage:
                                             CachedNetworkImageProvider(
                                               user.image!,
                                             ),
                                       )
                                       : const CircleAvatar(
-                                        radius: 14,
+                                        radius: 12,
                                         backgroundColor: Colors.indigo,
                                         child: Icon(
                                           Icons.person,
-                                          size: 18,
+                                          size: 14,
                                           color: Colors.white,
                                         ),
                                       ),
@@ -263,5 +266,3 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
     );
   }
 }
-
-
