@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appflowy_board/appflowy_board.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
@@ -89,6 +89,8 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
         orElse: () => <dynamic>[],
       );
 
+      if (!mounted) return;
+
       groupedItems.clear();
 
       for (final entry in groupOrder) {
@@ -111,9 +113,7 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
         groupedItems[id] = filtered;
       }
 
-      if (mounted) {
-        _refreshBoard();
-      }
+      _refreshBoard();
     } catch (e) {
       print('❌ Error loading tasks: $e');
     }
@@ -132,7 +132,23 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
       );
     }
 
+    if (!mounted) return;
     setState(() {});
+  }
+
+  Color _colorForGroup(String groupId) {
+    switch (groupId) {
+      case '1':
+        return Colors.red.shade300;
+      case '2':
+        return Colors.orange.shade300;
+      case '3':
+        return Colors.blue.shade300;
+      case '4':
+        return Colors.green.shade300;
+      default:
+        return Colors.grey.shade300;
+    }
   }
 
   @override
@@ -168,19 +184,33 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
               orElse: () => MapEntry(groupData.id, groupData.id),
             ).value;
 
+            final groupColor = _colorForGroup(groupData.id);
+
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: groupColor.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade400),
+                border: Border.all(color: groupColor, width: 2),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text("(${groupData.items.length})", style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: groupColor.darken(),
+                    ),
+                  ),
+                  Text(
+                    "(${groupData.items.length})",
+                    style: TextStyle(
+                      color: groupColor.darken().withOpacity(0.7),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -222,28 +252,6 @@ class MyGroupItem extends AppFlowyGroupItem {
   String get id => taskId;
 }
 
-class AppFlowyColumnHeader extends StatelessWidget {
-  final String title;
-  final int count;
-
-  const AppFlowyColumnHeader({
-    required this.title,
-    required this.count,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        Text("($count)", style: const TextStyle(color: Colors.grey)),
-      ],
-    );
-  }
-}
-
 class AppFlowyColumnItemCard extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -278,5 +286,15 @@ class AppFlowyColumnItemCard extends StatelessWidget {
         subtitle: subtitle != null ? Text(subtitle!) : null,
       ),
     );
+  }
+}
+
+/// Extension เพื่อปรับความเข้มสี (darken)
+extension ColorUtils on Color {
+  Color darken([double amount = .1]) {
+    assert(amount >= 0 && amount <= 1);
+    final hsl = HSLColor.fromColor(this);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return hslDark.toColor();
   }
 }
