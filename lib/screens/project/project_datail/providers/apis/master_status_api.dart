@@ -1,4 +1,4 @@
-//master_status_api.dart
+// 📁 master_status_api.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/task_status_model.dart';
 import 'package:project/utils/services/rest_api_service.dart';
@@ -12,9 +12,6 @@ class TaskStatusApi {
   Future<List<TaskStatusModel>> getAll() async {
     try {
       final response = await ref.read(apiClientProvider).get(_path);
-      print('✅ Response: $response'); // DEBUG
-
-      // ใช้ response.data สำหรับ dio หรือ http
       final resData = response.data;
       final List data = resData is List
           ? resData
@@ -28,3 +25,7 @@ class TaskStatusApi {
     }
   }
 }
+
+final taskStatusApiProvider = Provider<TaskStatusApi>(
+  (ref) => TaskStatusApi(ref: ref),
+);

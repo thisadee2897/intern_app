@@ -35,9 +35,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
   void _loadTasks() {
     final projectHdId = widget.item?.projectHd?.id ?? "1";
     ref.invalidate(taskBySprintControllerProvider(projectHdId));
-    ref
-        .read(taskBySprintControllerProvider(projectHdId).notifier)
-        .getTaskBySprint(projectHdId);
+    ref.read(taskBySprintControllerProvider(projectHdId).notifier).fetch();
   }
 
   @override

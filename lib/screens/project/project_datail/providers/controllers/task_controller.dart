@@ -32,19 +32,20 @@ final apiTaskBySprintProvider = Provider<TaskBySprintApi>(
 /// 🔸 Controller class สำหรับจัดการโหลด Task
 class TaskBySprintController extends StateNotifier<AsyncValue<List<TaskModel>>> {
   final Ref ref;
+  final String projectId;
 
-  TaskBySprintController(this.ref) : super(const AsyncValue.loading());
+  TaskBySprintController({required this.ref, required this.projectId})
+      : super(const AsyncValue.loading()) {
+    fetch(); // ✅ แก้ไข: เรียก fetch ใน constructor อย่างปลอดภัย
+  }
 
   /// ✅ โหลด Task และ return กลับ List<TaskModel>
-  Future<List<TaskModel>> getTaskBySprint(String projectId) async {
+  Future<void> fetch() async {
     try {
-      state = const AsyncValue.loading();
       final data = await ref.read(apiTaskBySprintProvider).get(projectId: projectId);
       state = AsyncValue.data(data);
-      return data;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
-      return [];
     }
   }
 }
@@ -52,5 +53,5 @@ class TaskBySprintController extends StateNotifier<AsyncValue<List<TaskModel>>> 
 /// ✅ Provider แบบ family ที่สามารถส่ง projectId เข้าไปได้
 final taskBySprintControllerProvider = StateNotifierProvider.family<
     TaskBySprintController, AsyncValue<List<TaskModel>>, String>(
-  (ref, projectId) => TaskBySprintController(ref),
+  (ref, projectId) => TaskBySprintController(ref: ref, projectId: projectId),
 );
