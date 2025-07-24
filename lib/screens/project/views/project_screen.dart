@@ -143,7 +143,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                   child: Row(
                     children: [
                       const Icon(
-                        Icons.folder,
+                        Icons.folder_outlined,
                         color: Colors.blueAccent,
                         size: 20,
                       ),
@@ -156,7 +156,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                               project.name ?? '-',
                               style: const TextStyle(
                                 fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                                // fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -214,7 +214,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
 
   Widget _buildSearchField() {
     return Container(
-      width: 250,
+      width: 180,
       height: 40,
       margin: const EdgeInsets.only(right: 8),
       decoration: BoxDecoration(
@@ -289,8 +289,8 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
         centerTitle: false,
         actions: [
           _buildSearchField(),
-          IconButton(
-            icon: const Icon(Icons.add, color: Colors.black),
+          const SizedBox(width: 8),
+          ElevatedButton.icon(
             onPressed: () async {
               final result = await Navigator.push(
                 context,
@@ -305,7 +305,21 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                 await _loadAllProjects();
               }
             },
+            icon: const Icon(Icons.add, size: 18, color: Colors.white),
+            label: const Text(
+              'New Category',
+              style: TextStyle(fontSize: 14, color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 104, 161, 247),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+              elevation: 0,
+            ),
           ),
+          const SizedBox(width: 12),
         ],
       ),
       body: Container(
@@ -316,7 +330,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
           },
           child: categoryAsyncValue.appWhen(
             dataBuilder: (categories) {
-        
               // กรณีมีข้อมูล → โหลด project ทุกหมวดหมู่
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _loadAllProjects();
@@ -356,195 +369,207 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     );
   }
 
-  Widget _buildCategoryTile(
-    BuildContext context, {
-    required String categoryName,
-    required String categoryId,
-    required bool isExpanded,
-    required ValueChanged<bool> onExpansionChanged,
-    required AsyncValue<List<ProjectHDModel>> projectsAsync,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: MouseRegion(
-        onEnter: (_) {
-          setState(() {
-            _hoveredCategoryId = categoryId;
-          });
-        },
-        onExit: (_) {
-          setState(() {
-            _hoveredCategoryId = '';
-          });
-        },
-        child: ExpansionTile(
-          controlAffinity: ListTileControlAffinity.leading,
-          backgroundColor: Colors.white,
-          collapsedBackgroundColor: Colors.white,
-          initiallyExpanded: isExpanded,
-          onExpansionChanged: onExpansionChanged,
-          title: Row(
-            children: [
-              const Icon(Icons.folder, color: Colors.blueAccent),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '$categoryName (${projectsAsync.value?.length ?? 0})',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+Widget _buildCategoryTile(
+  BuildContext context, {
+  required String categoryName,
+  required String categoryId,
+  required bool isExpanded,
+  required ValueChanged<bool> onExpansionChanged,
+  required AsyncValue<List<ProjectHDModel>> projectsAsync,
+}) {
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(
+        color: Colors.grey.shade300,
+        width: 1, // ✅ ขอบบาง
+      ),
+      borderRadius: BorderRadius.circular(12), // ✅ มุมมน
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.1),
+          blurRadius: 2,
+          offset: const Offset(0, 1),
+        ),
+      ],
+    ),
+    child: MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          _hoveredCategoryId = categoryId;
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          _hoveredCategoryId = '';
+        });
+      },
+      child: ExpansionTile(
+        controlAffinity: ListTileControlAffinity.leading,
+        backgroundColor: Colors.white,
+        collapsedBackgroundColor: Colors.white,
+        initiallyExpanded: isExpanded,
+        onExpansionChanged: onExpansionChanged,
+        title: Row(
+          children: [
+            const Icon(Icons.folder_outlined, color: Colors.blueAccent),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(categoryName),
+            ),
+            Text(
+              '(${projectsAsync.value?.length ?? 0})',
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton.icon(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProjectUpdateScreen(
+                      project: {"project_category_id": categoryId},
+                    ),
+                  ),
+                );
+                if (result == true) {
+                  ref.invalidate(projectListByCategoryProvider(categoryId));
+                  ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                  await _loadAllProjects();
+                  setState(() {});
+                }
+              },
+              icon: const Icon(
+                Icons.add,
+                size: 16,
+                color: Color.fromARGB(255, 81, 80, 80),
+              ),
+              label: const Text(
+                "Add",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color.fromARGB(255, 81, 80, 80),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              ElevatedButton.icon(
-                onPressed: () async {
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(197, 244, 244, 245),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                minimumSize: const Size(10, 32),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            PopupMenuButton<String>(
+              onSelected: (value) async {
+                if (value == 'edit') {
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (_) => ProjectUpdateScreen(
-                            project: {"project_category_id": categoryId},
-                          ),
+                      builder: (_) => CategoryEditScreen(
+                        workspaceId: selectedWorkspaceId,
+                        categoryId: categoryId,
+                        categoryName: categoryName,
+                      ),
                     ),
                   );
                   if (result == true) {
-                    ref.invalidate(projectListByCategoryProvider(categoryId));
                     ref.invalidate(categoryListProvider(selectedWorkspaceId));
                     await _loadAllProjects();
-                    setState(() {});
                   }
-                },
-                icon: const Icon(Icons.add, size: 16, color: Colors.white),
-                label: const Text(
-                  "Add",
-                  style: TextStyle(fontSize: 12, color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(199, 173, 187, 212),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  minimumSize: const Size(10, 32),
-                ),
-              ),
-              const SizedBox(width: 4),
-              PopupMenuButton<String>(
-                onSelected: (value) async {
-                  if (value == 'edit') {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (_) => CategoryEditScreen(
-                              workspaceId: selectedWorkspaceId,
-                              categoryId: categoryId,
-                              categoryName: categoryName,
-                            ),
-                      ),
-                    );
-                    if (result == true) {
-                      ref.invalidate(categoryListProvider(selectedWorkspaceId));
-                      await _loadAllProjects();
-                    }
-                  } else if (value == 'delete') {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder:
-                          (context) => AlertDialog(
-                            title: const Text('ยืนยันการลบ'),
-                            content: const Text(
-                              'คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: const Text('ยกเลิก'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color.fromARGB(57, 253, 253, 253),
-                                ),
-                                child: const Text('ลบ'),
-                              ),
-                            ],
-                          ),
-                    );
-                    //  ดำเนินการลบ
-                    if (confirm == true) {
-                      try {
-                        await ref
-                            .read(
-                              deleteProjectCategoryControllerProvider.notifier,
-                            )
-                            .deleteCategory({
-                              'project_category_id': categoryId,
-                            }); //
-                        ref.invalidate(categoryListProvider);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('ลบหมวดหมู่สำเร็จ')),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
-                        );
-                      }
-                    }
-                  }
-                },
-                itemBuilder:
-                    (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: ListTile(
-                          leading: Icon(Icons.edit),
-                          title: Text('แก้ไขหมวดหมู่'),
+                } else if (value == 'delete') {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('ยืนยันการลบ'),
+                      content: const Text('คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('ยกเลิก'),
                         ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: ListTile(
-                          leading: Icon(Icons.delete, color: Colors.red),
-                          title: Text(
-                            'ลบหมวดหมู่',
-                            style: TextStyle(color: Colors.red),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(57, 253, 253, 253),
                           ),
+                          child: const Text('ลบ'),
                         ),
-                      ),
-                    ],
-              ),
-            ],
-          ),
-          children: [
-            projectsAsync.when(
-              data: (projects) {
-                if (projects.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('ไม่มีโปรเจคในหมวดหมู่นี้'),
+                      ],
+                    ),
                   );
+                  if (confirm == true) {
+                    try {
+                      await ref
+                          .read(deleteProjectCategoryControllerProvider.notifier)
+                          .deleteCategory({'project_category_id': categoryId});
+                      ref.invalidate(categoryListProvider);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('ลบหมวดหมู่สำเร็จ')),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
+                      );
+                    }
+                  }
                 }
-                return Column(
-                  children:
-                      projects
-                          .map((project) => _buildProjectItem(project))
-                          .toList(),
-                );
               },
-              loading:
-                  () => const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(child: CircularProgressIndicator()),
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: ListTile(
+                    leading: Icon(Icons.edit),
+                    title: Text('แก้ไขหมวดหมู่'),
                   ),
-              error:
-                  (error, _) => Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text('โหลดโปรเจคล้มเหลว: $error'),
+                ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: ListTile(
+                    leading: Icon(Icons.delete, color: Colors.red),
+                    title: Text(
+                      'ลบหมวดหมู่',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
+                ),
+              ],
             ),
           ],
         ),
+        children: [
+          projectsAsync.when(
+            data: (projects) {
+              if (projects.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('ไม่มีโปรเจคในหมวดหมู่นี้'),
+                );
+              }
+              return Column(
+                children: projects
+                    .map((project) => _buildProjectItem(project))
+                    .toList(),
+              );
+            },
+            loading: () => const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (error, _) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('โหลดโปรเจคล้มเหลว: $error'),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildProjectItem(ProjectHDModel project) {
     return Container(
@@ -556,7 +581,10 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.folder, color: Color.fromARGB(255, 127, 190, 254)),
+          const Icon(
+            Icons.folder_outlined,
+            color: Color.fromARGB(255, 127, 190, 254),
+          ),
           const SizedBox(width: 12),
           Expanded(
             flex: 3,
@@ -565,7 +593,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
               children: [
                 Text(
                   project.name ?? '-',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  //style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   'ID: ${project.id}',
@@ -576,8 +604,8 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
           ),
           const SizedBox(width: 12),
           ElevatedButton.icon(
-            icon: const Icon(Icons.edit, size: 16),
-            label: const Text('แก้ไข', style: TextStyle(fontSize: 12)),
+            icon: const Icon(Icons.edit, size: 16, color: Colors.black),
+            label: const Text('แก้ไข', style: TextStyle(fontSize: 12, color: Colors.black)),
             onPressed: () async {
               final result = await Navigator.push(
                 context,
@@ -595,23 +623,31 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFD2CCE5),
+              backgroundColor: const Color.fromARGB(197, 244, 244, 245),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               minimumSize: const Size(10, 32),
+              // ขอบโค้ง
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.0),
+              ),
             ),
           ),
+
           const SizedBox(width: 8),
           ElevatedButton.icon(
-            icon: const Icon(Icons.open_in_new, size: 16),
-            label: const Text('เปิด', style: TextStyle(fontSize: 12)),
+            icon: const Icon(Icons.open_in_new, size: 16, color: Colors.black),
+            label: const Text('เปิด', style: TextStyle(fontSize: 12, color: Colors.black)),
             onPressed: () {
               ref.read(selectProjectIdProvider.notifier).state = project.id;
               ref.goSubPath(Routes.projectDetail);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFD2CCE5),
+              backgroundColor: const Color.fromARGB(197, 244, 244, 245),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               minimumSize: const Size(10, 32),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.0), // ปรับตามที่ต้องการ
+              ),
             ),
           ),
         ],
@@ -621,19 +657,25 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
 
   @override
   Widget buildDesktop(
-    BuildContext context,SizingInformation sizingInformation,) {
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     return _buildBody(context, sizingInformation);
   }
 
   @override
   Widget buildTablet(
-    BuildContext context,SizingInformation sizingInformation,) {
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     return _buildBody(context, sizingInformation);
   }
 
   @override
   Widget buildMobile(
-    BuildContext context,SizingInformation sizingInformation,) {
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     return _buildBody(context, sizingInformation);
   }
 }
