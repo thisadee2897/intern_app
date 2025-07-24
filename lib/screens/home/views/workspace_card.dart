@@ -38,37 +38,38 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
         height: 180,
         margin: const EdgeInsets.all(4), // Card มีระยะห่างเท่าๆกันทุกด้าน
         decoration: BoxDecoration(
-  borderRadius: BorderRadius.circular(20),
-  border: Border.all(
-    color: isHovered
-        ? const Color.fromARGB(255, 136, 148, 219)
-        : Colors.grey.shade300,
-    width: 3,
-  ),
-  boxShadow: [
-    BoxShadow(
-      color: isHovered
-          ? const Color.fromARGB(255, 72, 88, 177).withOpacity(0.25)
-          : Colors.grey.withOpacity(0.1),
-      blurRadius: 10,
-      offset: const Offset(0, 6),
-    ),
-  ],
-  gradient: isHovered
-      ? const LinearGradient(
-          colors: [
-            Color(0xFFDDE3FD), // สีฟ้าอ่อน
-            Color(0xFFB0BFF4), // น้ำเงินอมม่วง
-            Color(0xFF8CA8F1), // ม่วงอ่อน
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color:
+                isHovered
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).dividerColor,
+            width: 3,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color:
+                  isHovered
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.25)
+                      : Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
+            ),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        )
-      : null,
-  color: isHovered
-      ? null
-      : const Color.fromARGB(232, 22, 14, 66), // สีน้ำเงินเข้มเมื่อไม่ hover
-),
+          gradient:
+              isHovered
+                  ? LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                      Theme.of(context).colorScheme.primary.withOpacity(0.25),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                  : null,
+          color: isHovered ? null :  const Color.fromARGB(255, 245, 246, 247),
+        ),
 
         child: Stack(
           children: [
@@ -80,9 +81,9 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                 shaderCallback:
                     (bounds) => LinearGradient(
                       colors: [
-                        const Color.fromARGB(255, 67, 143, 205),
-                        const Color.fromARGB(255, 174, 91, 197),
-                        const Color.fromARGB(255, 239, 120, 160),
+                        const Color.fromARGB(255, 2, 27, 84),
+                        const Color.fromARGB(255, 58, 84, 231),
+                        const Color.fromARGB(255, 205, 136, 159),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -103,8 +104,8 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                   Icons.more_vert,
                   color:
                       isHovered
-                          ? const Color.fromARGB(160, 48, 63, 159)
-                          : const Color.fromARGB(184, 188, 202, 235),
+                          ? const Color.fromARGB(159, 14, 23, 78)
+                          : const Color.fromARGB(184, 82, 107, 164),
                 ),
                 onSelected: (value) async {
                   if (value == 'update') {
@@ -195,7 +196,8 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w500,
-                  color: const Color.fromARGB(255, 242, 242, 244),
+                  color: Theme.of(context).colorScheme.onSurface,
+
                   shadows: [
                     Shadow(
                       blurRadius: 1,

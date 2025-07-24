@@ -54,7 +54,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
               'Workspaces',
               style: TextStyle(
                 fontSize: 30,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.bold,
                 color: Color.fromARGB(255, 27, 27, 27),
               ),
             ),
