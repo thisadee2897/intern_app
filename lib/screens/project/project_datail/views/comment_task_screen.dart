@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appflowy_board/appflowy_board.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
+import 'package:project/utils/extension/hex_color.dart';
 
 class CommentTaskScreen extends ConsumerStatefulWidget {
   final String projectId;
@@ -17,12 +18,7 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
   late AppFlowyBoardController boardController;
   final Map<String, List<MyGroupItem>> groupedItems = {};
 
-  final List<MapEntry<String, String>> groupOrder = const [
-    MapEntry('1', 'TODO'),
-    MapEntry('2', 'IN PROGRESS'),
-    MapEntry('3', 'REVIEW'),
-    MapEntry('4', 'DONE'),
-  ];
+  final List<MapEntry<String, String>> groupOrder = const [MapEntry('1', 'TODO'), MapEntry('2', 'IN PROGRESS'), MapEntry('3', 'REVIEW'), MapEntry('4', 'DONE')];
 
   @override
   void initState() {
@@ -50,20 +46,24 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
         }
 
         try {
-          await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(body: {
-            "task_id": item.taskId,
-            "project_hd_id": widget.projectId,
-            "sprint_id": item.sprintId ?? "0",
-            "master_priority_id": item.priorityId ?? "1",
-            "master_task_status_id": toGroupId,
-            "master_type_of_work_id": item.typeOfWorkId ?? "1",
-            "task_name": item.title,
-            "task_description": item.subtitle ?? "",
-            "task_assigned_to": item.assignedToId ?? "0",
-            "task_start_date": item.startDate,
-            "task_end_date": item.endDate,
-            "task_is_active": true,
-          });
+          await ref
+              .read(insertOrUpdateTaskControllerProvider.notifier)
+              .submit(
+                body: {
+                  "task_id": item.taskId,
+                  "project_hd_id": widget.projectId,
+                  "sprint_id": item.sprintId ?? "0",
+                  "master_priority_id": item.priorityId ?? "1",
+                  "master_task_status_id": toGroupId,
+                  "master_type_of_work_id": item.typeOfWorkId ?? "1",
+                  "task_name": item.title,
+                  "task_description": item.subtitle ?? "",
+                  "task_assigned_to": item.assignedToId ?? "0",
+                  "task_start_date": item.startDate,
+                  "task_end_date": item.endDate,
+                  "task_is_active": true,
+                },
+              );
 
           ref.invalidate(taskBySprintControllerProvider(widget.projectId));
         } catch (e) {
@@ -84,10 +84,7 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
       await ref.read(taskBySprintControllerProvider(widget.projectId).notifier).fetch();
       final tasksState = ref.read(taskBySprintControllerProvider(widget.projectId));
 
-      final tasks = tasksState.maybeWhen(
-        data: (data) => data,
-        orElse: () => <dynamic>[],
-      );
+      final tasks = tasksState.maybeWhen(data: (data) => data, orElse: () => <dynamic>[]);
 
       if (!mounted) return;
 
@@ -95,20 +92,23 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
 
       for (final entry in groupOrder) {
         final id = entry.key;
-        final filtered = tasks
-            .where((e) => e.taskStatus?.id?.toString() == id)
-            .map((task) => MyGroupItem(
-                  taskId: task.id?.toString() ?? '',
-                  title: task.name ?? '',
-                  subtitle: task.description,
-                  sprintId: task.sprint?.id?.toString(),
-                  priorityId: task.priority?.id?.toString(),
-                  typeOfWorkId: task.typeOfWork?.id?.toString(),
-                  assignedToId: task.assignedTo?.id?.toString(),
-                  startDate: task.taskStartDate,
-                  endDate: task.taskEndDate,
-                ))
-            .toList();
+        final filtered =
+            tasks
+                .where((e) => e.taskStatus?.id?.toString() == id)
+                .map(
+                  (task) => MyGroupItem(
+                    taskId: task.id?.toString() ?? '',
+                    title: task.name ?? '',
+                    subtitle: task.description,
+                    sprintId: task.sprint?.id?.toString(),
+                    priorityId: task.priority?.id?.toString(),
+                    typeOfWorkId: task.typeOfWork?.id?.toString(),
+                    assignedToId: task.assignedTo?.id?.toString(),
+                    startDate: task.taskStartDate,
+                    endDate: task.taskEndDate,
+                  ),
+                )
+                .toList();
 
         groupedItems[id] = filtered;
       }
@@ -127,9 +127,7 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
       final name = entry.value;
       final items = groupedItems[id] ?? [];
 
-      boardController.addGroup(
-        AppFlowyGroupData(id: id, name: name, items: List.from(items)),
-      );
+      boardController.addGroup(AppFlowyGroupData(id: id, name: name, items: List.from(items)));
     }
 
     if (!mounted) return;
@@ -156,67 +154,66 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
     final taskAsync = ref.watch(taskBySprintControllerProvider(widget.projectId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Task Board")),
+      // appBar: AppBar(title: const Text("Task Board")),
+      backgroundColor: Colors.white,
       body: taskAsync.when(
-        data: (_) => AppFlowyBoard(
-          controller: boardController,
-          cardBuilder: (context, groupId, groupItem) {
-            if (groupItem is! MyGroupItem) return const SizedBox.shrink();
+        data:
+            (_) => AppFlowyBoard(
+              config: AppFlowyBoardConfig(
+                groupCornerRadius: 18,
+                groupBodyPadding: const EdgeInsets.all(8.0),
+                groupBackgroundColor: HexColor.fromHex('#F7F8FC'),
+                stretchGroupHeight: false,
 
-            return Padding(
-              key: ValueKey(groupItem.id),
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: AppFlowyColumnItemCard(
-                title: groupItem.title,
-                subtitle: groupItem.subtitle,
-                sprintId: groupItem.sprintId,
-                priorityId: groupItem.priorityId,
-                typeOfWorkId: groupItem.typeOfWorkId,
-                assignedToId: groupItem.assignedToId,
-                startDate: groupItem.startDate,
-                endDate: groupItem.endDate,
+                // groupMargin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               ),
-            );
-          },
-          headerBuilder: (context, groupData) {
-            final name = groupOrder.firstWhere(
-              (entry) => entry.key == groupData.id,
-              orElse: () => MapEntry(groupData.id, groupData.id),
-            ).value;
-
-            final groupColor = _colorForGroup(groupData.id);
-
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: groupColor.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: groupColor, width: 2),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: groupColor.darken(),
+              controller: boardController,
+              cardBuilder: (context, groupId, groupItem) {
+                if (groupItem is! MyGroupItem) return const SizedBox.shrink();
+                return Padding(
+                  key: ValueKey(groupItem.id),
+                  padding: const EdgeInsets.all(0),
+                  child: AppFlowyGroupCard(
+                    key: ValueKey(groupItem.id),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30), child: Text(groupItem.title)),
                     ),
                   ),
-                  Text(
-                    "(${groupData.items.length})",
-                    style: TextStyle(
-                      color: groupColor.darken().withOpacity(0.7),
-                    ),
+                  // child: AppFlowyColumnItemCard(
+                  //   title: groupItem.title,
+                  //   subtitle: groupItem.subtitle,
+                  //   sprintId: groupItem.sprintId,
+                  //   priorityId: groupItem.priorityId,
+                  //   typeOfWorkId: groupItem.typeOfWorkId,
+                  //   assignedToId: groupItem.assignedToId,
+                  //   startDate: groupItem.startDate,
+                  //   endDate: groupItem.endDate,
+                  // ),
+                );
+              },
+              headerBuilder: (context, groupData) {
+                final name = groupOrder.firstWhere((entry) => entry.key == groupData.id, orElse: () => MapEntry(groupData.id, groupData.id)).value;
+                final groupColor = _colorForGroup(groupData.id);
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: HexColor.fromHex('#F7F8FC'),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: groupColor, width: 2),
                   ),
-                ],
-              ),
-            );
-          },
-          groupConstraints: const BoxConstraints.tightFor(width: 280),
-        ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: groupColor.darken())),
+                      Text("(${groupData.items.length})", style: TextStyle(color: groupColor.darken().withOpacity(0.7))),
+                    ],
+                  ),
+                );
+              },
+              groupConstraints: const BoxConstraints.tightFor(width: 280),
+            ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error loading tasks: $err')),
       ),
