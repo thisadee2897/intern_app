@@ -105,7 +105,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       try {
         await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(body: taskJson);
         final projectId = widget.projectHdId ?? "1";
-        await ref.read(taskBySprintControllerProvider(projectId).notifier).getTaskBySprint(projectId);
+        await ref.read(taskBySprintControllerProvider(projectId).notifier).fetch();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(widget.task == null ? 'เพิ่มงานสำเร็จ' : 'แก้ไขงานสำเร็จ')),

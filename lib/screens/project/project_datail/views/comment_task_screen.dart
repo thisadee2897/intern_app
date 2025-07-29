@@ -1,321 +1,300 @@
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
-// ignore: depend_on_referenced_packages
-import 'package:path/path.dart' as path;
-import 'dart:io' as io show Directory, File;
+import 'package:flutter/material.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:appflowy_board/appflowy_board.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
 
-import 'widgets/quill_delta_sample.dart';
+class CommentTaskScreen extends ConsumerStatefulWidget {
+  final String projectId;
 
-class CommentTaskScreen extends StatefulWidget {
-  const CommentTaskScreen({super.key});
+  const CommentTaskScreen({super.key, required this.projectId});
 
   @override
-  State<CommentTaskScreen> createState() => _CommentTaskScreenState();
+  ConsumerState<CommentTaskScreen> createState() => _CommentTaskScreenState();
 }
 
-class _CommentTaskScreenState extends State<CommentTaskScreen> {
-  final QuillController _controller = () {
-    return QuillController.basic(
-      config: QuillControllerConfig(
-        clipboardConfig: QuillClipboardConfig(
-          enableExternalRichPaste: true,
-          onImagePaste: (imageBytes) async {
-            if (kIsWeb) {
-              // Dart IO is unsupported on the web.
-              return null;
-            }
-            // Save the image somewhere and return the image URL that will be
-            // stored in the Quill Delta JSON (the document).
-            final newFileName = 'image-file-${DateTime.now().toIso8601String()}.png';
-            final newPath = path.join(io.Directory.systemTemp.path, newFileName);
-            final file = await io.File(newPath).writeAsBytes(imageBytes, flush: true);
-            return file.path;
-          },
-        ),
-      ),
-    );
-  }();
-  final FocusNode _editorFocusNode = FocusNode();
-  final ScrollController _editorScrollController = ScrollController();
-  late List<FocusNode> _focusNodes;
-  late List<ScrollController> _scrollControllers;
-  late List<QuillController> _commentControllers;
-  int countData = 5;
+class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
+  late AppFlowyBoardController boardController;
+  final Map<String, List<MyGroupItem>> groupedItems = {};
+
+  final List<MapEntry<String, String>> groupOrder = const [
+    MapEntry('1', 'TODO'),
+    MapEntry('2', 'IN PROGRESS'),
+    MapEntry('3', 'REVIEW'),
+    MapEntry('4', 'DONE'),
+  ];
+
   @override
   void initState() {
     super.initState();
-    // Load document
-    _controller.document = Document.fromJson(kQuillDefaultSample);
-    _focusNodes = List.generate(countData, (_) => FocusNode());
-    _scrollControllers = List.generate(countData, (_) => ScrollController());
-    // 🔧 Initialize QuillControllers for each comment
-    final doc = TimeStampEmbed.fromDocument(_controller.document).document;
-    _commentControllers = List.generate(
-      countData,
-      (_) => QuillController(document: doc, selection: const TextSelection.collapsed(offset: 0), readOnly: true, keepStyleOnNewLine: true),
+
+    boardController = AppFlowyBoardController(
+      onMoveGroupItem: (groupId, fromIndex, toIndex) {
+        final list = groupedItems[groupId];
+        if (list == null || fromIndex >= list.length || toIndex > list.length) return;
+
+        final item = list.removeAt(fromIndex);
+        list.insert(toIndex, item);
+        _refreshBoard();
+      },
+      onMoveGroupItemToGroup: (fromGroupId, fromIndex, toGroupId, toIndex) async {
+        final fromList = groupedItems[fromGroupId];
+        final toList = groupedItems[toGroupId];
+        if (fromList == null || toList == null || fromIndex >= fromList.length) return;
+
+        final item = fromList.removeAt(fromIndex);
+        if (toIndex > toList.length) {
+          toList.add(item);
+        } else {
+          toList.insert(toIndex, item);
+        }
+
+        try {
+          await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(body: {
+            "task_id": item.taskId,
+            "project_hd_id": widget.projectId,
+            "sprint_id": item.sprintId ?? "0",
+            "master_priority_id": item.priorityId ?? "1",
+            "master_task_status_id": toGroupId,
+            "master_type_of_work_id": item.typeOfWorkId ?? "1",
+            "task_name": item.title,
+            "task_description": item.subtitle ?? "",
+            "task_assigned_to": item.assignedToId ?? "0",
+            "task_start_date": item.startDate,
+            "task_end_date": item.endDate,
+            "task_is_active": true,
+          });
+
+          ref.invalidate(taskBySprintControllerProvider(widget.projectId));
+        } catch (e) {
+          print("❌ อัปเดต status ผิดพลาด: $e");
+        }
+
+        _refreshBoard();
+      },
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTasks();
+    });
+  }
+
+  Future<void> _loadTasks() async {
+    try {
+      await ref.read(taskBySprintControllerProvider(widget.projectId).notifier).fetch();
+      final tasksState = ref.read(taskBySprintControllerProvider(widget.projectId));
+
+      final tasks = tasksState.maybeWhen(
+        data: (data) => data,
+        orElse: () => <dynamic>[],
+      );
+
+      if (!mounted) return;
+
+      groupedItems.clear();
+
+      for (final entry in groupOrder) {
+        final id = entry.key;
+        final filtered = tasks
+            .where((e) => e.taskStatus?.id?.toString() == id)
+            .map((task) => MyGroupItem(
+                  taskId: task.id?.toString() ?? '',
+                  title: task.name ?? '',
+                  subtitle: task.description,
+                  sprintId: task.sprint?.id?.toString(),
+                  priorityId: task.priority?.id?.toString(),
+                  typeOfWorkId: task.typeOfWork?.id?.toString(),
+                  assignedToId: task.assignedTo?.id?.toString(),
+                  startDate: task.taskStartDate,
+                  endDate: task.taskEndDate,
+                ))
+            .toList();
+
+        groupedItems[id] = filtered;
+      }
+
+      _refreshBoard();
+    } catch (e) {
+      print('❌ Error loading tasks: $e');
+    }
+  }
+
+  void _refreshBoard() {
+    boardController.clear();
+
+    for (final entry in groupOrder) {
+      final id = entry.key;
+      final name = entry.value;
+      final items = groupedItems[id] ?? [];
+
+      boardController.addGroup(
+        AppFlowyGroupData(id: id, name: name, items: List.from(items)),
+      );
+    }
+
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  Color _colorForGroup(String groupId) {
+    switch (groupId) {
+      case '1':
+        return Colors.red.shade300;
+      case '2':
+        return Colors.orange.shade300;
+      case '3':
+        return Colors.blue.shade300;
+      case '4':
+        return Colors.green.shade300;
+      default:
+        return Colors.grey.shade300;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final taskAsync = ref.watch(taskBySprintControllerProvider(widget.projectId));
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      // appBar: AppBar(
-      //   title: Text('Flutter Quill Example'),
-      //   actions: [
-      //     IconButton(
-      //       icon: const Icon(Icons.output),
-      //       tooltip: 'Print Delta JSON to log',
-      //       onPressed: () {
-      //         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('The JSON Delta has been printed to the console.')));
-      //         debugPrint(jsonEncode(_controller.document.toDelta().toJson()));
-      //       },
-      //     ),
-      //   ],
-      // ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder:
-              (context, constraints) => ListView(
+      appBar: AppBar(title: const Text("Task Board")),
+      body: taskAsync.when(
+        data: (_) => AppFlowyBoard(
+          controller: boardController,
+          cardBuilder: (context, groupId, groupItem) {
+            if (groupItem is! MyGroupItem) return const SizedBox.shrink();
+
+            return Padding(
+              key: ValueKey(groupItem.id),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: AppFlowyColumnItemCard(
+                title: groupItem.title,
+                subtitle: groupItem.subtitle,
+                sprintId: groupItem.sprintId,
+                priorityId: groupItem.priorityId,
+                typeOfWorkId: groupItem.typeOfWorkId,
+                assignedToId: groupItem.assignedToId,
+                startDate: groupItem.startDate,
+                endDate: groupItem.endDate,
+              ),
+            );
+          },
+          headerBuilder: (context, groupData) {
+            final name = groupOrder.firstWhere(
+              (entry) => entry.key == groupData.id,
+              orElse: () => MapEntry(groupData.id, groupData.id),
+            ).value;
+
+            final groupColor = _colorForGroup(groupData.id);
+
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: groupColor.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: groupColor, width: 2),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
-                      children: [
-                        CircleAvatar(
-                          // radius: 20,
-                          child: Image.network('https://cdn-icons-png.flaticon.com/512/8792/8792047.png', width: 40, height: 40, fit: BoxFit.cover),
-                        ),
-                        Container(
-                          width: constraints.maxWidth - 100,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.white,
-                          ),
-                          child: Column(
-                            children: [
-                              HeaderWidget(controller: _controller, editorFocusNode: _editorFocusNode),
-                              QuillEditor(
-                                focusNode: _editorFocusNode,
-                                scrollController: _editorScrollController,
-                                controller: _controller,
-                                config: QuillEditorConfig(
-                                  scrollable: true,
-                                  placeholder: 'Start writing your notes...',
-                                  padding: const EdgeInsets.all(16),
-                                  embedBuilders: [
-                                    ...FlutterQuillEmbeds.editorBuilders(
-                                      imageEmbedConfig: QuillEditorImageEmbedConfig(
-                                        imageProviderBuilder: (context, imageUrl) {
-                                          if (imageUrl.startsWith('assets/')) {
-                                            return AssetImage(imageUrl);
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                      videoEmbedConfig: QuillEditorVideoEmbedConfig(
-                                        customVideoBuilder: (videoUrl, readOnly) {
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                    TimeStampEmbedBuilder(),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: groupColor.darken(),
                     ),
                   ),
-                  // data Edit is Not Empty
-                  if (_controller.document.toDelta().length > 1)
-                    // Save Button
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        spacing: 10,
-                        children: [FilledButton(onPressed: null, child: const Text('Save')), TextButton(onPressed: null, child: const Text('Cancel'))],
-                      ),
+                  Text(
+                    "(${groupData.items.length})",
+                    style: TextStyle(
+                      color: groupColor.darken().withOpacity(0.7),
                     ),
-                  // add Listview.builder to display the document content
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: countData,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        child: Row(
-                          spacing: 10,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            // Profile picture
-                            CircleAvatar(
-                              // radius: 20,
-                              child: Image.network('https://cdn-icons-png.flaticon.com/512/8792/8792047.png', width: 40, height: 40, fit: BoxFit.cover),
-                            ),
-                            Column(
-                              spacing: 5,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("User Name $index", style: const TextStyle(fontWeight: FontWeight.bold)),
-                                // 5 hours ago
-                                Text('5 hours ago', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                                Container(
-                                  width: constraints.maxWidth - 100,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey.shade300),
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: Colors.white,
-                                  ),
-                                  child: QuillEditor(
-                                    focusNode: _focusNodes[index],
-                                    scrollController: _scrollControllers[index],
-                                    controller: _commentControllers[index],
-                                    config: QuillEditorConfig(
-                                      enableAlwaysIndentOnTab: false,
-                                      editorKey: GlobalKey(),
-                                      enableScribble: false,
-                                      readOnlyMouseCursor: SystemMouseCursors.basic,
-                                      scrollable: false,
-                                      showCursor: false,
-                                      onTapUp: (details, p1) => false,
-                                      padding: const EdgeInsets.all(16),
-                                      embedBuilders: [
-                                        ...FlutterQuillEmbeds.editorBuilders(
-                                          imageEmbedConfig: QuillEditorImageEmbedConfig(
-                                            imageProviderBuilder: (context, imageUrl) {
-                                              if (imageUrl.startsWith('assets/')) {
-                                                return AssetImage(imageUrl);
-                                              }
-                                              return null;
-                                            },
-                                          ),
-                                          videoEmbedConfig: QuillEditorVideoEmbedConfig(
-                                            customVideoBuilder: (videoUrl, readOnly) {
-                                              return null;
-                                            },
-                                          ),
-                                        ),
-                                        TimeStampEmbedBuilder(),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
                   ),
                 ],
               ),
+            );
+          },
+          groupConstraints: const BoxConstraints.tightFor(width: 280),
         ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(child: Text('Error loading tasks: $err')),
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _editorScrollController.dispose();
-    _editorFocusNode.dispose();
-    super.dispose();
-    for (final node in _focusNodes) {
-      node.dispose();
-    }
-    for (final ctrl in _scrollControllers) {
-      ctrl.dispose();
-    }
-  }
 }
 
-class HeaderWidget extends StatelessWidget {
-  const HeaderWidget({super.key, required QuillController controller, required FocusNode editorFocusNode})
-    : _controller = controller,
-      _editorFocusNode = editorFocusNode;
+class MyGroupItem extends AppFlowyGroupItem {
+  final String taskId;
+  final String title;
+  final String? subtitle;
 
-  final QuillController _controller;
-  final FocusNode _editorFocusNode;
+  final String? sprintId;
+  final String? priorityId;
+  final String? typeOfWorkId;
+  final String? assignedToId;
+  final String? startDate;
+  final String? endDate;
+
+  MyGroupItem({
+    required this.taskId,
+    required this.title,
+    this.subtitle,
+    this.sprintId,
+    this.priorityId,
+    this.typeOfWorkId,
+    this.assignedToId,
+    this.startDate,
+    this.endDate,
+  });
+
+  @override
+  String get id => taskId;
+}
+
+class AppFlowyColumnItemCard extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final String? sprintId;
+  final String? priorityId;
+  final String? typeOfWorkId;
+  final String? assignedToId;
+  final String? startDate;
+  final String? endDate;
+
+  const AppFlowyColumnItemCard({
+    required this.title,
+    this.subtitle,
+    this.sprintId,
+    this.priorityId,
+    this.typeOfWorkId,
+    this.assignedToId,
+    this.startDate,
+    this.endDate,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey.shade300))),
-      child: QuillSimpleToolbar(
-        // disable increate indent button
-        controller: _controller,
-        config: QuillSimpleToolbarConfig(
-          showIndent: false,
-          showAlignmentButtons: false,
-          showHeaderStyle: true,
-          showClipboardPaste: true,
-          showBackgroundColorButton: false,
-          showUnderLineButton: true,
-          showItalicButton: false,
-          showSubscript: false,
-          showSuperscript: false,
-          embedButtons: FlutterQuillEmbeds.toolbarButtons(videoButtonOptions: null),
-          showFontFamily: false,
-          showFontSize: false,
-          buttonOptions: QuillSimpleToolbarButtonOptions(
-            base: QuillToolbarBaseButtonOptions(
-              afterButtonPressed: () {
-                final isDesktop = {TargetPlatform.linux, TargetPlatform.windows, TargetPlatform.macOS}.contains(defaultTargetPlatform);
-                if (isDesktop) {
-                  Future.microtask(() {
-                    _editorFocusNode.requestFocus();
-                  });
-                }
-              },
-            ),
-            linkStyle: QuillToolbarLinkStyleButtonOptions(
-              validateLink: (link) {
-                // Treats all links as valid. When launching the URL,
-                // `https://` is prefixed if the link is incomplete (e.g., `google.com` → `https://google.com`)
-                // however this happens only within the editor.
-                return true;
-              },
-            ),
-          ),
-        ),
+    return Card(
+      elevation: 3,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: const Icon(Icons.task_alt),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: subtitle != null ? Text(subtitle!) : null,
       ),
     );
   }
 }
 
-class TimeStampEmbed extends Embeddable {
-  const TimeStampEmbed(String value) : super(timeStampType, value);
-
-  static const String timeStampType = 'timeStamp';
-
-  static TimeStampEmbed fromDocument(Document document) => TimeStampEmbed(jsonEncode(document.toDelta().toJson()));
-
-  Document get document => Document.fromJson(jsonDecode(data));
-}
-
-class TimeStampEmbedBuilder extends EmbedBuilder {
-  @override
-  String get key => 'timeStamp';
-
-  @override
-  String toPlainText(Embed node) {
-    return node.value.data;
-  }
-
-  @override
-  Widget build(BuildContext context, EmbedContext embedContext) {
-    return Row(children: [const Icon(Icons.access_time_rounded), Text(embedContext.node.value.data as String)]);
+/// Extension เพื่อปรับความเข้มสี (darken)
+extension ColorUtils on Color {
+  Color darken([double amount = .1]) {
+    assert(amount >= 0 && amount <= 1);
+    final hsl = HSLColor.fromColor(this);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return hslDark.toColor();
   }
 }
