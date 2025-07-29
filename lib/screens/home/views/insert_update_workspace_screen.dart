@@ -41,13 +41,21 @@ class _InsertUpdateWorkspaceScreenState
   ) {
     final isEdit = widget.workspace != null;
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+
+    final double baseFontSize = isSmallScreen ? 14 : 16;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? 'แก้ไข Workspace' : 'เพิ่ม Workspace ใหม่'),
-        backgroundColor: const Color.fromARGB(255, 24, 87, 118),
+        title: Text(
+          isEdit ? 'Edit Workspace' : 'Insert Workspace',
+          style: TextStyle(fontSize: baseFontSize + 10),
+        ),
+        backgroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(30),
         child: Form(
           key: _formKey,
           child: Column(
@@ -56,12 +64,28 @@ class _InsertUpdateWorkspaceScreenState
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'ชื่อ Workspace *',
+                  labelText: 'Name Workspace *',
+                  prefixIcon: const Icon(Icons.dashboard_customize_rounded),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  prefixIcon: const Icon(Icons.workspace_premium),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Colors.indigo,
+                      width: 2.0,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Colors.grey,
+                      width: 1.2,
+                    ),
+                  ),
+                  hoverColor: Colors.indigo.withOpacity(0.05),
                 ),
+                style: TextStyle(fontSize: baseFontSize),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
                     return 'กรุณากรอกชื่อ Workspace';
@@ -69,11 +93,14 @@ class _InsertUpdateWorkspaceScreenState
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 30),
 
               // ปุ่มเปิดปิด Active
               SwitchListTile(
-                title: const Text('เปิดใช้งาน Workspace (Active)'),
+                title: Text(
+                  'เปิดใช้งาน Workspace (Active)',
+                  style: TextStyle(fontSize: baseFontSize),
+                ),
                 value: _isActive,
                 onChanged: (val) {
                   setState(() {
@@ -81,34 +108,55 @@ class _InsertUpdateWorkspaceScreenState
                   });
                 },
               ),
-
-              const SizedBox(height: 32),
+              const SizedBox(height: 25),
 
               // ปุ่มบันทึก
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                    child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('ยกเลิก'),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 243, 242, 242), // สีพื้นหลังปุ่ม
+                        foregroundColor: const Color.fromARGB(199, 230, 33, 66), // สีตัวอักษร
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontSize:
+                              MediaQuery.of(context).size.width < 500 ? 12 : 16,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 5),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _handleSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 243, 242, 242), // สีพื้นหลังปุ่ม
+                        foregroundColor: const Color.fromARGB(199, 78, 90, 222), // สีตัวอักษร
+                      ),
                       child:
                           _isLoading
                               ? const SizedBox(
-                                width: 18,
-                                height: 18,
+                                width: 14,
+                                height: 14,
                                 child: CircularProgressIndicator(
                                   color: Colors.white,
                                   strokeWidth: 2,
                                 ),
                               )
                               : Text(
-                                isEdit ? 'อัปเดต Workspace' : 'เพิ่ม Workspace',
+                                isEdit
+                                    ? 'Update Workspace'
+                                    : 'Insert Workspace',
+                                style: TextStyle(
+                                  fontSize:
+                                      MediaQuery.of(context).size.width < 500
+                                          ? 12
+                                          : 16,
+                                ),
                               ),
                     ),
                   ),
@@ -118,6 +166,7 @@ class _InsertUpdateWorkspaceScreenState
           ),
         ),
       ),
+      backgroundColor: Colors.white,
     );
   }
 
@@ -136,17 +185,19 @@ class _InsertUpdateWorkspaceScreenState
             name: _nameController.text.trim(),
             active: _isActive,
           );
+          if (!mounted) return; // <--- เพิ่มบรรทัดนี้
 
       _showSuccessSnackBar(
         widget.workspace == null
-            ? 'เพิ่ม Workspace เรียบร้อย'
-            : 'อัปเดต Workspace เรียบร้อย',
+            ? 'Insert Workspace เรียบร้อย'
+            : 'Update Workspace เรียบร้อย',
       );
 
       Navigator.of(
         context,
       ).pop(true); // ส่งกลับ true เพื่อบอกให้รีเฟรชหน้าก่อนหน้า
     } catch (e) {
+      if (!mounted) return; // <--- เพิ่มบรรทัดนี้
       _showErrorSnackBar('เกิดข้อผิดพลาด: $e');
     } finally {
       if (mounted) {
@@ -167,7 +218,7 @@ class _InsertUpdateWorkspaceScreenState
             Text(msg),
           ],
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: const Color.fromARGB(255, 11, 41, 66),
       ),
     );
   }
