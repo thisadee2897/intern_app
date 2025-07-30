@@ -18,11 +18,11 @@ class _BoardWidgetState extends BaseState<BoardWidget> {
 
   @override
   Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Tablet View', style: Theme.of(context).textTheme.titleLarge));
+    return CommentTaskScreen(projectId: '95',);
   }
 
   @override
   Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
-    return Center(child: Text('Mobile View', style: Theme.of(context).textTheme.titleLarge));
+    return CommentTaskScreen(projectId: '95',);
   }
 }
