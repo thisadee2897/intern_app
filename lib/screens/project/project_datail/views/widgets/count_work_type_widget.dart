@@ -12,7 +12,7 @@ class CountWorkTypeWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric( horizontal: 5, vertical: 5),
       height: 30,
       width: 30,
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(5)),
       child: Tooltip(message: "$title : $count (story points)", child: Center(child: Text("0", style: TextStyle(color: Colors.grey)))),
     );
   }

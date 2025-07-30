@@ -24,6 +24,7 @@ class BacklogGroupWidget extends ConsumerStatefulWidget {
 class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     with RouteAware {
   bool isExpanding = false;
+  bool _isHovering = false;
 
   @override
   void initState() {
@@ -34,7 +35,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
 
   void _loadTasks() {
     final projectHdId = widget.item?.projectHd?.id ?? "1";
-    ref.invalidate(taskBySprintControllerProvider(projectHdId));
+    //ref.invalidate(taskBySprintControllerProvider(projectHdId));
     ref.read(taskBySprintControllerProvider(projectHdId).notifier).fetch();
   }
 
@@ -74,11 +75,11 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
         bool isSmallScreen = constraints.maxWidth < 600;
 
         return Container(
-          margin: const EdgeInsets.all(10),
-          padding: const EdgeInsets.all(10),
+          margin: const EdgeInsets.all(5),
+          padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
             color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(2),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,53 +105,22 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
-                          tooltip: 'เพิ่มงาน',
-                          color: Colors.blueAccent,
-                          visualDensity: VisualDensity.compact,
-                          constraints: const BoxConstraints(),
-                          onPressed: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => AddTaskScreen(
-                                      projectHdId: projectHdId,
-                                      sprintId: widget.item?.id,
-                                    ),
-                              ),
-                            );
-                            if (result == true) {
-                              WidgetsBinding.instance.addPostFrameCallback(
-                                (_) => _loadTasks(),
-                              );
-                            }
-                          },
-                        ),
                       ],
                     ),
                   ),
                   if (!isSmallScreen)
-                    Flexible(
-                      child: Wrap(
-                        spacing: 4,
-                        runSpacing: 4,
-                        alignment: WrapAlignment.end,
-                        children: _buildCountersAndButton(),
-                      ),
-                    ),
+                    Flexible(child: _buildCountersAndButton()),
                 ],
               ),
               if (isSmallScreen)
                 Padding(
                   padding: const EdgeInsets.only(top: 10.0),
-                  child: Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: _buildCountersAndButton(),
-                  ),
+                  // child: Wrap(
+                  //   spacing: 4,
+                  //   runSpacing: 4,
+                  //   children: _buildCountersAndButton(),
+                  // ),
+                  child: _buildCountersAndButton(),
                 ),
               if (isExpanding) ...[
                 if (taskList.isEmpty)
@@ -186,11 +156,14 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                   ),
                 ...taskList.map(
                   (task) => Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.symmetric(vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(2),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.05),
@@ -200,15 +173,30 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                       ],
                     ),
                     child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                      dense: true,
+                      minVerticalPadding: 0,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 0,
+                      ),
                       title: Text(
                         task.name ?? '-',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
-                      subtitle: Text(task.description ?? ''),
+                      subtitle: Text(
+                        task.description ?? '',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                      ),
                       leading: const Icon(
                         Icons.task_alt_rounded,
                         color: Colors.indigo,
+                        size: 20,
                       ),
                       onTap:
                           () => Navigator.push(
@@ -267,6 +255,62 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                                 ),
                               ),
                             ],
+                      ),
+                    ),
+                  ),
+                ),
+                // ปุ่ม + Create
+                Divider(thickness: 1, height: 25, color: Colors.grey[300]),
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  onEnter: (_) => setState(() => _isHovering = true),
+                  onExit: (_) => setState(() => _isHovering = false),
+                  child: GestureDetector(
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => AddTaskScreen(
+                                projectHdId: projectHdId,
+                                sprintId: widget.item?.id,
+                              ),
+                        ),
+                      );
+                      if (result == true) {
+                        WidgetsBinding.instance.addPostFrameCallback(
+                          (_) => _loadTasks(),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12.0,
+                        horizontal: 16.0,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.add,
+                            size: 18,
+                            color:
+                                _isHovering
+                                    ? Colors.blue[700]
+                                    : Colors.grey[700],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Create',
+                            style: TextStyle(
+                              color:
+                                  _isHovering
+                                      ? Colors.blue[700]
+                                      : Colors.grey[800],
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -356,39 +400,51 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     }
   }
 
-  List<Widget> _buildCountersAndButton() {
-    return [
-      CountWorkTypeWidget(title: 'todo', count: '0 of 0'),
-      CountWorkTypeWidget(
-        title: 'in progress',
-        count: '0 of 0',
-        color: Colors.lightBlue,
-      ),
-      CountWorkTypeWidget(
-        title: 'in review',
-        count: '0 of 0',
-        color: Colors.deepOrange,
-      ),
-      CountWorkTypeWidget(
-        title: 'done',
-        count: '0 of 0',
-        color: Colors.lightGreenAccent,
-      ),
-      _buildButtonsRow(),
-    ];
-  }
+  Widget _buildCountersAndButton() {
+    final isBacklog = widget.item == null;
 
-  Widget _buildButtonsRow() {
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: Alignment.centerRight, // ดันทุกอย่างไปขวาสุด
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Tooltip(
-            message: 'Create Sprint',
-            child: IconButton(
-              icon: const Icon(Icons.add, color: Colors.blue),
-              iconSize: 18,
+          CountWorkTypeWidget(title: 'todo', count: '0 of 0'),
+          CountWorkTypeWidget(
+            title: 'in progress',
+            count: '0 of 0',
+            color: Colors.lightBlue,
+          ),
+          CountWorkTypeWidget(
+            title: 'in review',
+            count: '0 of 0',
+            color: Colors.deepOrange,
+          ),
+          CountWorkTypeWidget(
+            title: 'done',
+            count: '0 of 0',
+            color: Colors.lightGreenAccent,
+          ),
+          const SizedBox(width: 10),
+
+          // อันนี้ไว้เว้นระยะจากปุ่มถัดไป (เช่น Add Sprint หรือ More)
+          if (isBacklog)
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 251, 250, 250),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 5,
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    3,
+                  ), 
+                ),
+              ),
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
@@ -401,15 +457,14 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                   ref.invalidate(sprintProvider);
                 }
               },
+              child: const Text('Create sprint'),
             ),
-          ),
-          if (widget.item != null)
-            Tooltip(
-              message: 'Edit Sprint',
-              child: IconButton(
-                icon: const Icon(Icons.edit, color: Colors.orange),
-                iconSize: 18,
-                onPressed: () async {
+
+          if (!isBacklog)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_horiz, color: Colors.grey),
+              onSelected: (value) async {
+                if (value == 'edit') {
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -421,58 +476,70 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                     await ref.read(sprintProvider.notifier).get();
                     ref.invalidate(sprintProvider);
                   }
-                },
-              ),
-            ),
-          Tooltip(
-            message: 'Delete Sprint',
-            child: IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              iconSize: 18,
-              onPressed:
-                  widget.item == null
-                      ? null
-                      : () async {
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                title: const Text('ยืนยันการลบ'),
-                                content: Text(
-                                  'คุณต้องการลบ Sprint "${widget.item!.name}" ใช่หรือไม่?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed:
-                                        () => Navigator.pop(context, false),
-                                    child: const Text('ยกเลิก'),
-                                  ),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                    ),
-                                    onPressed:
-                                        () => Navigator.pop(context, true),
-                                    child: const Text('ลบ'),
-                                  ),
-                                ],
+                } else if (value == 'delete') {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder:
+                        (context) => AlertDialog(
+                          title: const Text('ยืนยันการลบ'),
+                          content: Text(
+                            'คุณต้องการลบ Sprint "${widget.item!.name}" ใช่หรือไม่?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('ยกเลิก'),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
                               ),
-                        );
-                        if (confirm == true) {
-                          await ref
-                              .read(sprintProvider.notifier)
-                              .delete(widget.item!.id!);
-                          ref.invalidate(sprintProvider);
-                          await ref.read(sprintProvider.notifier).get();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('ลบ Sprint สำเร็จ')),
-                            );
-                          }
-                        }
-                      },
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('ลบ'),
+                            ),
+                          ],
+                        ),
+                  );
+                  if (confirm == true) {
+                    await ref
+                        .read(sprintProvider.notifier)
+                        .delete(widget.item!.id!);
+                    ref.invalidate(sprintProvider);
+                    await ref.read(sprintProvider.notifier).get();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('ลบ Sprint สำเร็จ')),
+                      );
+                    }
+                  }
+                }
+              },
+              itemBuilder:
+                  (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.edit,
+                          size: 20,
+                          color: Colors.orange,
+                        ),
+                        title: Text('แก้ไข Sprint'),
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.delete_outline,
+                          size: 20,
+                          color: Colors.red,
+                        ),
+                        title: Text('ลบ Sprint'),
+                      ),
+                    ),
+                  ],
             ),
-          ),
         ],
       ),
     );
