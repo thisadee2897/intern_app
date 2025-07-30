@@ -9,11 +9,11 @@ class CountWorkTypeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric( horizontal: 5, vertical: 5),
-      height: 30,
-      width: 30,
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(5)),
-      child: Tooltip(message: "$title : $count (story points)", child: Center(child: Text("0", style: TextStyle(color: Colors.grey)))),
+      margin: const EdgeInsets.symmetric( horizontal: 2, vertical: 2),
+      height: 25,
+      width: 25,
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
+      child: Tooltip(message: "$title : $count (story points)", child: Center(child: Text("0", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)))),
     );
   }
 }

@@ -101,7 +101,10 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                         Expanded(
                           child: Text(
                             widget.item?.name ?? 'Backlog',
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w300,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -125,21 +128,21 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
               if (isExpanding) ...[
                 if (taskList.isEmpty)
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(10),
                     child: Center(
                       child: Column(
                         children: [
                           Icon(
                             Icons.assignment_outlined,
-                            size: 48,
-                            color: Colors.grey[400],
+                            size: 35,
+                            color: Colors.grey[600],
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'ไม่มีงานในรายการ',
                             style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
+                              fontSize: 14,
+                              color: Colors.grey[500],
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -156,17 +159,14 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                   ),
                 ...taskList.map(
                   (task) => Container(
-                    margin: const EdgeInsets.symmetric(vertical: 2),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 1,
-                    ),
+                    margin: const EdgeInsets.symmetric(vertical: 1),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: const Color.fromARGB(255, 53, 53, 53).withOpacity(0.05),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -175,27 +175,24 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                     child: ListTile(
                       dense: true,
                       minVerticalPadding: 0,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 0,
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                       title: Text(
                         task.name ?? '-',
                         style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
                         ),
                       ),
                       subtitle: Text(
                         task.description ?? '',
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 14,
                           color: Colors.black54,
                         ),
                       ),
                       leading: const Icon(
-                        Icons.task_alt_rounded,
-                        color: Colors.indigo,
+                        Icons.check_box,
+                        color: Color.fromARGB(255, 77, 100, 231),
                         size: 20,
                       ),
                       onTap:
@@ -424,25 +421,21 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
             count: '0 of 0',
             color: Colors.lightGreenAccent,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 5),
 
           // อันนี้ไว้เว้นระยะจากปุ่มถัดไป (เช่น Add Sprint หรือ More)
           if (isBacklog)
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 251, 250, 250),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 5,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                minimumSize: const Size(0, 32),
                 textStyle: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    3,
-                  ), 
+                  borderRadius: BorderRadius.circular(3),
                 ),
               ),
               onPressed: () async {
@@ -457,7 +450,10 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                   ref.invalidate(sprintProvider);
                 }
               },
-              child: const Text('Create sprint'),
+              child: const Text(
+                'Create sprint',
+                style: TextStyle(color: Color.fromARGB(255, 91, 91, 91)),
+              ),
             ),
 
           if (!isBacklog)
@@ -519,12 +515,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                     const PopupMenuItem(
                       value: 'edit',
                       child: ListTile(
-                        leading: Icon(
-                          Icons.edit,
-                          size: 20,
-                          color: Colors.orange,
-                        ),
-                        title: Text('แก้ไข Sprint'),
+                        leading: Icon(Icons.edit, size: 20, color: Colors.grey),
+                        title: Text('edit sprint'),
                       ),
                     ),
                     const PopupMenuItem(
@@ -533,9 +525,9 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                         leading: Icon(
                           Icons.delete_outline,
                           size: 20,
-                          color: Colors.red,
+                          color: Colors.grey,
                         ),
-                        title: Text('ลบ Sprint'),
+                        title: Text('delete sprint'),
                       ),
                     ),
                   ],
