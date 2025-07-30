@@ -99,13 +99,30 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                               () => setState(() => isExpanding = !isExpanding),
                         ),
                         Expanded(
-                          child: Text(
-                            widget.item?.name ?? 'Backlog',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w300,
-                            ),
+                          child: RichText(
                             overflow: TextOverflow.ellipsis,
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text:
+                                      widget.item?.name ??
+                                      'Backlog', // ชื่อ Sprint
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black, 
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: ' (${taskList.length} work items)', // จำนวนงานใน Sprint
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(255, 71, 71, 71), 
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -166,7 +183,12 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                       borderRadius: BorderRadius.circular(2),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color.fromARGB(255, 53, 53, 53).withOpacity(0.05),
+                          color: const Color.fromARGB(
+                            255,
+                            53,
+                            53,
+                            53,
+                          ).withOpacity(0.05),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
