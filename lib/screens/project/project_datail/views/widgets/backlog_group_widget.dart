@@ -657,6 +657,8 @@ import 'package:project/models/task_model.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/models/task_status_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/delete_task_controller.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/master_task_status_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
 import 'package:project/screens/project/project_datail/views/widgets/detil_task_screen.dart';
@@ -679,13 +681,6 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     with RouteAware {
   bool isExpanding = false;
   bool _isHovering = false;
-
-  final taskStatusList = [
-    TaskStatusModel(id: "1", name: "To Do"),
-    TaskStatusModel(id: "2", name: "In Progress"),
-    TaskStatusModel(id: "3", name: "In Review"),
-    TaskStatusModel(id: "4", name: "Done"),
-  ];
 
   @override
   void initState() {
@@ -722,6 +717,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     final projectHdId = widget.item?.projectHd?.id ?? "1";
     final sprintId = widget.item?.id ?? 'backlog';
     final taskState = ref.watch(taskBySprintControllerProvider(projectHdId));
+    final taskStatusState = ref.watch(masterTaskStatusControllerProvider);
 
     final List<TaskModel> taskList = taskState.when(
       data:
@@ -729,6 +725,11 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
               tasks.where((task) => task.sprint?.id == sprintId).toList(),
       loading: () => [],
       error: (_, __) => [],
+    );
+
+    final List<TaskStatusModel> taskStatusList = taskStatusState.maybeWhen(
+      data: (list) => list,
+      orElse: () => [],
     );
 
     return LayoutBuilder(
@@ -982,8 +983,13 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
 
                                   try {
                                     await ref
-                                        .read(apiInsertOrUpdateTask)
-                                        .post(body: mapTaskToApi(updatedTask));
+                                        .read(
+                                          insertOrUpdateTaskControllerProvider
+                                              .notifier,
+                                        )
+                                        .submit(
+                                          body: mapTaskToApi(updatedTask),
+                                        );
 
                                     ref.invalidate(
                                       taskBySprintControllerProvider(
@@ -1011,8 +1017,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                               ),
                             ),
                           ),
+                          const SizedBox(width: 8),
 
-                          const SizedBox(width: 8, height: 0),
                           PopupMenuButton<String>(
                             onSelected: (value) async {
                               if (value == 'comment') {
