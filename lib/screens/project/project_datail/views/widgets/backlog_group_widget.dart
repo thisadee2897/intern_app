@@ -668,6 +668,7 @@ import 'package:project/screens/project/project_datail/views/widgets/task_screen
 import 'package:project/screens/project/sprint/views/widgets/insert_update_sprint.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 
+// Widget สำหรับแสดงกลุ่มงานใน Backlog หรือ Sprint
 class BacklogGroupWidget extends ConsumerStatefulWidget {
   final bool isExpanded;
   final SprintModel? item;
@@ -686,10 +687,12 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
   @override
   void initState() {
     super.initState();
+    // โหลด Task หลังจาก UI ถูกสร้างเสร็จ
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadTasks());
   }
 
   void _loadTasks() {
+    // โหลดรายการงานตาม projectHdId
     final projectHdId = widget.item?.projectHd?.id ?? "1";
     ref.read(taskBySprintControllerProvider(projectHdId).notifier).fetch();
   }
@@ -697,27 +700,33 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // subscribe เพื่อ track route changes
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
   @override
   void dispose() {
+    // ยกเลิกการติดตาม route
     routeObserver.unsubscribe(this);
     super.dispose();
   }
 
   @override
   void didPopNext() {
+    // เมื่อกลับมาจากหน้าอื่น โหลด Task ใหม่
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadTasks());
   }
 
   @override
   Widget build(BuildContext context) {
+    // ดึงค่า project และ sprint ที่เกี่ยวข้อง
     final projectHdId = widget.item?.projectHd?.id ?? "1";
     final sprintId = widget.item?.id ?? 'backlog';
+    // ดึงสถานะของ task และ task status
     final taskState = ref.watch(taskBySprintControllerProvider(projectHdId));
     final taskStatusState = ref.watch(masterTaskStatusControllerProvider);
 
+    // filter task ที่อยู่ใน sprint ปัจจุบัน
     final List<TaskModel> taskList = taskState.when(
       data:
           (tasks) =>
@@ -726,6 +735,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       error: (_, __) => [],
     );
 
+    // ดึง list ของสถานะทั้งหมด
     final List<TaskStatusModel> taskStatusList = taskStatusState.maybeWhen(
       data: (list) => list,
       orElse: () => [],
@@ -733,6 +743,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        // ตรวจสอบว่าเป็นจอเล็กหรือไม่
         bool isSmallScreen = constraints.maxWidth < 600;
 
         return Container(
@@ -766,6 +777,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     );
   }
 
+  // Header ของกล่อง backlog/sprint
   Widget _buildHeader(bool isSmallScreen, int taskCount) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -780,6 +792,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
                         : const Icon(Icons.expand_more),
                 onPressed: () => setState(() => isExpanding = !isExpanding),
               ),
+              // ชื่อ sprint/backlog + จำนวนงาน
               Expanded(
                 child: RichText(
                   overflow: TextOverflow.ellipsis,
@@ -813,6 +826,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     );
   }
 
+  // แสดงข้อความเมื่อไม่มีงานในรายการ
   Widget _buildEmptyTaskMessage() {
     return Container(
       padding: const EdgeInsets.all(10),
@@ -836,6 +850,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     );
   }
 
+  // สร้าง tile สำหรับแต่ละงาน
   Widget _buildTaskTile(
     TaskModel task,
     String projectHdId,
@@ -913,7 +928,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       ),
     );
   }
-
+  // Dropdown สำหรับเปลี่ยนสถานะของ task
   Widget _buildTaskStatusDropdown(
     TaskModel task,
     String projectHdId,
@@ -975,7 +990,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       ),
     );
   }
-
+  // แปลง TaskModel เป็น map สำหรับส่งไปยัง API
   Map<String, dynamic> _mapTaskToApi(TaskModel task) {
     final map = {
       'task_id': task.id,
@@ -992,6 +1007,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     return map;
   }
 
+  // เมนูเพิ่มเติมของแต่ละงาน (comment, edit, delete)
   Widget _buildTaskPopupMenu(TaskModel task, String projectHdId) {
     return PopupMenuButton<String>(
       onSelected: (value) async {
@@ -1043,7 +1059,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
           ],
     );
   }
-
+  // ปุ่มสำหรับสร้างงานใหม่
   Widget _buildCreateButton(String projectHdId) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -1085,7 +1101,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       ),
     );
   }
-
+  // ฟังก์ชันสำหรับ ลบ Task พร้อม dialog ยืนยัน
   Future<void> _deleteTask(TaskModel task) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -1162,7 +1178,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       }
     }
   }
-
+  // ส่วนแสดง counter และปุ่มจัดการ sprint
   Widget _buildCountersAndButton() {
     final isBacklog = widget.item == null;
 
