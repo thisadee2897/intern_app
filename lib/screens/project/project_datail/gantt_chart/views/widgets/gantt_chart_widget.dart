@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:project/models/sprint_model.dart';
+import 'package:project/models/task_model.dart';
+import 'package:project/screens/project/project_datail/gantt_chart/views/widgets/gantt_app_widget.dart';
 import 'package:project/utils/extension/context_extension.dart';
-import 'package:project/utils/extension/date.dart';
 import '../../models/gantt_models.dart';
 import '../../utils/date_helpers.dart';
-import '../../providers/gantt_data_provider.dart';
 
 class GanttChartWidget extends ConsumerStatefulWidget {
-  const GanttChartWidget({super.key});
+  const GanttChartWidget(this.ganttData, {super.key});
+  final List<SprintModel> ganttData;
 
   @override
   ConsumerState<GanttChartWidget> createState() => _GanttChartWidgetState();
@@ -92,27 +94,14 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     return monthMap.entries.map((entry) => MonthInfo(name: entry.key, dayCount: entry.value)).toList();
   }
 
-  List<ProcessedSprint> _processedSprints(List<Sprint> sprints, List<Task> tasks) {
-    return sprints.map((sprint) {
-      final sprintTasks = tasks.where((t) => t.sprintId == sprint.id).toList()..sort((a, b) => a.start.compareTo(b.start));
-      final tasksWithLayout = sprintTasks.asMap().entries.map((entry) => TaskWithLayout(task: entry.value, rowIndex: entry.key)).toList();
-      final rowCount = sprintTasks.length;
-      final sprintRowHeight = sprintRowHeaderHeight + (rowCount * taskRowHeight);
-      return ProcessedSprint(sprint: sprint, tasksWithLayout: tasksWithLayout, rowCount: rowCount, sprintRowHeight: sprintRowHeight);
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final ganttData = ref.watch(ganttDataProvider);
-    final sprints = ganttData.sprints;
-    final tasks = ganttData.tasks;
+    final ganttData = widget.ganttData;
 
-    if (sprints.isEmpty && tasks.isEmpty) {
-      return const Center(child: Text('No data available. Add some sprints and tasks to get started.', style: TextStyle(color: Colors.white70)));
-    }
-
-    final allDates = [...tasks.map((t) => t.start), ...tasks.map((t) => t.end), ...sprints.map((s) => s.start), ...sprints.map((s) => s.end)];
+    List<DateTime> allDates = [
+      ...ganttData.expand((sprint) => sprint.tasks?.map((task) => DateTime.parse(task.taskStartDate ?? DateTime.now().toString())) ?? []),
+      ...ganttData.expand((sprint) => sprint.tasks?.map((task) => DateTime.parse(task.taskEndDate ?? DateTime.now().toString())) ?? []),
+    ];
 
     final DateTime chartStartDate, chartEndDate;
     if (allDates.isEmpty) {
@@ -122,14 +111,12 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     } else {
       final minDate = allDates.reduce((a, b) => a.isBefore(b) ? a : b);
       final maxDate = allDates.reduce((a, b) => a.isAfter(b) ? a : b);
-      chartStartDate = DateHelpers.addDays(minDate, -15);
-      chartEndDate = DateHelpers.addDays(maxDate, 15);
+      chartStartDate = DateHelpers.addDays(minDate, -3);
+      chartEndDate = DateHelpers.addDays(maxDate, 45);
     }
 
     final dateRange = _getDateRange(chartStartDate, chartEndDate);
     final months = _getMonths(dateRange);
-    final processedSprints = _processedSprints(sprints, tasks);
-
     final today = DateHelpers.startOfToday();
     final todayPosition = DateHelpers.differenceInDays(today, chartStartDate) * dayWidth;
     return Column(
@@ -138,7 +125,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
         Expanded(
           child: Row(
             children: [
-              _buildSidebar(processedSprints),
+              _buildSidebar(ganttData),
               // show gantt chart tasks
               Expanded(
                 child: Scrollbar(
@@ -156,24 +143,27 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                           ListView.builder(
                             physics: const ClampingScrollPhysics(),
                             controller: _taskVerticalController,
-                            itemCount: processedSprints.length,
+                            itemCount: ganttData.length,
                             itemBuilder: (context, index) {
-                              final sprint = processedSprints[index];
+                              final sprint = ganttData[index];
                               return Container(
                                 decoration: BoxDecoration(border: Border(bottom: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)))),
-                                height: sprint.sprintRowHeight + 1,
+                                height: (sprintRowHeaderHeight + (sprint.tasks!.length * taskRowHeight)) + 1,
                                 child: Stack(
                                   children: [
                                     // Task bars
-                                    ...sprint.tasksWithLayout.map((taskLayout) {
-                                      final task = taskLayout.task;
-                                      final start = DateTime(task.start.year, task.start.month, task.start.day);
-                                      final end = DateTime(task.end.year, task.end.month, task.end.day);
+                                    ...sprint.tasks!.map((task) {
+                                      if (task.taskStartDate == null || task.taskEndDate == null) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      final start = DateTime.parse(task.taskStartDate!.toString());
+                                      final end = DateTime.parse(task.taskEndDate!.toString());
                                       final offset = DateHelpers.differenceInDays(start, chartStartDate);
                                       final duration = DateHelpers.differenceInDays(end, start) + 1;
                                       final left = offset * dayWidth;
                                       final width = duration * dayWidth;
-                                      final top = sprintRowHeaderHeight + taskLayout.rowIndex * taskRowHeight;
+                                      final rowIndex = sprint.tasks!.indexOf(task);
+                                      final top = sprintRowHeaderHeight + rowIndex * taskRowHeight;
                                       return Positioned(
                                         left: left,
                                         top: top,
@@ -184,7 +174,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                                           alignment: Alignment.centerLeft,
                                           padding: const EdgeInsets.symmetric(horizontal: 8),
                                           child: Text(
-                                            "${task.start.toFormattedString} - ${task.end.toFormattedString} (${task.durationDays})",
+                                            "${task.taskStartDate} - ${task.taskEndDate}",
                                             style: const TextStyle(fontSize: 12, color: Colors.white60),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -201,7 +191,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                             left: todayPosition,
                             top: 0,
                             width: 1,
-                            height: processedSprints.fold<double>(0, (sum, sprint) => sum + sprint.sprintRowHeight),
+                            height: ganttData.fold<double>(0, (sum, sprint) => sum + (sprintRowHeaderHeight + (sprint.tasks!.length * taskRowHeight))),
                             child: Container(color: Colors.red),
                           ),
                         ],
@@ -291,7 +281,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     );
   }
 
-  Widget _buildSidebar(List<ProcessedSprint> processedSprints) {
+  Widget _buildSidebar(List<SprintModel> sprints) {
     return Container(
       width: sprintSidebarWidth,
       decoration: BoxDecoration(border: Border(right: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)))),
@@ -300,9 +290,9 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
         child: ListView.builder(
           physics: const ClampingScrollPhysics(), // ไม่เกิด overscroll/สกอเตลิด
           controller: _sidebarVerticalController,
-          itemCount: processedSprints.length,
+          itemCount: sprints.length,
           itemBuilder: (context, index) {
-            final processedSprint = processedSprints[index];
+            final processedSprint = sprints[index];
             return Container(
               decoration: BoxDecoration(border: Border(bottom: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)))),
               child: Column(
@@ -317,31 +307,48 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                       ),
                     ),
                     height: sprintRowHeaderHeight,
-                    padding: const EdgeInsets.only(left: 2, right: 8),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        processedSprint.sprint.name,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: context.primaryColor),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    padding: const EdgeInsets.only(left: 2),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            processedSprint.name ?? 'N/A',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: context.primaryColor),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        // menu
+                        PopupMenuButton(
+                          icon: Icon(Icons.more_vert, size: 16),
+                          itemBuilder: (context) {
+                            return [
+                              PopupMenuItem(value: 'add', child: Text('Add task'),onTap: (){
+                                ref.read(isShowDetailTaskProvider.notifier).state = true;
+                              },),
+                              PopupMenuItem(value: 'edit', child: Text('Edit sprint')),
+                              PopupMenuItem(value: 'delete', child: Text('Delete sprint')),
+                            ];
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   ListView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    itemCount: processedSprint.rowCount,
+                    itemCount: processedSprint.tasks!.length,
                     itemBuilder: (context, indexitem) {
-                      final taskWithLayout = processedSprint.tasksWithLayout[indexitem];
+                      TaskModel taskWithLayout = processedSprint.tasks![indexitem];
                       return Container(
                         height: taskRowHeight,
                         padding: const EdgeInsets.only(left: 16, right: 8),
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Tooltip(
-                            message:
-                                "${taskWithLayout.task.name} \n${taskWithLayout.task.start.toFormattedString} - ${taskWithLayout.task.end.toFormattedString}\n${taskWithLayout.task.durationDays} days",
-                            child: Text(taskWithLayout.task.name, style: const TextStyle(color: Colors.black54), overflow: TextOverflow.ellipsis),
+                            message: "${taskWithLayout.name} \n${taskWithLayout.taskStartDate} - ${taskWithLayout.taskEndDate}",
+                            child: Text(taskWithLayout.name!, style: const TextStyle(color: Colors.black54), overflow: TextOverflow.ellipsis),
                           ),
                         ),
                       );
