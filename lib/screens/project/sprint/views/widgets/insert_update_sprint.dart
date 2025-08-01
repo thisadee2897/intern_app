@@ -453,7 +453,7 @@ class _InsertUpdateSprintState extends BaseState<InsertUpdateSprint> {
             duration: int.parse(durationController.text.trim()),
             goal: goalController.text.trim(),
             projectHdId: selectedProjectId,
-            hdId: "1", // ค่าคงที่ตามที่ระบุ
+            hdId: selectedProjectId, // ค่าคงที่ตามที่ระบุ
           );
 
       final state = ref.read(insertUpdateSprintProvider);

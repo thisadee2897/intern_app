@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/apis/project_data/get_sprint_by_project.dart';
 import 'package:project/apis/master_data/insert_or_update_sprint.dart';
 import 'package:project/models/sprint_model.dart';
+import 'package:project/screens/project/project_datail/views/widgets/backlog_group_widget.dart';
 import 'package:project/screens/project/sprint/providers/apis/delete_sprint_api.dart';
 
 // -------------------  SprintNotifier -------------------
@@ -16,8 +19,7 @@ class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
     } else {
       state = const AsyncValue.loading();
       state = await AsyncValue.guard(() async {
-        List<SprintModel> response =
-            await ref.read(apiSprintByProject).get(projectId: id);
+        List<SprintModel> response = await ref.read(apiSprintByProject).get(projectId: id);
         return response;
       });
     }
@@ -31,8 +33,7 @@ class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
 
       // ลบจาก state local ด้วย
       state.whenData((list) {
-        final updatedList =
-            list.where((sprint) => sprint.id != sprintId).toList();
+        final updatedList = list.where((sprint) => sprint.id != sprintId).toList();
         state = AsyncValue.data(updatedList);
       });
     } catch (e, st) {
@@ -71,11 +72,36 @@ class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel?>>
         "hd_id": projectHdId,
       };
 
-      final result =
-          await ref.read(apiInsertOrUpdateSprint).post(body: body);
+      final result = await ref.read(apiInsertOrUpdateSprint).post(body: body);
       state = AsyncValue.data(result);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  // Start Sprint
+  Future<void> startSprint(String id, String? goal, String name) async {
+    state = const AsyncValue.loading();
+    try {
+      DateTime? startDate = ref.read(formStartDateProvider);
+      DateTime? endDate = ref.read(formEndDateProvider);
+      int duration = endDate!.difference(startDate!).inDays;
+      final body = {
+        "id": id,
+        "name": name,
+        "duration": duration,
+        "start_date": startDate.toString(),
+        "end_date": endDate.toString(),
+        "goal": goal,
+        "hd_id": ref.read(selectProjectIdProvider),
+        "project_hd_id": ref.read(selectProjectIdProvider),
+        "startting": true,
+      };
+      print(jsonEncode(body));
+      final result = await ref.read(apiInsertOrUpdateSprint).post(body: body);
+      state = AsyncValue.data(result);
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -85,14 +111,9 @@ class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel?>>
 }
 
 // -------------------  Providers -------------------
-final sprintProvider = StateNotifierProvider<SprintNotifier, AsyncValue<List<SprintModel>>>(
-  (ref) => SprintNotifier(ref),
-);
+final sprintProvider = StateNotifierProvider<SprintNotifier, AsyncValue<List<SprintModel>>>((ref) => SprintNotifier(ref));
 
-final insertUpdateSprintProvider = 
-    StateNotifierProvider<InsertUpdateSprintNotifier, AsyncValue<SprintModel?>>( 
-  (ref) => InsertUpdateSprintNotifier(ref), 
-);
+final insertUpdateSprintProvider = StateNotifierProvider<InsertUpdateSprintNotifier, AsyncValue<SprintModel?>>((ref) => InsertUpdateSprintNotifier(ref));
 
 final selectProjectIdProvider = StateProvider<String?>((ref) => null); //  Provider สำหรับเลือก Project ID
 
