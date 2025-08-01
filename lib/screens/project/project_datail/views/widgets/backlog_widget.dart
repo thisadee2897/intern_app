@@ -28,10 +28,7 @@ class _BacklogWidgetState extends BaseState<BacklogWidget> {
   }
 
   @override
-  Widget buildDesktop(
-    BuildContext context,
-    SizingInformation sizingInformation,
-  ) {
+  Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
     final state = ref.watch(sprintProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -41,25 +38,21 @@ class _BacklogWidgetState extends BaseState<BacklogWidget> {
           child: state.when(
             data: (datas) {
               return ListView.builder(
-                itemCount: datas.length + 1,
+                itemCount: datas.length,
                 itemBuilder: (context, index) {
-                  if (index == datas.length) {
-                    // ส่ง item: null เพื่อแสดง backlog group (ไม่มี sprint)
-                    return BacklogGroupWidget(isExpanded: true, item: null);
-                  } else {
-                    SprintModel item = datas[index];
-                    return BacklogGroupWidget(item: item);
-                  }
+                  SprintModel item = datas[index];
+                  return BacklogGroupWidget(item: item);
+                  // if (index == datas.length) {
+                  //   // ส่ง item: null เพื่อแสดง backlog group (ไม่มี sprint)
+                  //   // return BacklogGroupWidget(isExpanded: true, item: null);
+                  // } else {
+                  //   SprintModel item = datas[index];
+                  //   return BacklogGroupWidget(item: item);
+                  // }
                 },
               );
             },
-            error:
-                (err, stx) => Center(
-                      child: Text(
-                        'Error: ${err.toString()}',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
+            error: (err, stx) => Center(child: Text('Error: ${err.toString()}', style: const TextStyle(color: Colors.red))),
             loading: () => const Center(child: CircularProgressIndicator()),
           ),
         );
@@ -68,18 +61,12 @@ class _BacklogWidgetState extends BaseState<BacklogWidget> {
   }
 
   @override
-  Widget buildTablet(
-    BuildContext context,
-    SizingInformation sizingInformation,
-  ) {
+  Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
     return buildDesktop(context, sizingInformation);
   }
 
   @override
-  Widget buildMobile(
-    BuildContext context,
-    SizingInformation sizingInformation,
-  ) {
+  Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
     return buildDesktop(context, sizingInformation);
   }
 }

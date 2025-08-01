@@ -90,7 +90,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       final taskJson = {
         "task_id": widget.task?.id ?? "0",
         "project_hd_id": widget.projectHdId ?? "1",
-        "sprint_id": widget.sprintId ?? "0",
+        "sprint_id": widget.sprintId,
         "master_priority_id": selectedPriority,
         "master_task_status_id": selectedStatus,
         "master_type_of_work_id": selectedTypeOfWork,
@@ -104,7 +104,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
 
       try {
         await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(body: taskJson);
-        final projectId = widget.projectHdId ?? "1";
+        final projectId = widget.projectHdId!;
         await ref.read(taskBySprintControllerProvider(projectId).notifier).fetch();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
