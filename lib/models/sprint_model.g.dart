@@ -29,6 +29,9 @@ _$SprintModelImpl _$$SprintModelImplFromJson(Map<String, dynamic> json) =>
           : UserModel.fromJson(json['updated_by'] as Map<String, dynamic>),
       active: json['active'] as bool?,
       startting: json['startting'] as bool?,
+      tasks: (json['tasks'] as List<dynamic>?)
+          ?.map((e) => TaskModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$$SprintModelImplToJson(_$SprintModelImpl instance) =>
@@ -48,4 +51,5 @@ Map<String, dynamic> _$$SprintModelImplToJson(_$SprintModelImpl instance) =>
       'updated_by': instance.updatedBy,
       'active': instance.active,
       'startting': instance.startting,
+      'tasks': instance.tasks,
     };

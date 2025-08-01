@@ -50,6 +50,8 @@ mixin _$SprintModel {
   bool? get active => throw _privateConstructorUsedError;
   @JsonKey(name: 'startting')
   bool? get startting => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tasks')
+  List<TaskModel>? get tasks => throw _privateConstructorUsedError;
 
   /// Serializes this SprintModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -82,7 +84,8 @@ abstract class $SprintModelCopyWith<$Res> {
       @JsonKey(name: 'created_by') UserModel? createdBy,
       @JsonKey(name: 'updated_by') UserModel? updatedBy,
       @JsonKey(name: 'active') bool? active,
-      @JsonKey(name: 'startting') bool? startting});
+      @JsonKey(name: 'startting') bool? startting,
+      @JsonKey(name: 'tasks') List<TaskModel>? tasks});
 
   $ProjectHDModelCopyWith<$Res>? get projectHd;
   $UserModelCopyWith<$Res>? get createdBy;
@@ -119,6 +122,7 @@ class _$SprintModelCopyWithImpl<$Res, $Val extends SprintModel>
     Object? updatedBy = freezed,
     Object? active = freezed,
     Object? startting = freezed,
+    Object? tasks = freezed,
   }) {
     return _then(_value.copyWith(
       tableName: freezed == tableName
@@ -181,6 +185,10 @@ class _$SprintModelCopyWithImpl<$Res, $Val extends SprintModel>
           ? _value.startting
           : startting // ignore: cast_nullable_to_non_nullable
               as bool?,
+      tasks: freezed == tasks
+          ? _value.tasks
+          : tasks // ignore: cast_nullable_to_non_nullable
+              as List<TaskModel>?,
     ) as $Val);
   }
 
@@ -250,7 +258,8 @@ abstract class _$$SprintModelImplCopyWith<$Res>
       @JsonKey(name: 'created_by') UserModel? createdBy,
       @JsonKey(name: 'updated_by') UserModel? updatedBy,
       @JsonKey(name: 'active') bool? active,
-      @JsonKey(name: 'startting') bool? startting});
+      @JsonKey(name: 'startting') bool? startting,
+      @JsonKey(name: 'tasks') List<TaskModel>? tasks});
 
   @override
   $ProjectHDModelCopyWith<$Res>? get projectHd;
@@ -288,6 +297,7 @@ class __$$SprintModelImplCopyWithImpl<$Res>
     Object? updatedBy = freezed,
     Object? active = freezed,
     Object? startting = freezed,
+    Object? tasks = freezed,
   }) {
     return _then(_$SprintModelImpl(
       tableName: freezed == tableName
@@ -350,6 +360,10 @@ class __$$SprintModelImplCopyWithImpl<$Res>
           ? _value.startting
           : startting // ignore: cast_nullable_to_non_nullable
               as bool?,
+      tasks: freezed == tasks
+          ? _value._tasks
+          : tasks // ignore: cast_nullable_to_non_nullable
+              as List<TaskModel>?,
     ));
   }
 }
@@ -372,7 +386,9 @@ class _$SprintModelImpl implements _SprintModel {
       @JsonKey(name: 'created_by') this.createdBy,
       @JsonKey(name: 'updated_by') this.updatedBy,
       @JsonKey(name: 'active') this.active,
-      @JsonKey(name: 'startting') this.startting});
+      @JsonKey(name: 'startting') this.startting,
+      @JsonKey(name: 'tasks') final List<TaskModel>? tasks})
+      : _tasks = tasks;
 
   factory _$SprintModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$SprintModelImplFromJson(json);
@@ -422,10 +438,20 @@ class _$SprintModelImpl implements _SprintModel {
   @override
   @JsonKey(name: 'startting')
   final bool? startting;
+  final List<TaskModel>? _tasks;
+  @override
+  @JsonKey(name: 'tasks')
+  List<TaskModel>? get tasks {
+    final value = _tasks;
+    if (value == null) return null;
+    if (_tasks is EqualUnmodifiableListView) return _tasks;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
 
   @override
   String toString() {
-    return 'SprintModel(tableName: $tableName, id: $id, name: $name, duration: $duration, satartDate: $satartDate, endDate: $endDate, goal: $goal, completed: $completed, projectHd: $projectHd, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy, active: $active, startting: $startting)';
+    return 'SprintModel(tableName: $tableName, id: $id, name: $name, duration: $duration, satartDate: $satartDate, endDate: $endDate, goal: $goal, completed: $completed, projectHd: $projectHd, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy, active: $active, startting: $startting, tasks: $tasks)';
   }
 
   @override
@@ -457,7 +483,8 @@ class _$SprintModelImpl implements _SprintModel {
                 other.updatedBy == updatedBy) &&
             (identical(other.active, active) || other.active == active) &&
             (identical(other.startting, startting) ||
-                other.startting == startting));
+                other.startting == startting) &&
+            const DeepCollectionEquality().equals(other._tasks, _tasks));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -478,7 +505,8 @@ class _$SprintModelImpl implements _SprintModel {
       createdBy,
       updatedBy,
       active,
-      startting);
+      startting,
+      const DeepCollectionEquality().hash(_tasks));
 
   /// Create a copy of SprintModel
   /// with the given fields replaced by the non-null parameter values.
@@ -498,21 +526,23 @@ class _$SprintModelImpl implements _SprintModel {
 
 abstract class _SprintModel implements SprintModel {
   const factory _SprintModel(
-      {@JsonKey(name: 'table_name') final String? tableName,
-      @JsonKey(name: 'id') final String? id,
-      @JsonKey(name: 'name') final String? name,
-      @JsonKey(name: 'duration') final num? duration,
-      @JsonKey(name: 'satart_date') final String? satartDate,
-      @JsonKey(name: 'end_date') final String? endDate,
-      @JsonKey(name: 'goal') final String? goal,
-      @JsonKey(name: 'completed') final bool? completed,
-      @JsonKey(name: 'project_hd') final ProjectHDModel? projectHd,
-      @JsonKey(name: 'created_at') final String? createdAt,
-      @JsonKey(name: 'updated_at') final String? updatedAt,
-      @JsonKey(name: 'created_by') final UserModel? createdBy,
-      @JsonKey(name: 'updated_by') final UserModel? updatedBy,
-      @JsonKey(name: 'active') final bool? active,
-      @JsonKey(name: 'startting') final bool? startting}) = _$SprintModelImpl;
+          {@JsonKey(name: 'table_name') final String? tableName,
+          @JsonKey(name: 'id') final String? id,
+          @JsonKey(name: 'name') final String? name,
+          @JsonKey(name: 'duration') final num? duration,
+          @JsonKey(name: 'satart_date') final String? satartDate,
+          @JsonKey(name: 'end_date') final String? endDate,
+          @JsonKey(name: 'goal') final String? goal,
+          @JsonKey(name: 'completed') final bool? completed,
+          @JsonKey(name: 'project_hd') final ProjectHDModel? projectHd,
+          @JsonKey(name: 'created_at') final String? createdAt,
+          @JsonKey(name: 'updated_at') final String? updatedAt,
+          @JsonKey(name: 'created_by') final UserModel? createdBy,
+          @JsonKey(name: 'updated_by') final UserModel? updatedBy,
+          @JsonKey(name: 'active') final bool? active,
+          @JsonKey(name: 'startting') final bool? startting,
+          @JsonKey(name: 'tasks') final List<TaskModel>? tasks}) =
+      _$SprintModelImpl;
 
   factory _SprintModel.fromJson(Map<String, dynamic> json) =
       _$SprintModelImpl.fromJson;
@@ -562,6 +592,9 @@ abstract class _SprintModel implements SprintModel {
   @override
   @JsonKey(name: 'startting')
   bool? get startting;
+  @override
+  @JsonKey(name: 'tasks')
+  List<TaskModel>? get tasks;
 
   /// Create a copy of SprintModel
   /// with the given fields replaced by the non-null parameter values.

@@ -1,6 +1,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:project/models/project_h_d_model.dart';
+import 'package:project/models/task_model.dart';
 import 'package:project/models/user_model.dart';
 
 part 'sprint_model.freezed.dart';
@@ -24,6 +25,7 @@ class SprintModel with _$SprintModel {
   @JsonKey(name: 'updated_by') UserModel? updatedBy,
   @JsonKey(name: 'active') bool? active,
   @JsonKey(name: 'startting') bool? startting,
+  @JsonKey(name: 'tasks') List<TaskModel>? tasks,
   }) = _SprintModel;
 
   factory SprintModel.fromJson(Map<String, dynamic> json) => _$SprintModelFromJson(json);
