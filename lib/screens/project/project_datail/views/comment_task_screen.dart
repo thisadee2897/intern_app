@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appflowy_board/appflowy_board.dart';
+import 'package:project/models/task_status_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/task_status_controller.dart';
 import 'package:project/utils/extension/hex_color.dart';
 
 class CommentTaskScreen extends ConsumerStatefulWidget {
@@ -17,8 +19,7 @@ class CommentTaskScreen extends ConsumerStatefulWidget {
 class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
   late AppFlowyBoardController boardController;
   final Map<String, List<MyGroupItem>> groupedItems = {};
-
-  final List<MapEntry<String, String>> groupOrder = const [MapEntry('1', 'TODO'), MapEntry('2', 'IN PROGRESS'), MapEntry('3', 'REVIEW'), MapEntry('4', 'DONE')];
+  List<TaskStatusModel> statusList = [];
 
   @override
   void initState() {
@@ -28,7 +29,6 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
       onMoveGroupItem: (groupId, fromIndex, toIndex) {
         final list = groupedItems[groupId];
         if (list == null || fromIndex >= list.length || toIndex > list.length) return;
-
         final item = list.removeAt(fromIndex);
         list.insert(toIndex, item);
         _refreshBoard();
@@ -46,25 +46,22 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
         }
 
         try {
-          await ref
-              .read(insertOrUpdateTaskControllerProvider.notifier)
-              .submit(
-                body: {
-                  "task_id": item.taskId,
-                  "project_hd_id": widget.projectId,
-                  "sprint_id": item.sprintId ?? "0",
-                  "master_priority_id": item.priorityId ?? "1",
-                  "master_task_status_id": toGroupId,
-                  "master_type_of_work_id": item.typeOfWorkId ?? "1",
-                  "task_name": item.title,
-                  "task_description": item.subtitle ?? "",
-                  "task_assigned_to": item.assignedToId ?? "0",
-                  "task_start_date": item.startDate,
-                  "task_end_date": item.endDate,
-                  "task_is_active": true,
-                },
-              );
-
+          await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(
+            body: {
+              "task_id": item.taskId,
+              "project_hd_id": widget.projectId,
+              "sprint_id": item.sprintId ?? "0",
+              "master_priority_id": item.priorityId ?? "1",
+              "master_task_status_id": toGroupId,
+              "master_type_of_work_id": item.typeOfWorkId ?? "1",
+              "task_name": item.title,
+              "task_description": item.subtitle ?? "",
+              "task_assigned_to": item.assignedToId ?? "0",
+              "task_start_date": item.startDate,
+              "task_end_date": item.endDate,
+              "task_is_active": true,
+            },
+          );
           ref.invalidate(taskBySprintControllerProvider(widget.projectId));
         } catch (e) {
           print("❌ อัปเดต status ผิดพลาด: $e");
@@ -74,7 +71,8 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
       },
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(taskStatusControllerProvider.notifier).fetch();
       _loadTasks();
     });
   }
@@ -83,32 +81,28 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
     try {
       await ref.read(taskBySprintControllerProvider(widget.projectId).notifier).fetch();
       final tasksState = ref.read(taskBySprintControllerProvider(widget.projectId));
-
       final tasks = tasksState.maybeWhen(data: (data) => data, orElse: () => <dynamic>[]);
 
       if (!mounted) return;
-
+      final statusState = ref.read(taskStatusControllerProvider);
+      statusList = statusState.maybeWhen(data: (data) => data, orElse: () => []);
       groupedItems.clear();
 
-      for (final entry in groupOrder) {
-        final id = entry.key;
-        final filtered =
-            tasks
-                .where((e) => e.taskStatus?.id?.toString() == id)
-                .map(
-                  (task) => MyGroupItem(
-                    taskId: task.id?.toString() ?? '',
-                    title: task.name ?? '',
-                    subtitle: task.description,
-                    sprintId: task.sprint?.id?.toString(),
-                    priorityId: task.priority?.id?.toString(),
-                    typeOfWorkId: task.typeOfWork?.id?.toString(),
-                    assignedToId: task.assignedTo?.id?.toString(),
-                    startDate: task.taskStartDate,
-                    endDate: task.taskEndDate,
-                  ),
-                )
-                .toList();
+      for (final status in statusList) {
+        final id = status.id ?? '';
+        final filtered = tasks.where((e) => e.taskStatus?.id?.toString() == id).map(
+          (task) => MyGroupItem(
+            taskId: task.id?.toString() ?? '',
+            title: task.name ?? '',
+            subtitle: task.description,
+            sprintId: task.sprint?.id?.toString(),
+            priorityId: task.priority?.id?.toString(),
+            typeOfWorkId: task.typeOfWork?.id?.toString(),
+            assignedToId: task.assignedTo?.id?.toString(),
+            startDate: task.taskStartDate,
+            endDate: task.taskEndDate,
+          ),
+        ).toList();
 
         groupedItems[id] = filtered;
       }
@@ -121,32 +115,22 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
 
   void _refreshBoard() {
     boardController.clear();
-
-    for (final entry in groupOrder) {
-      final id = entry.key;
-      final name = entry.value;
+    for (final status in statusList) {
+      final id = status.id ?? '';
+      final name = status.name ?? '';
       final items = groupedItems[id] ?? [];
-
       boardController.addGroup(AppFlowyGroupData(id: id, name: name, items: List.from(items)));
     }
-
     if (!mounted) return;
     setState(() {});
   }
 
   Color _colorForGroup(String groupId) {
-    switch (groupId) {
-      case '1':
-        return Colors.red.shade300;
-      case '2':
-        return Colors.orange.shade300;
-      case '3':
-        return Colors.blue.shade300;
-      case '4':
-        return Colors.green.shade300;
-      default:
-        return Colors.grey.shade300;
-    }
+    final status = statusList.firstWhere(
+      (s) => s.id == groupId,
+      orElse: () => const TaskStatusModel(color: "#CCCCCC"),
+    );
+    return HexColor.fromHex(status.color ?? '#CCCCCC');
   }
 
   @override
@@ -154,66 +138,97 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
     final taskAsync = ref.watch(taskBySprintControllerProvider(widget.projectId));
 
     return Scaffold(
-      // appBar: AppBar(title: const Text("Task Board")),
       backgroundColor: Colors.white,
       body: taskAsync.when(
-        data:
-            (_) => AppFlowyBoard(
-              config: AppFlowyBoardConfig(
-                groupCornerRadius: 18,
-                groupBodyPadding: const EdgeInsets.all(8.0),
-                groupBackgroundColor: HexColor.fromHex('#F7F8FC'),
-                stretchGroupHeight: false,
-
-                // groupMargin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              ),
-              controller: boardController,
-              cardBuilder: (context, groupId, groupItem) {
-                if (groupItem is! MyGroupItem) return const SizedBox.shrink();
-                return Padding(
-                  key: ValueKey(groupItem.id),
-                  padding: const EdgeInsets.all(0),
-                  child: AppFlowyGroupCard(
-                    key: ValueKey(groupItem.id),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30), child: Text(groupItem.title)),
-                    ),
+        data: (_) => AppFlowyBoard(
+          config: AppFlowyBoardConfig(
+            groupCornerRadius: 18,
+            groupBodyPadding: const EdgeInsets.all(8.0),
+            groupBackgroundColor: HexColor.fromHex('#F7F8FC'),
+            stretchGroupHeight: false,
+          ),
+          controller: boardController,
+          cardBuilder: (context, groupId, groupItem) {
+            if (groupItem is! MyGroupItem) return const SizedBox.shrink();
+            return Padding(
+              key: ValueKey(groupItem.id),
+              padding: const EdgeInsets.all(0),
+              child: AppFlowyGroupCard(
+                key: ValueKey(groupItem.id),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                    child: Text(groupItem.title),
                   ),
-                  // child: AppFlowyColumnItemCard(
-                  //   title: groupItem.title,
-                  //   subtitle: groupItem.subtitle,
-                  //   sprintId: groupItem.sprintId,
-                  //   priorityId: groupItem.priorityId,
-                  //   typeOfWorkId: groupItem.typeOfWorkId,
-                  //   assignedToId: groupItem.assignedToId,
-                  //   startDate: groupItem.startDate,
-                  //   endDate: groupItem.endDate,
-                  // ),
-                );
-              },
-              headerBuilder: (context, groupData) {
-                final name = groupOrder.firstWhere((entry) => entry.key == groupData.id, orElse: () => MapEntry(groupData.id, groupData.id)).value;
-                final groupColor = _colorForGroup(groupData.id);
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+              ),
+            );
+          },
+          headerBuilder: (context, groupData) {
+            final status = statusList.firstWhere(
+              (s) => s.id == groupData.id,
+              orElse: () => const TaskStatusModel(name: '', color: "#CCCCCC"),
+            );
+            final groupColor = HexColor.fromHex(status.color ?? '#CCCCCC');
+            final name = status.name ?? groupData.id;
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: HexColor.fromHex('#F7F8FC'),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: groupColor, width: 2),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(name,
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: groupColor.darken())),
+                  Text("(${groupData.items.length})",
+                      style: TextStyle(
+                          color: groupColor.darken().withOpacity(0.7))),
+                ],
+              ),
+            );
+          },
+          footerBuilder: (context, groupData) {
+            return Padding(
+              padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+              child: InkWell(
+                onTap: () {
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: HexColor.fromHex('#F7F8FC'),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: groupColor, width: 2),
+                    color: Colors.white,
+                    border: Border.all(color: HexColor.fromHex('#A3E635'), width: 2),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: groupColor.darken())),
-                      Text("(${groupData.items.length})", style: TextStyle(color: groupColor.darken().withOpacity(0.7))),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.add, size: 18, color: Color(0xFF22C55E)),
+                      SizedBox(width: 6),
+                      Text(
+                        'New',
+                        style: TextStyle(
+                          color: Color(0xFF22C55E),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
-                );
-              },
-              groupConstraints: const BoxConstraints.tightFor(width: 280),
-            ),
+                ),
+              ),
+            );
+          },
+          groupConstraints: const BoxConstraints.tightFor(width: 280),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error loading tasks: $err')),
       ),
@@ -225,7 +240,6 @@ class MyGroupItem extends AppFlowyGroupItem {
   final String taskId;
   final String title;
   final String? subtitle;
-
   final String? sprintId;
   final String? priorityId;
   final String? typeOfWorkId;
@@ -286,7 +300,6 @@ class AppFlowyColumnItemCard extends StatelessWidget {
   }
 }
 
-/// Extension เพื่อปรับความเข้มสี (darken)
 extension ColorUtils on Color {
   Color darken([double amount = .1]) {
     assert(amount >= 0 && amount <= 1);
