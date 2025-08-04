@@ -1,36 +1,26 @@
+// 📁 task_status_controller.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/task_status_model.dart';
-import 'package:project/utils/services/rest_api_service.dart';
+import 'package:project/screens/project/project_datail/providers/apis/master_status_api.dart';
 
-// API class
-class TaskStatusApi {
+final taskStatusControllerProvider =
+    StateNotifierProvider<TaskStatusController, AsyncValue<List<TaskStatusModel>>>(
+  (ref) => TaskStatusController(ref),
+);
+
+class TaskStatusController extends StateNotifier<AsyncValue<List<TaskStatusModel>>> {
   final Ref ref;
-  final String _path = 'master_data_all/get_master_task_status';
 
-  TaskStatusApi({required this.ref});
+  TaskStatusController(this.ref) : super(const AsyncValue.loading()) {
+    fetch(); // fetch เมื่อ controller ถูกสร้าง
+  }
 
-  Future<List<TaskStatusModel>> getAll() async {
+  Future<void> fetch() async {
     try {
-      final response = await ref.read(apiClientProvider).get(_path);
-      print('✅ Response: $response');
-
-      final resData = response.data;
-      final List data = resData is List
-          ? resData
-          : (resData is Map && resData['data'] is List ? resData['data'] : []);
-
-      return data.map((e) => TaskStatusModel.fromJson(e)).toList();
-    } catch (e, stack) {
-      print('❌ Error loading task statuses: $e');
-      print(stack);
-      return [];
+      final result = await ref.read(taskStatusApiProvider).getAll();
+      state = AsyncValue.data(result);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
   }
 }
-
-// Controller
-final taskStatusControllerProvider =
-    FutureProvider.autoDispose<List<TaskStatusModel>>((ref) async {
-  final api = TaskStatusApi(ref: ref);
-  return await api.getAll();
-});

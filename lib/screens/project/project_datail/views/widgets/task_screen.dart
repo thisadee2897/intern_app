@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:project/components/form_startdate_and_enddate_widget.dart';
 import 'package:project/models/task_model.dart';
 import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
@@ -24,8 +25,6 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
-  final startDateTimeController = TextEditingController();
-  final endDateTimeController = TextEditingController();
 
   String? selectedPriority;
   String? selectedTypeOfWork;
@@ -40,7 +39,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   void initState() {
     super.initState();
     final t = widget.task;
-    final user = ref.read(loginProvider).value?.user; // ✅ ดึง user จาก loginProvider
+    final user = ref.read(loginProvider).value?.user;
 
     if (t != null) {
       nameController.text = t.name ?? '';
@@ -52,36 +51,8 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       startDateTime = t.taskStartDate != null ? DateTime.tryParse(t.taskStartDate!) : null;
       endDateTime = t.taskEndDate != null ? DateTime.tryParse(t.taskEndDate!) : null;
       isActive = t.active ?? true;
-
-      if (startDateTime != null) {
-        startDateTimeController.text = DateFormat('yyyy-MM-dd').format(startDateTime!);
-      }
-      if (endDateTime != null) {
-        endDateTimeController.text = DateFormat('yyyy-MM-dd').format(endDateTime!);
-      }
     } else {
-      selectedAssignee = user?.id?.toString(); // ✅ default ผู้รับผิดชอบเป็นคนล็อกอิน
-    }
-  }
-
-  Future<void> _selectDate({required BuildContext context, required bool isStart}) async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: isStart ? (startDateTime ?? DateTime.now()) : (endDateTime ?? DateTime.now()),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (pickedDate != null) {
-      setState(() {
-        final formatted = DateFormat('yyyy-MM-dd').format(pickedDate);
-        if (isStart) {
-          startDateTime = pickedDate;
-          startDateTimeController.text = formatted;
-        } else {
-          endDateTime = pickedDate;
-          endDateTimeController.text = formatted;
-        }
-      });
+      selectedAssignee = user?.id?.toString();
     }
   }
 
@@ -223,19 +194,30 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                     error: (e, _) => Text('Error: $e'),
                   ),
                   const SizedBox(height: 12),
-                  TextFormField(
-                    controller: startDateTimeController,
-                    readOnly: true,
-                    decoration: inputDecoration('วันเริ่มต้น', Icons.calendar_today),
-                    onTap: () => _selectDate(context: context, isStart: true),
+
+                  // ✅ ใช้ Widget ที่แยกไว้สำหรับเลือกวันที่
+                  FormStartDateWidget(
+                    startDate: startDateTime,
+                    endDate: endDateTime,
+                    onChanged: (date) {
+                      setState(() {
+                        startDateTime = date;
+                      });
+                    },
+                    validator: (val) => startDateTime == null ? 'กรุณาเลือกวันเริ่มต้น' : null,
                   ),
                   const SizedBox(height: 12),
-                  TextFormField(
-                    controller: endDateTimeController,
-                    readOnly: true,
-                    decoration: inputDecoration('วันสิ้นสุด', Icons.event),
-                    onTap: () => _selectDate(context: context, isStart: false),
+                  FormEndDateWidget(
+                    startDate: startDateTime,
+                    endDate: endDateTime,
+                    onChanged: (date) {
+                      setState(() {
+                        endDateTime = date;
+                      });
+                    },
+                    validator: (val) => endDateTime == null ? 'กรุณาเลือกวันสิ้นสุด' : null,
                   ),
+
                   const SizedBox(height: 12),
                   SwitchListTile(
                     value: isActive,
