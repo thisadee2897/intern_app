@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/components/export.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
-import 'package:project/screens/project/project_update/provider/controllers/project_updateController.dart';
+import 'package:project/screens/project/project_update/provider/controllers/project_update_controller.dart';
 
 class ProjectUpdateScreen extends BaseStatefulWidget {
   final dynamic project;

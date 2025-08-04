@@ -260,6 +260,7 @@ class AppFlowyColumnItemCard extends StatelessWidget {
   final String? endDate;
 
   const AppFlowyColumnItemCard({
+    super.key,
     required this.title,
     this.subtitle,
     this.sprintId,
@@ -268,8 +269,7 @@ class AppFlowyColumnItemCard extends StatelessWidget {
     this.assignedToId,
     this.startDate,
     this.endDate,
-    Key? key,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -75,7 +75,7 @@ class InsertUpdateWorkspaceController extends StateNotifier<AsyncValue<Workspace
       state = AsyncValue.data(workspace);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
-      print("insertOrUpdateWorkspace${st}");
+      print("insertOrUpdateWorkspace$st");
     }
   }
 

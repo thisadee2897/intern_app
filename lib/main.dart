@@ -12,7 +12,7 @@ void main() async {
   await initializeDateFormatting();
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    const lockedSize = Size(400, 720);
+    const lockedSize = Size(1024, 768);
     setWindowTitle('My Locked Window');
     setWindowMinSize(lockedSize);
     // setWindowMaxSize(lockedSize);

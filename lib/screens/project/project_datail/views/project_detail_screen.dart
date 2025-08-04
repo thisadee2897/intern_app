@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/screens/project/project_datail/gantt_chart/views/widgets/gantt_app_widget.dart';
-import '../gantt_chart/views/gantt_chart.dart';
 import 'widgets/export.dart';
 // import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart'; // อย่าลืม import SprintProvider ด้วย
 

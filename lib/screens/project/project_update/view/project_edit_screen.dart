@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/components/export.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
-import 'package:project/screens/project/project_update/provider/controllers/delete_projectController.dart';
-import 'package:project/screens/project/project_update/provider/controllers/project_updateController.dart';
+import 'package:project/screens/project/project_update/provider/controllers/delete_project_controller.dart';
+import 'package:project/screens/project/project_update/provider/controllers/project_update_controller.dart';
 
 class ProjectEditScreen extends BaseStatefulWidget {
   final dynamic project;
@@ -93,13 +92,15 @@ class _ProjectEditScreenState extends BaseState<ProjectEditScreen> {
       try {
         await ref.read(deleteProjectHDControllerProvider.notifier).deleteProject(widget.project.id.toString());
 
-        if (mounted) {
-          Navigator.of(context).pop(true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('✅ ลบโปรเจกต์เรียบร้อยแล้ว')),
-          );
-        }
+        if (!mounted) return;
+        
+        Navigator.of(context).pop(true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('✅ ลบโปรเจกต์เรียบร้อยแล้ว')),
+        );
       } catch (e) {
+        if (!mounted) return;
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('❌ ล้มเหลว: ${e.toString()}')),
         );
