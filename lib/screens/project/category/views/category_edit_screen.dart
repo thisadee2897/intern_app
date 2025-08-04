@@ -10,11 +10,11 @@ class CategoryEditScreen extends BaseStatefulWidget {
   final String? categoryName;
 
   const CategoryEditScreen({
-    Key? key,
+    super.key,
     required this.workspaceId,
     this.categoryId,
     this.categoryName,
-  }) : super(key: key);
+  });
 
   @override
   BaseState<CategoryEditScreen> createState() => _CategoryEditScreenState();
@@ -257,14 +257,14 @@ class _CategoryEditFormScreenState extends BaseState<CategoryEditFormScreen> {
     try {
       await ref.read(categoryFormControllerProvider.notifier).insertOrUpdateCategory(body);
 
-      if (mounted) {
+      if (context.mounted) {
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('แก้ไขหมวดหมู่สำเร็จ')),
         );
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('แก้ไขหมวดหมู่ล้มเหลว: $e')),
         );

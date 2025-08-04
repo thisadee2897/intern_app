@@ -384,19 +384,15 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       
     } catch (e) {
       // แสดง error message
-      _showErrorMessage('อัปเดตสถานะล้มเหลว: ${e.toString()}');
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('อัปเดตสถานะล้มเหลว: ${e.toString()}'), 
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-  }
-
-  /// แสดง error message
-  void _showErrorMessage(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message), 
-        backgroundColor: Colors.red,
-      ),
-    );
   }
 
   /// แปลง TaskModel เป็น map สำหรับส่งไปยัง API
@@ -520,7 +516,11 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     final projectHDId = ref.read(selectProjectIdProvider);
     
     if (projectHDId == null) {
-      _showErrorMessage('โปรดเลือกโปรเจกต์ก่อน');
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('โปรดเลือกโปรเจกต์ก่อน')),
+      );
       return;
     }
 
@@ -534,7 +534,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       ),
     );
     
-    if (result == true) {
+    if (result == true && mounted) {
       _loadTasks();
     }
   }
@@ -583,26 +583,27 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       // ลบ Task
       await ref.read(deleteTaskControllerProvider.notifier).deleteTask(task.id ?? '');
 
-      if (!mounted) return;
-      
-      // รีเฟรช data
-      _loadTasks();
-      
-      // ซ่อน loading และแสดงความสำเร็จ
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      _showSuccessSnackBar('ลบงาน "${task.name}" สำเร็จ');
+      if (mounted) {
+        // รีเฟรช data
+        _loadTasks();
+        
+        // ซ่อน loading และแสดงความสำเร็จ
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        _showSuccessSnackBar('ลบงาน "${task.name}" สำเร็จ');
+      }
     } catch (e) {
-      if (!mounted) return;
-      
-      // ซ่อน loading และแสดง error
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      _showErrorSnackBar('เกิดข้อผิดพลาดในการลบงาน: ${e.toString()}');
+      if (mounted) {
+        // ซ่อน loading และแสดง error
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        _showErrorSnackBar('เกิดข้อผิดพลาดในการลบงาน: ${e.toString()}');
+      }
     }
   }
 
   /// แสดง Loading SnackBar
   void _showLoadingSnackBar(String message) {
     if (!mounted) return;
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -627,6 +628,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
   /// แสดง Success SnackBar
   void _showSuccessSnackBar(String message) {
     if (!mounted) return;
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message), 
@@ -636,9 +638,10 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     );
   }
 
-  /// แสดง Error SnackBar  
+  /// แสดง Error SnackBar
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message), 
@@ -758,7 +761,11 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
   Future<void> _handleStartSprint(int taskCount) async {
     final item = widget.item;
     if (item == null) {
-      _showErrorMessage('โปรดเลือก Sprint ก่อน');
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('โปรดเลือก Sprint ก่อน')),
+      );
       return;
     }
 
@@ -769,13 +776,18 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
     ref.read(formEndDateProvider.notifier).state = item.endDate.formDateTimeJson;
 
     // แสดง dialog สำหรับเริ่ม sprint
-    if (!mounted) return;
-    await _showStartSprintDialog(taskCount, item);
+    if (mounted) {
+      await _showStartSprintDialog(taskCount, item);
+    }
   }
 
   /// จัดการการจบ Sprint
   Future<void> _handleCompleteSprint() async {
-    _showErrorMessage('ฟีเจอร์นี้ยังไม่เปิดใช้งาน');
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('ฟีเจอร์นี้ยังไม่เปิดใช้งาน')),
+    );
   }
 
   /// แสดง Dialog สำหรับเริ่ม Sprint
@@ -899,11 +911,15 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       if (!mounted) return;
       
       Navigator.pop(context);
-      _showSuccessSnackBar('Sprint started successfully');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sprint started successfully')),
+      );
     } catch (e) {
       if (!mounted) return;
       
-      _showErrorSnackBar('Error starting sprint: ${e.toString()}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error starting sprint: ${e.toString()}')),
+      );
     }
   }
 
@@ -971,11 +987,15 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
         
         if (!mounted) return;
         
-        _showSuccessSnackBar('ลบ Sprint สำเร็จ');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ลบ Sprint สำเร็จ')),
+        );
       } catch (e) {
         if (!mounted) return;
         
-        _showErrorSnackBar('เกิดข้อผิดพลาด: ${e.toString()}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('เกิดข้อผิดพลาด: ${e.toString()}')),
+        );
       }
     }
   }

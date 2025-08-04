@@ -105,14 +105,14 @@ class _CategoryAddScreenState extends BaseState<CategoryAddScreen> {
                                     .read(categoryFormControllerProvider.notifier)
                                     .insertOrUpdateCategory(body);
 
-                                if (mounted) {
+                                if (context.mounted) {
                                   Navigator.pop(context, true);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('เพิ่มหมวดหมู่สำเร็จ')),
                                   );
                                 }
                               } catch (e) {
-                                if (mounted) {
+                                if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('เพิ่มหมวดหมู่ล้มเหลว: $e')),
                                   );

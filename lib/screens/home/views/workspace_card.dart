@@ -147,17 +147,21 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
                             .read(deleteWorkspaceControllerProvider.notifier)
                             .deleteWorkspace(id: widget.workspace.id!);
                         widget.onWorkspaceChanged?.call();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Delete Workspace เรียบร้อย'),
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Delete Workspace เรียบร้อย'),
+                            ),
+                          );
+                        }
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('delete Workspace ไม่สำเร็จ: $e'),
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('delete Workspace ไม่สำเร็จ: $e'),
+                            ),
+                          );
+                        }
                       }
                     }
                   }

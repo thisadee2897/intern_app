@@ -29,6 +29,11 @@ class DeleteCommentTaskController extends StateNotifier<DeleteCommentTaskState> 
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  /// รีเซ็ต state กลับเป็นค่าเริ่มต้น
+  void reset() {
+    state = DeleteCommentTaskState();
+  }
 }
 
 final deleteCommentTaskControllerProvider = StateNotifierProvider<DeleteCommentTaskController, DeleteCommentTaskState>((ref) {
