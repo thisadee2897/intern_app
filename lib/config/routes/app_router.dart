@@ -72,19 +72,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             navigatorKey: _shellNavigatorHomeKey,
-            routes: [GoRoute(path: Routes.home, pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()))],
-          ),
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorProjectKey,
             routes: [
               GoRoute(
-                path: Routes.project,
-                pageBuilder: (context, state) => const NoTransitionPage(child: ProjectScreen()),
+                path: Routes.home,
+                pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()),
                 routes: [
                   GoRoute(
-                    path: Routes.projectDetail,
-                    pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()),
-                    routes: [GoRoute(path: Routes.projectDetail, pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()))],
+                    path: Routes.project,
+                    pageBuilder: (context, state) => const NoTransitionPage(child: ProjectScreen()),
+                    routes: [
+                      GoRoute(
+                        path: Routes.projectDetail,
+                        pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()),
+                        routes: [GoRoute(path: Routes.projectDetail, pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()))],
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -106,54 +108,54 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorContactUsKey,
-            routes: [
-              GoRoute(
-                path: Routes.contactUs,
-                pageBuilder: (context, state) => NoTransitionPage(child: ContactUsScreen()),
-                // routes: [
-                //   GoRoute(
-                //     path: Routes.appointmentDetail,
-                //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
-                //     routes: const [],
-                //   ),
-                // ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorproductupdate,
-            routes: [
-              GoRoute(
-                path: Routes.productUpdate,
-                pageBuilder: (context, state) => NoTransitionPage(child: ProductUpdatScreen()),
-                // routes: [
-                //   GoRoute(
-                //     path: Routes.appointmentDetail,
-                //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
-                //     routes: const [],
-                //   ),
-                // ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorDocumentationKey,
-            routes: [
-              GoRoute(
-                path: Routes.documentation,
-                pageBuilder: (context, state) => NoTransitionPage(child: DocumentationScreen()),
-                // routes: [
-                //   GoRoute(
-                //     path: Routes.appointmentDetail,
-                //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
-                //     routes: const [],
-                //   ),
-                // ],
-              ),
-            ],
-          ),
+          // StatefulShellBranch(
+          //   navigatorKey: _shellNavigatorContactUsKey,
+          //   routes: [
+          //     GoRoute(
+          //       path: Routes.contactUs,
+          //       pageBuilder: (context, state) => NoTransitionPage(child: ContactUsScreen()),
+          //       // routes: [
+          //       //   GoRoute(
+          //       //     path: Routes.appointmentDetail,
+          //       //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
+          //       //     routes: const [],
+          //       //   ),
+          //       // ],
+          //     ),
+          //   ],
+          // ),
+          // StatefulShellBranch(
+          //   navigatorKey: _shellNavigatorproductupdate,
+          //   routes: [
+          //     GoRoute(
+          //       path: Routes.productUpdate,
+          //       pageBuilder: (context, state) => NoTransitionPage(child: ProductUpdatScreen()),
+          //       // routes: [
+          //       //   GoRoute(
+          //       //     path: Routes.appointmentDetail,
+          //       //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
+          //       //     routes: const [],
+          //       //   ),
+          //       // ],
+          //     ),
+          //   ],
+          // ),
+          // StatefulShellBranch(
+          //   navigatorKey: _shellNavigatorDocumentationKey,
+          //   routes: [
+          //     GoRoute(
+          //       path: Routes.documentation,
+          //       pageBuilder: (context, state) => NoTransitionPage(child: DocumentationScreen()),
+          //       // routes: [
+          //       //   GoRoute(
+          //       //     path: Routes.appointmentDetail,
+          //       //     pageBuilder: (context, state) => const NoTransitionPage(child: AppointmentDetailScreen()),
+          //       //     routes: const [],
+          //       //   ),
+          //       // ],
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     ],

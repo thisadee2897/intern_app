@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:project/screens/home/views/insert_update_workspace_screen.dart';
+import 'package:project/screens/project/views/project_screen.dart';
 
 class WorkspaceCard extends StatefulWidget {
   final String title;
@@ -114,6 +115,7 @@ class _WorkspaceCardState extends State<WorkspaceCard>
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => _onHoverEnter(),
       onExit: (_) => _onHoverExit(),
       child: AnimatedBuilder(
@@ -141,7 +143,7 @@ class _WorkspaceCardState extends State<WorkspaceCard>
                         closedShape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        openBuilder: (context, _) => const InsertUpdateWorkspaceScreen(),
+                        openBuilder: (context, _) => const ProjectScreen(),
                         closedBuilder: (context, openContainer) => GestureDetector(
                           onTap: () {
                             _onTap();
