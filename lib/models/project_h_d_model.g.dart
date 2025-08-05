@@ -11,6 +11,9 @@ _$ProjectHDModelImpl _$$ProjectHDModelImplFromJson(Map<String, dynamic> json) =>
       tableName: json['table_name'] as String?,
       id: json['id'] as String?,
       categoryId: json['category_id'] as String?,
+      category: json['category'] == null
+          ? null
+          : CategoryModel.fromJson(json['category'] as Map<String, dynamic>),
       name: json['name'] as String?,
       key: json['key'] as String?,
       description: json['description'] as String?,
@@ -34,6 +37,7 @@ Map<String, dynamic> _$$ProjectHDModelImplToJson(
       'table_name': instance.tableName,
       'id': instance.id,
       'category_id': instance.categoryId,
+      'category': instance.category,
       'name': instance.name,
       'key': instance.key,
       'description': instance.description,

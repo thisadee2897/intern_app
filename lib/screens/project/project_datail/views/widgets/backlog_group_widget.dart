@@ -50,10 +50,9 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   bool _isHovering = false;
 
   /// Controller สำหรับชื่อ Sprint
-  final TextEditingController _sprintNameController = TextEditingController();
-
+  late TextEditingController _sprintNameController;
   /// Controller สำหรับเป้าหมาย Sprint
-  final TextEditingController _sprintGoalController = TextEditingController();
+  late TextEditingController _sprintGoalController;
 
   @override
   void initState() {
@@ -64,6 +63,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
 
   /// โหลดรายการงานตาม projectHdId
   void _loadTasks() {
+    _sprintNameController = TextEditingController();
+    _sprintGoalController = TextEditingController();
     final projectHdId = ref.read(selectProjectIdProvider);
     if (projectHdId != null) {
       ref.read(taskBySprintControllerProvider(projectHdId).notifier).fetch();
@@ -685,9 +686,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                                   try {
                                     await ref
                                         .read(updateSprintToCompleteProvider.notifier)
-                                        .updateComplete(
-                                          sprintCompleteId: item.id!,
-                                          moveTaskToSprintId: nextSprint!.id!);
+                                        .updateComplete(sprintCompleteId: item.id!, moveTaskToSprintId: nextSprint!.id!);
                                     if (!mounted) return;
                                     Navigator.pop(context);
                                     _showSuccessSnackBar('Sprint completed successfully');

@@ -1,274 +1,324 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:project/components/export.dart';
-import 'package:project/models/workspace_model.dart';
-import 'package:project/screens/home/providers/controllers/delete_workspace_controllers.dart';
 import 'package:project/screens/home/views/insert_update_workspace_screen.dart';
 
-class WorkspaceCard extends ConsumerStatefulWidget {
-  final WorkspaceModel workspace;
-  final VoidCallback? onWorkspaceChanged;
-  final Future<void> Function(String id)? onDeleteWorkspace;
+class WorkspaceCard extends StatefulWidget {
+  final String title;
+  final Color color;
 
-  const WorkspaceCard({
-    super.key,
-    required this.workspace,
-    this.onWorkspaceChanged,
-    this.onDeleteWorkspace,
-  });
+  const WorkspaceCard({super.key, required this.title, required this.color});
 
   @override
-  ConsumerState<WorkspaceCard> createState() => _WorkspaceCardState();
+  State<WorkspaceCard> createState() => _WorkspaceCardState();
 }
 
-class _WorkspaceCardState extends ConsumerState<WorkspaceCard> {
-  bool isHovered = false;
+class _WorkspaceCardState extends State<WorkspaceCard>
+    with TickerProviderStateMixin {
+  bool _hovering = false;
+  late AnimationController _scaleController;
+  late AnimationController _rotationController;
+  late AnimationController _bounceController;
+  late AnimationController _shimmerController;
+  
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _rotationAnimation;
+  late Animation<double> _bounceAnimation;
+  late Animation<double> _shimmerAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Scale animation for hover effect
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _scaleController,
+      curve: Curves.easeOutBack,
+    ));
+
+    // Rotation animation for subtle 3D effect
+    _rotationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 0.02,
+    ).animate(CurvedAnimation(
+      parent: _rotationController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Bounce animation for click effect
+    _bounceController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _bounceAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(
+      parent: _bounceController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Shimmer animation for elegant glow
+    _shimmerController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    _shimmerAnimation = Tween<double>(
+      begin: -2.0,
+      end: 2.0,
+    ).animate(CurvedAnimation(
+      parent: _shimmerController,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    _rotationController.dispose();
+    _bounceController.dispose();
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  void _onHoverEnter() {
+    setState(() => _hovering = true);
+    _scaleController.forward();
+    _rotationController.forward();
+    _shimmerController.repeat(reverse: true);
+  }
+
+  void _onHoverExit() {
+    setState(() => _hovering = false);
+    _scaleController.reverse();
+    _rotationController.reverse();
+    _shimmerController.stop();
+  }
+
+  void _onTap() {
+    _bounceController.forward().then((_) {
+      _bounceController.reverse();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final users = widget.workspace.users ?? [];
-
     return MouseRegion(
-      onEnter: (_) => setState(() => isHovered = true),
-      onExit: (_) => setState(() => isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        width: 300,
-        height: 180,
-        margin: const EdgeInsets.all(4), // Card มีระยะห่างเท่าๆกันทุกด้าน
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color:
-                isHovered
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).dividerColor,
-            width: 3,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color:
-                  isHovered
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.25)
-                      : Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 6),
-            ),
-          ],
-          gradient:
-              isHovered
-                  ? LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                      Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                      Theme.of(context).colorScheme.primary.withOpacity(0.25),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                  : null,
-          color: isHovered ? null :  const Color.fromARGB(255, 245, 246, 247),
-        ),
-
-        child: Stack(
-          children: [
-            // ไอคอนตกแต่งแบบไล่สี
-            Positioned(
-              top: 8,
-              left: 8,
-              child: ShaderMask(
-                shaderCallback:
-                    (bounds) => LinearGradient(
-                      colors: [
-                        const Color.fromARGB(255, 2, 27, 84),
-                        const Color.fromARGB(255, 58, 84, 231),
-                        const Color.fromARGB(255, 205, 136, 159),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ).createShader(
-                      Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-                    ),
-                blendMode: BlendMode.srcIn,
-                child: const Icon(Icons.dashboard_customize_rounded, size: 50),
-              ),
-            ),
-
-            // ปุ่มเมนู ⋮ มุมบนขวา
-            Positioned(
-              top: 0,
-              right: 8,
-              child: PopupMenuButton<String>(
-                icon: Icon(
-                  Icons.more_vert,
-                  color:
-                      isHovered
-                          ? const Color.fromARGB(159, 14, 23, 78)
-                          : const Color.fromARGB(184, 82, 107, 164),
-                ),
-                onSelected: (value) async {
-                  if (value == 'update') {
-                    final result = await Navigator.push<bool>(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (_) => InsertUpdateWorkspaceScreen(
-                              workspace: widget.workspace,
-                            ),
-                      ),
-                    );
-                    if (result == true) widget.onWorkspaceChanged?.call();
-                  } else if (value == 'delete') {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder:
-                          (context) => AlertDialog(
-                            title: const Text("ยืนยันการลบ"),
-                            content: const Text(
-                              "คุณแน่ใจหรือไม่ว่าต้องการลบ Workspace นี้?",
-                            ),
-                            backgroundColor: Colors.white,
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: const Text("ยกเลิก"),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                child: const Text("ลบ"),
-                              ),
-                            ],
-                          ),
-                    );
-                    if (confirmed == true) {
-                      try {
-                        await ref
-                            .read(deleteWorkspaceControllerProvider.notifier)
-                            .deleteWorkspace(id: widget.workspace.id!);
-                        widget.onWorkspaceChanged?.call();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Delete Workspace เรียบร้อย'),
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('delete Workspace ไม่สำเร็จ: $e'),
-                            ),
-                          );
-                        }
-                      }
-                    }
-                  }
-                },
-                itemBuilder:
-                    (context) => [
-                      const PopupMenuItem(
-                        value: 'update',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 16),
-                            SizedBox(width: 2),
-                            Text('edit workspace'),
-                          ],
+      onEnter: (_) => _onHoverEnter(),
+      onExit: (_) => _onHoverExit(),
+      child: AnimatedBuilder(
+        animation: _scaleController,
+        builder: (context, child) {
+          return AnimatedBuilder(
+            animation: _bounceController,
+            builder: (context, child) {
+              return AnimatedBuilder(
+                animation: _rotationController,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: (_scaleAnimation.value * _bounceAnimation.value).clamp(0.5, 2.0),
+                    child: Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001)
+                        ..rotateX(_rotationAnimation.value)
+                        ..rotateY(_rotationAnimation.value * 0.5),
+                      child: OpenContainer(
+                        closedElevation: _hovering ? 12 : 4,
+                        openElevation: 0,
+                        transitionType: ContainerTransitionType.fadeThrough,
+                        transitionDuration: const Duration(milliseconds: 600),
+                        closedShape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, size: 16),
-                            SizedBox(width: 2),
-                            Text('delete workspace'),
-                          ],
-                        ),
-                      ),
-                    ],
-              ),
-            ),
-
-            // ชื่อ Workspace ตรงกลาง
-            Center(
-              child: Text(
-                widget.workspace.name ?? '',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSurface,
-
-                  shadows: [
-                    Shadow(
-                      blurRadius: 1,
-                      color: Colors.indigo.shade100.withOpacity(0.5),
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-
-            // สมาชิกหลายคน (avatars) มุมล่างซ้าย
-            if (users.isNotEmpty)
-              Positioned(
-                bottom: 10,
-                left: 10,
-                child: Row(
-                  children: [
-                    ...users
-                        .take(4)
-                        .map(
-                          (user) => Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.white,
-                              child:
-                                  user.image != null && user.image!.isNotEmpty
-                                      ? CircleAvatar(
-                                        radius: 12,
-                                        backgroundImage:
-                                            CachedNetworkImageProvider(
-                                              user.image!,
-                                            ),
-                                      )
-                                      : const CircleAvatar(
-                                        radius: 12,
-                                        backgroundColor: Colors.indigo,
-                                        child: Icon(
-                                          Icons.person,
-                                          size: 14,
-                                          color: Colors.white,
-                                        ),
+                        openBuilder: (context, _) => const InsertUpdateWorkspaceScreen(),
+                        closedBuilder: (context, openContainer) => GestureDetector(
+                          onTap: () {
+                            _onTap();
+                            openContainer();
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  widget.color.withOpacity(_hovering ? 0.9 : 0.8),
+                                  widget.color.withOpacity(_hovering ? 0.7 : 0.6),
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: widget.color.withOpacity(_hovering ? 0.4 : 0.2),
+                                  blurRadius: _hovering ? 20 : 8,
+                                  offset: Offset(0, _hovering ? 8 : 4),
+                                  spreadRadius: _hovering ? 2 : 0,
+                                ),
+                                if (_hovering)
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, -2),
+                                    spreadRadius: -2,
+                                  ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Stack(
+                                children: [
+                                  // Background pattern
+                                  Positioned.fill(
+                                    child: CustomPaint(
+                                      painter: _PatternPainter(
+                                        color: Colors.white.withOpacity(0.1),
                                       ),
+                                    ),
+                                  ),
+                                  
+                                  // Shimmer effect
+                                  if (_hovering)
+                                    AnimatedBuilder(
+                                      animation: _shimmerController,
+                                      builder: (context, child) {
+                                        return Positioned.fill(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(20),
+                                            child: Transform.translate(
+                                              offset: Offset(_shimmerAnimation.value * 200, 0),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    begin: Alignment.centerLeft,
+                                                    end: Alignment.centerRight,
+                                                    colors: [
+                                                      Colors.transparent,
+                                                      Colors.white.withOpacity(0.3),
+                                                      Colors.transparent,
+                                                    ],
+                                                    stops: const [0.0, 0.5, 1.0],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  
+                                  // Content
+                                  Positioned.fill(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          // Icon with animation
+                                          AnimatedContainer(
+                                            duration: const Duration(milliseconds: 300),
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(_hovering ? 0.25 : 0.15),
+                                              borderRadius: BorderRadius.circular(16),
+                                            ),
+                                            child: const Icon(
+                                              Icons.work_outline_rounded,
+                                              size: 32,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          
+                                          const SizedBox(height: 16),
+                                          
+                                          // Title with subtle animation
+                                          AnimatedDefaultTextStyle(
+                                            duration: const Duration(milliseconds: 200),
+                                            style: TextStyle(
+                                              fontSize: _hovering ? 18 : 16,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                              letterSpacing: 0.5,
+                                              shadows: [
+                                                Shadow(
+                                                  color: Colors.black.withOpacity(0.3),
+                                                  offset: const Offset(0, 1),
+                                                  blurRadius: 2,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Text(
+                                              widget.title,
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          
+                                          // Animated indicator
+                                          AnimatedContainer(
+                                            duration: const Duration(milliseconds: 300),
+                                            margin: const EdgeInsets.only(top: 12),
+                                            height: 3,
+                                            width: _hovering ? 40 : 20,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(0.8),
+                                              borderRadius: BorderRadius.circular(2),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                    if (users.length > 4)
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.indigo.shade200,
-                        child: Text(
-                          '+${users.length - 4}',
-                          style: const TextStyle(
-                            color: Colors.indigo,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                       ),
-                  ],
-                ),
-              ),
-          ],
-        ),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }
+}
+
+class _PatternPainter extends CustomPainter {
+  final Color color;
+
+  _PatternPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    const spacing = 30.0;
+    const radius = 2.0;
+
+    for (double x = 0; x < size.width; x += spacing) {
+      for (double y = 0; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), radius, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

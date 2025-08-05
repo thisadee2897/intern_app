@@ -1,5 +1,6 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:project/models/category_model.dart';
 import 'package:project/models/user_model.dart';
 
 part 'project_h_d_model.freezed.dart';
@@ -11,6 +12,7 @@ class ProjectHDModel with _$ProjectHDModel {
   @JsonKey(name: 'table_name') String? tableName,
   @JsonKey(name: 'id') String? id,
   @JsonKey(name: 'category_id') String? categoryId,
+  @JsonKey(name: 'category') CategoryModel? category,
   @JsonKey(name: 'name') String? name,
   @JsonKey(name: 'key') String? key,
   @JsonKey(name: 'description') String? description,

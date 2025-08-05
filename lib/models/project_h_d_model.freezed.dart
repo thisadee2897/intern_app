@@ -26,6 +26,8 @@ mixin _$ProjectHDModel {
   String? get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'category_id')
   String? get categoryId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'category')
+  CategoryModel? get category => throw _privateConstructorUsedError;
   @JsonKey(name: 'name')
   String? get name => throw _privateConstructorUsedError;
   @JsonKey(name: 'key')
@@ -67,6 +69,7 @@ abstract class $ProjectHDModelCopyWith<$Res> {
       {@JsonKey(name: 'table_name') String? tableName,
       @JsonKey(name: 'id') String? id,
       @JsonKey(name: 'category_id') String? categoryId,
+      @JsonKey(name: 'category') CategoryModel? category,
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'key') String? key,
       @JsonKey(name: 'description') String? description,
@@ -78,6 +81,7 @@ abstract class $ProjectHDModelCopyWith<$Res> {
       @JsonKey(name: 'active') bool? active,
       @JsonKey(ignore: true) double progress});
 
+  $CategoryModelCopyWith<$Res>? get category;
   $UserModelCopyWith<$Res>? get leader;
   $UserModelCopyWith<$Res>? get createdBy;
   $UserModelCopyWith<$Res>? get updatedBy;
@@ -101,6 +105,7 @@ class _$ProjectHDModelCopyWithImpl<$Res, $Val extends ProjectHDModel>
     Object? tableName = freezed,
     Object? id = freezed,
     Object? categoryId = freezed,
+    Object? category = freezed,
     Object? name = freezed,
     Object? key = freezed,
     Object? description = freezed,
@@ -125,6 +130,10 @@ class _$ProjectHDModelCopyWithImpl<$Res, $Val extends ProjectHDModel>
           ? _value.categoryId
           : categoryId // ignore: cast_nullable_to_non_nullable
               as String?,
+      category: freezed == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as CategoryModel?,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -166,6 +175,20 @@ class _$ProjectHDModelCopyWithImpl<$Res, $Val extends ProjectHDModel>
           : progress // ignore: cast_nullable_to_non_nullable
               as double,
     ) as $Val);
+  }
+
+  /// Create a copy of ProjectHDModel
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $CategoryModelCopyWith<$Res>? get category {
+    if (_value.category == null) {
+      return null;
+    }
+
+    return $CategoryModelCopyWith<$Res>(_value.category!, (value) {
+      return _then(_value.copyWith(category: value) as $Val);
+    });
   }
 
   /// Create a copy of ProjectHDModel
@@ -223,6 +246,7 @@ abstract class _$$ProjectHDModelImplCopyWith<$Res>
       {@JsonKey(name: 'table_name') String? tableName,
       @JsonKey(name: 'id') String? id,
       @JsonKey(name: 'category_id') String? categoryId,
+      @JsonKey(name: 'category') CategoryModel? category,
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'key') String? key,
       @JsonKey(name: 'description') String? description,
@@ -234,6 +258,8 @@ abstract class _$$ProjectHDModelImplCopyWith<$Res>
       @JsonKey(name: 'active') bool? active,
       @JsonKey(ignore: true) double progress});
 
+  @override
+  $CategoryModelCopyWith<$Res>? get category;
   @override
   $UserModelCopyWith<$Res>? get leader;
   @override
@@ -258,6 +284,7 @@ class __$$ProjectHDModelImplCopyWithImpl<$Res>
     Object? tableName = freezed,
     Object? id = freezed,
     Object? categoryId = freezed,
+    Object? category = freezed,
     Object? name = freezed,
     Object? key = freezed,
     Object? description = freezed,
@@ -282,6 +309,10 @@ class __$$ProjectHDModelImplCopyWithImpl<$Res>
           ? _value.categoryId
           : categoryId // ignore: cast_nullable_to_non_nullable
               as String?,
+      category: freezed == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as CategoryModel?,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -333,6 +364,7 @@ class _$ProjectHDModelImpl implements _ProjectHDModel {
       {@JsonKey(name: 'table_name') this.tableName,
       @JsonKey(name: 'id') this.id,
       @JsonKey(name: 'category_id') this.categoryId,
+      @JsonKey(name: 'category') this.category,
       @JsonKey(name: 'name') this.name,
       @JsonKey(name: 'key') this.key,
       @JsonKey(name: 'description') this.description,
@@ -356,6 +388,9 @@ class _$ProjectHDModelImpl implements _ProjectHDModel {
   @override
   @JsonKey(name: 'category_id')
   final String? categoryId;
+  @override
+  @JsonKey(name: 'category')
+  final CategoryModel? category;
   @override
   @JsonKey(name: 'name')
   final String? name;
@@ -389,7 +424,7 @@ class _$ProjectHDModelImpl implements _ProjectHDModel {
 
   @override
   String toString() {
-    return 'ProjectHDModel(tableName: $tableName, id: $id, categoryId: $categoryId, name: $name, key: $key, description: $description, leader: $leader, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy, active: $active, progress: $progress)';
+    return 'ProjectHDModel(tableName: $tableName, id: $id, categoryId: $categoryId, category: $category, name: $name, key: $key, description: $description, leader: $leader, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy, active: $active, progress: $progress)';
   }
 
   @override
@@ -402,6 +437,8 @@ class _$ProjectHDModelImpl implements _ProjectHDModel {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.categoryId, categoryId) ||
                 other.categoryId == categoryId) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.key, key) || other.key == key) &&
             (identical(other.description, description) ||
@@ -427,6 +464,7 @@ class _$ProjectHDModelImpl implements _ProjectHDModel {
       tableName,
       id,
       categoryId,
+      category,
       name,
       key,
       description,
@@ -460,6 +498,7 @@ abstract class _ProjectHDModel implements ProjectHDModel {
       {@JsonKey(name: 'table_name') final String? tableName,
       @JsonKey(name: 'id') final String? id,
       @JsonKey(name: 'category_id') final String? categoryId,
+      @JsonKey(name: 'category') final CategoryModel? category,
       @JsonKey(name: 'name') final String? name,
       @JsonKey(name: 'key') final String? key,
       @JsonKey(name: 'description') final String? description,
@@ -483,6 +522,9 @@ abstract class _ProjectHDModel implements ProjectHDModel {
   @override
   @JsonKey(name: 'category_id')
   String? get categoryId;
+  @override
+  @JsonKey(name: 'category')
+  CategoryModel? get category;
   @override
   @JsonKey(name: 'name')
   String? get name;

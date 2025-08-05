@@ -17,9 +17,7 @@ class Responsive extends StatelessWidget {
       // If our width is more than 1100 then we consider it a desktop
       builder: (context, sizing) {
         if (sizing.isDesktop) {
-          return Container(
-            color: Colors.white,
-            child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1200), child: desktop(sizing))));
+          return desktop(sizing);
         }
         // If width it less then 1100 and more then 650 we consider it as tablet
         else if (sizing.isTablet) {

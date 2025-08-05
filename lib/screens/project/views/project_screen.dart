@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
+import 'package:project/models/category_model.dart';
 import 'package:project/models/project_h_d_model.dart';
 import 'package:project/screens/project/category/views/category_add_screen.dart';
 import 'package:project/screens/project/category/views/category_edit_screen.dart';
@@ -13,6 +14,8 @@ import 'package:project/screens/project/sprint/providers/controllers/sprint_cont
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/screens/project/category/providers/controllers/delete_project_category_controller.dart';
 import 'package:project/utils/extension/context_extension.dart';
+
+import 'widgets/insert_or_update_project.dart';
 
 class ProjectScreen extends BaseStatefulWidget {
   const ProjectScreen({super.key});
@@ -286,10 +289,12 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                       categoryName: categoryName,
                       categoryId: categoryId,
                       isExpanded: isExpanded,
+                      
                       onExpansionChanged: (expanded) {
                         setState(() => categoryExpansionState[categoryId] = expanded);
                       },
                       projectsAsync: projectAsyncValue,
+                      category: category,
                     );
                   }),
                 ],
@@ -308,6 +313,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     required bool isExpanded,
     required ValueChanged<bool> onExpansionChanged,
     required AsyncValue<List<ProjectHDModel>> projectsAsync,
+    required CategoryModel category,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -339,16 +345,17 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
               const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => ProjectUpdateScreen(project: {"project_category_id": categoryId})),
-                  );
-                  if (result == true) {
-                    ref.invalidate(projectListByCategoryProvider(categoryId));
-                    ref.invalidate(categoryListProvider(selectedWorkspaceId));
-                    await _loadAllProjects();
-                    setState(() {});
-                  }
+                  await showDialog(context: context, builder: (context) => InsertOrUpdateProjectHD(category: category));
+                  // final result = await Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(builder: (_) => ProjectUpdateScreen(project: {"project_category_id": categoryId})),
+                  // );
+                  // if (result == true) {
+                  //   ref.invalidate(projectListByCategoryProvider(categoryId));
+                  //   ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                  //   await _loadAllProjects();
+                  //   setState(() {});
+                  // }
                 },
                 icon: const Icon(Icons.add, size: 16, color: Color.fromARGB(255, 81, 80, 80)),
                 label: const Text("Add", style: TextStyle(fontSize: 12, color: Color.fromARGB(255, 81, 80, 80), fontWeight: FontWeight.bold)),
@@ -429,7 +436,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     final project = projects[index];
-                    return _buildProjectItem(project,index);
+                    return _buildProjectItem(project, index);
                   },
                 );
               },
@@ -442,13 +449,14 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     );
   }
 
-  Widget _buildProjectItem(ProjectHDModel project,int index) {
+  Widget _buildProjectItem(ProjectHDModel project, int index) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: index.isEven ? Colors.white : context.primaryColor.withValues(alpha: 0.02), 
-        border: Border(bottom: BorderSide(color: const Color.fromARGB(255, 247, 247, 247)))),
+        color: index.isEven ? Colors.white : context.primaryColor.withValues(alpha: 0.02),
+        border: Border(bottom: BorderSide(color: const Color.fromARGB(255, 247, 247, 247))),
+      ),
       child: Row(
         children: [
           const Icon(Icons.folder_outlined, color: Color.fromARGB(255, 127, 190, 254)),

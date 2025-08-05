@@ -65,6 +65,7 @@ dependencies:
   flutter_quill_extensions: ^11.0.0
   cached_network_image: ^3.4.1
   appflowy_board: ^0.1.2
+  animations: ^2.0.11
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -127,3 +128,5 @@ flutter_intl:
   arb_dir: lib/config/translation/l10n
   output_dir: lib/config/translation/generated
   use_deferred_loaing: false
+
+  # dart run build_runner build --delete-conflicting-outputs
