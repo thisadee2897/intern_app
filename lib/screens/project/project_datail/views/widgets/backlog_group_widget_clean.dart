@@ -130,7 +130,6 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
       builder: (context, constraints) {
         // ตรวจสอบว่าเป็นจอเล็กหรือไม่
         bool isSmallScreen = constraints.maxWidth < 600;
-
         return Container(
           margin: const EdgeInsets.all(5),
           padding: const EdgeInsets.all(5),
@@ -169,12 +168,16 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
         Expanded(
           child: Row(
             children: [
-              IconButton(
-                icon: isExpanding 
-                  ? const Icon(Icons.expand_less) 
-                  : const Icon(Icons.expand_more),
-                onPressed: () => setState(() => isExpanding = !isExpanding),
-                tooltip: isExpanding ? 'ย่อ' : 'ขยาย',
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: IconButton(
+                  icon: isExpanding 
+                    ? const Icon(Icons.expand_less) 
+                    : const Icon(Icons.expand_more),
+                  onPressed: () => setState(() => isExpanding = !isExpanding),
+                  tooltip: isExpanding ? 'ย่อ' : 'ขยาย',
+                ),
               ),
               // ชื่อ sprint/backlog + จำนวนงาน
               Expanded(
@@ -418,24 +421,27 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
 
   /// เมนูเพิ่มเติมของแต่ละงาน (comment, edit, delete)
   Widget _buildTaskPopupMenu(TaskModel task, String projectHdId) {
-    return PopupMenuButton<String>(
-      tooltip: 'ตัวเลือกเพิ่มเติม',
-      onSelected: (value) => _handleTaskMenuAction(value, task, projectHdId),
-      itemBuilder: (context) => const [
-        PopupMenuItem(
-          value: 'comment', 
-          child: ListTile(
-            leading: Icon(Icons.comment), 
-            title: Text('ดูความคิดเห็น'),
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: PopupMenuButton<String>(
+        tooltip: 'ตัวเลือกเพิ่มเติม',
+        onSelected: (value) => _handleTaskMenuAction(value, task, projectHdId),
+        itemBuilder: (context) => const [
+          PopupMenuItem(
+            value: 'comment', 
+            child: ListTile(
+              leading: Icon(Icons.comment), 
+              title: Text('ดูความคิดเห็น'),
+            ),
           ),
-        ),
-        PopupMenuItem(
-          value: 'edit', 
-          child: ListTile(
-            leading: Icon(Icons.edit), 
-            title: Text('แก้ไขงาน'),
+          PopupMenuItem(
+            value: 'edit', 
+            child: ListTile(
+              leading: Icon(Icons.edit), 
+              title: Text('แก้ไขงาน'),
+            ),
           ),
-        ),
         PopupMenuItem(
           value: 'delete', 
           child: ListTile(
@@ -444,6 +450,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
           ),
         ),
       ],
+      ),
     );
   }
 
@@ -925,11 +932,14 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
 
   /// เมนูเพิ่มเติมสำหรับ Sprint
   Widget _buildSprintMoreMenu() {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_horiz, color: Colors.grey),
-      tooltip: 'ตัวเลือกเพิ่มเติม',
-      onSelected: _handleSprintMenuAction,
-      itemBuilder: (context) => const [
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: PopupMenuButton<String>(
+        icon: const Icon(Icons.more_horiz, color: Colors.grey),
+        tooltip: 'ตัวเลือกเพิ่มเติม',
+        onSelected: _handleSprintMenuAction,
+        itemBuilder: (context) => const [
         PopupMenuItem(
           value: 'edit', 
           child: ListTile(
@@ -945,6 +955,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget>
           ),
         ),
       ],
+      ),
     );
   }
 

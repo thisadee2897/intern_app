@@ -346,9 +346,13 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                         padding: const EdgeInsets.only(left: 16, right: 8),
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          child: Tooltip(
-                            message: "${taskWithLayout.name} \n${taskWithLayout.taskStartDate} - ${taskWithLayout.taskEndDate}",
-                            child: Text(taskWithLayout.name!, style: const TextStyle(color: Colors.black54), overflow: TextOverflow.ellipsis),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Tooltip(
+                                message: "${taskWithLayout.name} \n${taskWithLayout.taskStartDate} - ${taskWithLayout.taskEndDate}",
+                                child: Text(taskWithLayout.name!, style: const TextStyle(color: Colors.black54), overflow: TextOverflow.ellipsis),
+                              );
+                            },
                           ),
                         ),
                       );

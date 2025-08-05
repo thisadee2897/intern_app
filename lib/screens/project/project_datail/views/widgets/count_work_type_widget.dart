@@ -13,7 +13,16 @@ class CountWorkTypeWidget extends StatelessWidget {
       height: 30,
       width: 30,
       decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(10)),
-      child: Tooltip(message: "$title : $count (story points)", child: Center(child: Text("0", style: TextStyle(color: Colors.grey)))),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Tooltip(
+            message: "$title : $count (story points)", 
+            child: Center(
+              child: Text("0", style: TextStyle(color: Colors.grey))
+            ),
+          );
+        },
+      ),
     );
   }
 }

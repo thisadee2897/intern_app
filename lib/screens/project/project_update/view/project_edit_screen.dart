@@ -241,10 +241,14 @@ class _ProjectEditScreenState extends BaseState<ProjectEditScreen> {
                 Positioned(
                   top: 0,
                   right: 0,
-                  child: IconButton(
-                    tooltip: 'ลบโปรเจกต์',
-                    icon: const Icon(Icons.delete, color: Colors.redAccent),
-                    onPressed: _confirmDelete,
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: IconButton(
+                      tooltip: 'ลบโปรเจกต์',
+                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                      onPressed: _confirmDelete,
+                    ),
                   ),
                 ),
               ],

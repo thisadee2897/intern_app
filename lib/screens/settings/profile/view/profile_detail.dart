@@ -145,13 +145,17 @@ class _EditProfileScreenState extends BaseState<EditProfileScreen> {
                             Expanded(
                               child: TextField(controller: imageController, enabled: isEditingImage, decoration: _inputDecoration('Image URL', Icons.image)),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              tooltip: 'Clear image',
-                              onPressed: () {
-                                imageController.clear();
-                                setState(() {});
-                              },
+                            SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: IconButton(
+                                icon: const Icon(Icons.close),
+                                tooltip: 'Clear image',
+                                onPressed: () {
+                                  imageController.clear();
+                                  setState(() {});
+                                },
+                              ),
                             ),
                             TextButton(
                               onPressed: () {
