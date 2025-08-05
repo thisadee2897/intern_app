@@ -233,13 +233,13 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
     }
   }
 
-  Color _colorForGroup(String groupId) {
-    final status = statusList.firstWhere(
-      (s) => s.id == groupId,
-      orElse: () => const TaskStatusModel(color: "#CCCCCC"),
-    );
-    return HexColor.fromHex(status.color ?? '#CCCCCC');
-  }
+  // Color _colorForGroup(String groupId) {
+  //   final status = statusList.firstWhere(
+  //     (s) => s.id == groupId,
+  //     orElse: () => const TaskStatusModel(color: "#CCCCCC"),
+  //   );
+  //   return HexColor.fromHex(status.color ?? '#CCCCCC');
+  // }
 
   @override
   Widget build(BuildContext context) {

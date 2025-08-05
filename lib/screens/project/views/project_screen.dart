@@ -4,12 +4,12 @@ import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
 import 'package:project/models/category_model.dart';
 import 'package:project/models/project_h_d_model.dart';
+import 'package:project/models/workspace_model.dart';
 import 'package:project/screens/project/category/views/category_add_screen.dart';
 import 'package:project/screens/project/category/views/category_edit_screen.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
 import 'package:project/screens/project/project_update/view/project_edit_screen.dart';
-import 'package:project/screens/project/project_update/view/project_update_screen.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/screens/project/category/providers/controllers/delete_project_category_controller.dart';
@@ -18,14 +18,15 @@ import 'package:project/utils/extension/context_extension.dart';
 import 'widgets/insert_or_update_project.dart';
 
 class ProjectScreen extends BaseStatefulWidget {
-  const ProjectScreen({super.key});
+  final WorkspaceModel workspace;
+  const ProjectScreen(this.workspace, {super.key});
 
   @override
   BaseState<ProjectScreen> createState() => _ProjectScreenState();
 }
 
 class _ProjectScreenState extends BaseState<ProjectScreen> {
-  String selectedWorkspaceId = '1';
+  // String widget.workspaceId = '1';
   Map<String, bool> categoryExpansionState = {};
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -36,7 +37,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(categoryListProvider(selectedWorkspaceId));
+      ref.read(categoryListProvider(widget.workspace.id!));
     });
     _searchController.addListener(_onSearchChanged);
     _searchFocusNode.addListener(_onSearchFocusChanged);
@@ -161,13 +162,13 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
   // ส่วนของ UI หลัก, ListView, CategoryTile และ Project Item
 
   onRefresh() async {
-    ref.invalidate(categoryListProvider(selectedWorkspaceId));
+    ref.invalidate(categoryListProvider(widget.workspace.id!));
     ref.invalidate(projectListByCategoryProvider(''));
     await _loadAllProjects();
   }
 
   Future<void> _loadAllProjects() async {
-    final categoryAsyncValue = ref.read(categoryListProvider(selectedWorkspaceId));
+    final categoryAsyncValue = ref.read(categoryListProvider(widget.workspace.id!));
     final categories = categoryAsyncValue.value ?? [];
     List<ProjectHDModel> allProjects = [];
     for (var category in categories) {
@@ -222,7 +223,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
   }
 
   Widget _buildBody(BuildContext context, SizingInformation sizingInformation) {
-    final categoryAsyncValue = ref.watch(categoryListProvider(selectedWorkspaceId));
+    final categoryAsyncValue = ref.watch(categoryListProvider(widget.workspace.id!));
     EdgeInsets padding = const EdgeInsets.all(16);
     double topSpace = 40;
     if (sizingInformation.isMobile) {
@@ -234,20 +235,20 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 240, 242, 245),
+      // backgroundColor: const Color.fromARGB(255, 240, 242, 245),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        title: const Text('Projects', style: TextStyle(color: Color.fromARGB(255, 4, 4, 4), fontWeight: FontWeight.bold)),
+        title:  Text(widget.workspace.name ?? '', style: TextStyle(color: Color.fromARGB(255, 4, 4, 4))),
         centerTitle: false,
         actions: [
           _buildSearchField(),
           const SizedBox(width: 8),
           ElevatedButton.icon(
             onPressed: () async {
-              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryAddScreen(workspaceId: selectedWorkspaceId)));
+              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryAddScreen(workspaceId: widget.workspace.id!)));
               if (result == true) {
-                ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                ref.invalidate(categoryListProvider(widget.workspace.id!));
                 await _loadAllProjects();
               }
             },
@@ -352,7 +353,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                   // );
                   // if (result == true) {
                   //   ref.invalidate(projectListByCategoryProvider(categoryId));
-                  //   ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                  //   ref.invalidate(categoryListProvider(widget.workspaceId));
                   //   await _loadAllProjects();
                   //   setState(() {});
                   // }
@@ -373,11 +374,11 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CategoryEditScreen(workspaceId: selectedWorkspaceId, categoryId: categoryId, categoryName: categoryName),
+                        builder: (_) => CategoryEditScreen(workspaceId: widget.workspace.id!, categoryId: categoryId, categoryName: categoryName),
                       ),
                     );
                     if (result == true) {
-                      ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                      ref.invalidate(categoryListProvider(widget.workspace.id!));
                       await _loadAllProjects();
                     }
                   } else if (value == 'delete') {
@@ -485,7 +486,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
               final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditScreen(project: project)));
               if (result == true) {
                 ref.invalidate(projectListByCategoryProvider(project.categoryId ?? ''));
-                ref.invalidate(categoryListProvider(selectedWorkspaceId));
+                ref.invalidate(categoryListProvider(widget.workspace.id!));
                 await _loadAllProjects();
                 setState(() {});
               }
