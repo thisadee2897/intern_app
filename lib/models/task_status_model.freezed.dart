@@ -32,6 +32,8 @@ mixin _$TaskStatusModel {
   String? get color => throw _privateConstructorUsedError;
   @JsonKey(name: 'active')
   bool? get active => throw _privateConstructorUsedError;
+  @JsonKey(name: 'count')
+  int get count => throw _privateConstructorUsedError;
 
   /// Serializes this TaskStatusModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -55,7 +57,8 @@ abstract class $TaskStatusModelCopyWith<$Res> {
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'color') String? color,
-      @JsonKey(name: 'active') bool? active});
+      @JsonKey(name: 'active') bool? active,
+      @JsonKey(name: 'count') int count});
 }
 
 /// @nodoc
@@ -79,6 +82,7 @@ class _$TaskStatusModelCopyWithImpl<$Res, $Val extends TaskStatusModel>
     Object? description = freezed,
     Object? color = freezed,
     Object? active = freezed,
+    Object? count = null,
   }) {
     return _then(_value.copyWith(
       tableName: freezed == tableName
@@ -105,6 +109,10 @@ class _$TaskStatusModelCopyWithImpl<$Res, $Val extends TaskStatusModel>
           ? _value.active
           : active // ignore: cast_nullable_to_non_nullable
               as bool?,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -123,7 +131,8 @@ abstract class _$$TaskStatusModelImplCopyWith<$Res>
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'color') String? color,
-      @JsonKey(name: 'active') bool? active});
+      @JsonKey(name: 'active') bool? active,
+      @JsonKey(name: 'count') int count});
 }
 
 /// @nodoc
@@ -145,6 +154,7 @@ class __$$TaskStatusModelImplCopyWithImpl<$Res>
     Object? description = freezed,
     Object? color = freezed,
     Object? active = freezed,
+    Object? count = null,
   }) {
     return _then(_$TaskStatusModelImpl(
       tableName: freezed == tableName
@@ -171,6 +181,10 @@ class __$$TaskStatusModelImplCopyWithImpl<$Res>
           ? _value.active
           : active // ignore: cast_nullable_to_non_nullable
               as bool?,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -184,7 +198,8 @@ class _$TaskStatusModelImpl implements _TaskStatusModel {
       @JsonKey(name: 'name') this.name,
       @JsonKey(name: 'description') this.description,
       @JsonKey(name: 'color') this.color,
-      @JsonKey(name: 'active') this.active});
+      @JsonKey(name: 'active') this.active,
+      @JsonKey(name: 'count') this.count = 0});
 
   factory _$TaskStatusModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$TaskStatusModelImplFromJson(json);
@@ -207,10 +222,13 @@ class _$TaskStatusModelImpl implements _TaskStatusModel {
   @override
   @JsonKey(name: 'active')
   final bool? active;
+  @override
+  @JsonKey(name: 'count')
+  final int count;
 
   @override
   String toString() {
-    return 'TaskStatusModel(tableName: $tableName, id: $id, name: $name, description: $description, color: $color, active: $active)';
+    return 'TaskStatusModel(tableName: $tableName, id: $id, name: $name, description: $description, color: $color, active: $active, count: $count)';
   }
 
   @override
@@ -225,13 +243,14 @@ class _$TaskStatusModelImpl implements _TaskStatusModel {
             (identical(other.description, description) ||
                 other.description == description) &&
             (identical(other.color, color) || other.color == color) &&
-            (identical(other.active, active) || other.active == active));
+            (identical(other.active, active) || other.active == active) &&
+            (identical(other.count, count) || other.count == count));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, tableName, id, name, description, color, active);
+  int get hashCode => Object.hash(
+      runtimeType, tableName, id, name, description, color, active, count);
 
   /// Create a copy of TaskStatusModel
   /// with the given fields replaced by the non-null parameter values.
@@ -257,7 +276,8 @@ abstract class _TaskStatusModel implements TaskStatusModel {
       @JsonKey(name: 'name') final String? name,
       @JsonKey(name: 'description') final String? description,
       @JsonKey(name: 'color') final String? color,
-      @JsonKey(name: 'active') final bool? active}) = _$TaskStatusModelImpl;
+      @JsonKey(name: 'active') final bool? active,
+      @JsonKey(name: 'count') final int count}) = _$TaskStatusModelImpl;
 
   factory _TaskStatusModel.fromJson(Map<String, dynamic> json) =
       _$TaskStatusModelImpl.fromJson;
@@ -280,6 +300,9 @@ abstract class _TaskStatusModel implements TaskStatusModel {
   @override
   @JsonKey(name: 'active')
   bool? get active;
+  @override
+  @JsonKey(name: 'count')
+  int get count;
 
   /// Create a copy of TaskStatusModel
   /// with the given fields replaced by the non-null parameter values.

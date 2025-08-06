@@ -30,8 +30,13 @@ _$SprintModelImpl _$$SprintModelImplFromJson(Map<String, dynamic> json) =>
       active: json['active'] as bool?,
       startting: json['startting'] as bool?,
       tasks: (json['tasks'] as List<dynamic>?)
-          ?.map((e) => TaskModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
+              ?.map((e) => TaskModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      countStatus: (json['count_status'] as List<dynamic>?)
+              ?.map((e) => TaskStatusModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$SprintModelImplToJson(_$SprintModelImpl instance) =>
@@ -52,4 +57,5 @@ Map<String, dynamic> _$$SprintModelImplToJson(_$SprintModelImpl instance) =>
       'active': instance.active,
       'startting': instance.startting,
       'tasks': instance.tasks,
+      'count_status': instance.countStatus,
     };

@@ -13,6 +13,7 @@ class TaskStatusModel with _$TaskStatusModel {
   @JsonKey(name: 'description') String? description,
   @JsonKey(name: 'color') String? color,
   @JsonKey(name: 'active') bool? active,
+  @JsonKey(name: 'count') @Default(0) int count,
   }) = _TaskStatusModel;
 
   factory TaskStatusModel.fromJson(Map<String, dynamic> json) => _$TaskStatusModelFromJson(json);

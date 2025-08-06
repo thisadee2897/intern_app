@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:project/apis/project_data/get_sprint_by_project.dart';
+import 'package:project/apis/project_data/get_back_log.dart';
 import 'package:project/apis/master_data/insert_or_update_sprint.dart';
 import 'package:project/models/sprint_model.dart';
-import 'package:project/screens/project/project_datail/views/widgets/backlog_group_widget.dart';
+import 'package:project/models/task_model.dart';
+import 'package:project/models/task_status_model.dart';
 import 'package:project/screens/project/sprint/providers/apis/delete_sprint_api.dart';
+
+import '../../../project_datail/views/widgets/backlog_widget.dart';
 
 // -------------------  SprintNotifier -------------------
 class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
@@ -19,9 +22,21 @@ class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
     } else {
       state = const AsyncValue.loading();
       state = await AsyncValue.guard(() async {
-        List<SprintModel> response = await ref.read(apiSprintByProject).get(projectId: id);
+        List<SprintModel> response = await ref.read(apiBacklog).get(projectId: id);
         return response;
       });
+    }
+  }
+
+  Future<void> updateStatusTask(TaskStatusModel model, TaskModel item) async {
+    try {
+      String? id = ref.read(selectProjectIdProvider);
+      state = await AsyncValue.guard(() async {
+        List<SprintModel> response = await ref.read(apiBacklog).get(projectId: id!);
+        return response;
+      });
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
   }
 
