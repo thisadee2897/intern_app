@@ -1,4 +1,6 @@
 // Dialog class สำหรับเพิ่ม Category
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
 import 'package:project/models/category_model.dart';

@@ -1,15 +1,14 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
-import 'package:project/apis/project_data/get_project_category_unique_name.dart';
 import 'package:project/components/export.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
 import 'package:project/models/category_model.dart';
 import 'package:project/models/project_h_d_model.dart';
 import 'package:project/models/workspace_model.dart';
-import 'package:project/screens/project/category/providers/controllers/category_form_controller.dart';
-import 'package:project/screens/project/category/views/category_edit_screen.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
 import 'package:project/screens/project/project_update/view/project_edit_screen.dart';
