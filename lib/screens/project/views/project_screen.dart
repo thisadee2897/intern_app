@@ -12,6 +12,7 @@ import 'package:project/models/user_login_model.dart';
 import 'package:project/models/workspace_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
+import 'package:project/screens/project/project_datail/views/project_detail_screen.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/screens/project/category/providers/controllers/delete_project_category_controller.dart';
@@ -642,7 +643,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           ref.read(selectProjectIdProvider.notifier).state = project.id;
-          ref.goSubPath(Routes.projectDetail);
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -722,7 +723,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
               borderRadius: BorderRadius.circular(8),
               onTap: () {
                 ref.read(selectProjectIdProvider.notifier).state = project.id;
-                ref.goSubPath(Routes.projectDetail);
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
