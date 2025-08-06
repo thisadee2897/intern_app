@@ -1,11 +1,14 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
+import 'package:project/apis/project_data/get_project_category_unique_name.dart';
 import 'package:project/components/export.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
 import 'package:project/models/category_model.dart';
 import 'package:project/models/project_h_d_model.dart';
 import 'package:project/models/workspace_model.dart';
-import 'package:project/screens/project/category/views/category_add_screen.dart';
+import 'package:project/screens/project/category/providers/controllers/category_form_controller.dart';
 import 'package:project/screens/project/category/views/category_edit_screen.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
@@ -13,8 +16,8 @@ import 'package:project/screens/project/project_update/view/project_edit_screen.
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/screens/project/category/providers/controllers/delete_project_category_controller.dart';
-import 'package:project/utils/extension/context_extension.dart';
 
+import 'widgets/category_dialog.dart';
 import 'widgets/insert_or_update_project.dart';
 
 class ProjectScreen extends BaseStatefulWidget {
@@ -25,7 +28,7 @@ class ProjectScreen extends BaseStatefulWidget {
   BaseState<ProjectScreen> createState() => _ProjectScreenState();
 }
 
-class _ProjectScreenState extends BaseState<ProjectScreen> {
+class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderStateMixin {
   // String widget.workspaceId = '1';
   Map<String, bool> categoryExpansionState = {};
   final TextEditingController _searchController = TextEditingController();
@@ -34,18 +37,55 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
   List<ProjectHDModel> _filteredProjects = [];
   OverlayEntry? _overlayEntry;
 
+  // Animation Controllers
+  late AnimationController _fabAnimationController;
+  late AnimationController _searchAnimationController;
+  late AnimationController _categoryAnimationController;
+
+  late Animation<double> _fabScaleAnimation;
+  late Animation<double> _searchFadeAnimation;
+  late Animation<Offset> _searchSlideAnimation;
+  late Animation<double> _categoryStaggerAnimation;
+
   @override
   void initState() {
+    super.initState();
+
+    // Initialize Animation Controllers
+    _fabAnimationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+
+    _searchAnimationController = AnimationController(duration: const Duration(milliseconds: 400), vsync: this);
+
+    _categoryAnimationController = AnimationController(duration: const Duration(milliseconds: 600), vsync: this);
+
+    // Initialize Animations
+    _fabScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _fabAnimationController, curve: Curves.elasticOut));
+
+    _searchFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _searchAnimationController, curve: Curves.easeInOut));
+
+    _searchSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, -1.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _searchAnimationController, curve: Curves.easeOutBack));
+
+    _categoryStaggerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _categoryAnimationController, curve: Curves.easeOutQuart));
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(categoryListProvider(widget.workspace.id!));
+      _fabAnimationController.forward();
+      _searchAnimationController.forward();
+      _categoryAnimationController.forward();
     });
+
     _searchController.addListener(_onSearchChanged);
     _searchFocusNode.addListener(_onSearchFocusChanged);
-    super.initState();
   }
 
   @override
   void dispose() {
+    _fabAnimationController.dispose();
+    _searchAnimationController.dispose();
+    _categoryAnimationController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
     _removeOverlay();
@@ -97,69 +137,107 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
 
   Widget _buildSearchSuggestions() {
     return Positioned(
-      top: kToolbarHeight + MediaQuery.of(context).padding.top,
+      top: kToolbarHeight + MediaQuery.of(context).padding.top + 8,
       left: 16,
       right: 16,
-      child: Material(
-        elevation: 4,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          constraints: const BoxConstraints(maxHeight: 300),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300)),
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            itemCount: _filteredProjects.length,
-            itemBuilder: (context, index) {
-              final project = _filteredProjects[index];
-              return InkWell(
-                onTap: () {
-                  _searchController.clear();
-                  _hideOverlay();
-                  _searchFocusNode.unfocus();
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    ref.read(selectProjectIdProvider.notifier).state = project.id;
-                    ref.goSubPath(Routes.projectDetail);
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: index == _filteredProjects.length - 1 ? Colors.transparent : Colors.grey.shade200)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.folder_outlined, color: Colors.blueAccent, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              project.name ?? '-',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                // fontWeight: FontWeight.w500,
+      child: SlideTransition(
+        position: _searchSlideAnimation,
+        child: FadeTransition(
+          opacity: _searchFadeAnimation,
+          child: Material(
+            elevation: 8,
+            borderRadius: BorderRadius.circular(16),
+            shadowColor: Colors.black26,
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 400),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8))],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: _filteredProjects.length,
+                  itemBuilder: (context, index) {
+                    final project = _filteredProjects[index];
+                    return AnimatedContainer(
+                      duration: Duration(milliseconds: 200 + (index * 50)),
+                      curve: Curves.easeOutBack,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          _searchController.clear();
+                          _hideOverlay();
+                          _searchFocusNode.unfocus();
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            ref.read(selectProjectIdProvider.notifier).state = project.id;
+                            ref.goSubPath(Routes.projectDetail);
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          decoration: BoxDecoration(
+                            border: Border(bottom: BorderSide(color: index == _filteredProjects.length - 1 ? Colors.transparent : Colors.grey.shade100)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
+                                child: const Icon(Icons.folder_outlined, color: Colors.blueAccent, size: 20),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text('ID: ${project.id}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                          ],
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(project.name ?? '-', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
+                                    const SizedBox(height: 4),
+                                    Text('ID: ${project.id}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8)),
+                                child: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey.shade600),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  // ส่วนของ UI หลัก, ListView, CategoryTile และ Project Item
+  // สร้าง Dialog สวยๆ สำหรับเพิ่ม Category
+  Future<void> _showAddCategoryDialog(CategoryModel item) async {
+    await showModal(
+      context: context,
+      configuration: const FadeScaleTransitionConfiguration(
+        barrierDismissible: true,
+        transitionDuration: Duration(milliseconds: 400),
+        reverseTransitionDuration: Duration(milliseconds: 300),
+      ),
+      builder: (context) => AddCategoryDialog(category: item, workspaceId: widget.workspace.id!),
+    ).then((result) {
+      if (result == true) {
+        ref.invalidate(categoryListProvider(widget.workspace.id!));
+        _loadAllProjects();
+      }
+    });
+  }
 
   onRefresh() async {
     ref.invalidate(categoryListProvider(widget.workspace.id!));
@@ -182,42 +260,53 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
   }
 
   Widget _buildSearchField() {
-    return Container(
-      width: 180,
-      height: 40,
-      margin: const EdgeInsets.only(right: 8),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade300)),
-      child: TextField(
-        controller: _searchController,
-        focusNode: _searchFocusNode,
-        decoration: InputDecoration(
-          hintText: 'ค้นหาโปรเจค...',
-          hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
-          prefixIcon: const Icon(Icons.search, color: Colors.grey, size: 20),
-          suffixIcon:
-              _searchController.text.isNotEmpty
-                  ? IconButton(
-                    icon: const Icon(Icons.clear, color: Colors.grey, size: 20),
-                    onPressed: () {
-                      _searchController.clear();
-                      _hideOverlay();
-                    },
-                  )
-                  : null,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    return SlideTransition(
+      position: _searchSlideAnimation,
+      child: FadeTransition(
+        opacity: _searchFadeAnimation,
+        child: Container(
+          width: 220,
+          height: 44,
+          margin: const EdgeInsets.only(right: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))],
+          ),
+          child: TextField(
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            decoration: InputDecoration(
+              hintText: 'ค้นหาโปรเจค...',
+              hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade500, fontWeight: FontWeight.w400),
+              prefixIcon: Container(padding: const EdgeInsets.all(12), child: Icon(Icons.search_rounded, color: Colors.grey.shade500, size: 20)),
+              suffixIcon:
+                  _searchController.text.isNotEmpty
+                      ? IconButton(
+                        icon: Icon(Icons.clear_rounded, color: Colors.grey.shade500, size: 20),
+                        onPressed: () {
+                          _searchController.clear();
+                          _hideOverlay();
+                        },
+                      )
+                      : null,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            onSubmitted: (value) {
+              if (_filteredProjects.isNotEmpty) {
+                final firstProject = _filteredProjects.first;
+                _searchController.clear();
+                _hideOverlay();
+                _searchFocusNode.unfocus();
+                ref.read(selectProjectIdProvider.notifier).state = firstProject.id;
+                ref.goSubPath(Routes.projectDetail);
+              }
+            },
+          ),
         ),
-        style: const TextStyle(fontSize: 14),
-        onSubmitted: (value) {
-          if (_filteredProjects.isNotEmpty) {
-            final firstProject = _filteredProjects.first;
-            _searchController.clear();
-            _hideOverlay();
-            _searchFocusNode.unfocus();
-            ref.read(selectProjectIdProvider.notifier).state = firstProject.id;
-            ref.goSubPath(Routes.projectDetail);
-          }
-        },
       ),
     );
   }
@@ -225,79 +314,113 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
   Widget _buildBody(BuildContext context, SizingInformation sizingInformation) {
     final categoryAsyncValue = ref.watch(categoryListProvider(widget.workspace.id!));
     EdgeInsets padding = const EdgeInsets.all(16);
-    double topSpace = 40;
     if (sizingInformation.isMobile) {
       padding = const EdgeInsets.symmetric(horizontal: 4, vertical: 4);
-      topSpace = 16;
     } else if (sizingInformation.isTablet) {
       padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 8);
-      topSpace = 24;
     }
 
     return Scaffold(
-      // backgroundColor: const Color.fromARGB(255, 240, 242, 245),
+      backgroundColor: Colors.grey.shade50,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        title:  Text(widget.workspace.name ?? '', style: TextStyle(color: Color.fromARGB(255, 4, 4, 4))),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        shadowColor: Colors.black26,
+        surfaceTintColor: Colors.white,
+        title: Text(widget.workspace.name ?? '', style: const TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.w700)),
         centerTitle: false,
         actions: [
           _buildSearchField(),
-          const SizedBox(width: 8),
-          ElevatedButton.icon(
-            onPressed: () async {
-              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryAddScreen(workspaceId: widget.workspace.id!)));
-              if (result == true) {
-                ref.invalidate(categoryListProvider(widget.workspace.id!));
-                await _loadAllProjects();
-              }
-            },
-            icon: const Icon(Icons.add, size: 18, color: Colors.white),
-            label: const Text('New Category', style: TextStyle(fontSize: 14, color: Colors.white)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 104, 161, 247),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
-              elevation: 0,
+          const SizedBox(width: 12),
+          ScaleTransition(
+            scale: _fabScaleAnimation,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                gradient: const LinearGradient(colors: [Color(0xFF667eea), Color(0xFF764ba2)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                boxShadow: [BoxShadow(color: const Color(0xFF667eea).withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => _showAddCategoryDialog(CategoryModel(id: '0')),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.add_rounded, size: 20, color: Colors.white),
+                        const SizedBox(width: 8),
+                        const Text('New Category', style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
         ],
       ),
       body: Container(
-        color: Colors.white,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.grey.shade50, Colors.white]),
+        ),
         child: RefreshIndicator(
           onRefresh: () async {
             await onRefresh();
           },
+          color: const Color(0xFF667eea),
+          backgroundColor: Colors.white,
           child: categoryAsyncValue.appWhen(
             dataBuilder: (categories) {
               // กรณีมีข้อมูล → โหลด project ทุกหมวดหมู่
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _loadAllProjects();
               });
-              return ListView(
-                padding: padding,
-                children: [
-                  SizedBox(height: topSpace),
-                  ...categories.map((category) {
-                    final categoryId = category.id ?? '0';
-                    final categoryName = category.name ?? '-';
-                    final isExpanded = categoryExpansionState[categoryId] ?? false;
-                    final projectAsyncValue = ref.watch(projectListByCategoryProvider(categoryId));
-                    return _buildCategoryTile(
-                      context,
-                      categoryName: categoryName,
-                      categoryId: categoryId,
-                      isExpanded: isExpanded,
-                      
-                      onExpansionChanged: (expanded) {
-                        setState(() => categoryExpansionState[categoryId] = expanded);
-                      },
-                      projectsAsync: projectAsyncValue,
-                      category: category,
-                    );
-                  }),
+
+              return CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(child: SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top + 20)),
+                  SliverPadding(
+                    padding: padding,
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final category = categories[index];
+                        final categoryId = category.id ?? '0';
+                        final categoryName = category.name ?? '-';
+                        final isExpanded = categoryExpansionState[categoryId] ?? false;
+                        final projectAsyncValue = ref.watch(projectListByCategoryProvider(categoryId));
+
+                        return FadeTransition(
+                          opacity: _categoryStaggerAnimation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: Offset(0.0, 0.5 + (index * 0.1)),
+                              end: Offset.zero,
+                            ).animate(CurvedAnimation(parent: _categoryAnimationController, curve: Interval(index * 0.1, 1.0, curve: Curves.easeOutBack))),
+                            child: _buildCategoryTile(
+                              context,
+                              categoryName: categoryName,
+                              categoryId: categoryId,
+                              isExpanded: isExpanded,
+                              onExpansionChanged: (expanded) {
+                                setState(() => categoryExpansionState[categoryId] = expanded);
+                              },
+                              projectsAsync: projectAsyncValue,
+                              category: category,
+                              index: index,
+                            ),
+                          ),
+                        );
+                      }, childCount: categories.length),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
                 ],
               );
             },
@@ -315,134 +438,119 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     required ValueChanged<bool> onExpansionChanged,
     required AsyncValue<List<ProjectHDModel>> projectsAsync,
     required CategoryModel category,
+    required int index,
   }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      padding: const EdgeInsets.symmetric(vertical: 4),
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300 + (index * 100)),
+      curve: Curves.easeOutBack,
+      margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 1, // ✅ ขอบบาง
-        ),
-        borderRadius: BorderRadius.circular(12), // ✅ มุมมน
-        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 2, offset: const Offset(0, 1))],
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 8), spreadRadius: -4),
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4, offset: const Offset(0, 2)),
+        ],
+        border: Border.all(color: isExpanded ? const Color(0xFF667eea).withOpacity(0.3) : Colors.grey.shade200, width: 1),
       ),
-      child: MouseRegion(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
         child: ExpansionTile(
           controlAffinity: ListTileControlAffinity.leading,
           backgroundColor: Colors.transparent,
           collapsedBackgroundColor: Colors.transparent,
           initiallyExpanded: isExpanded,
           onExpansionChanged: onExpansionChanged,
-          collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          childrenPadding: const EdgeInsets.only(bottom: 16),
+          iconColor: const Color(0xFF667eea),
+          collapsedIconColor: Colors.grey.shade600,
           title: Row(
             children: [
-              const Icon(Icons.folder_outlined, color: Colors.blueAccent),
-              const SizedBox(width: 8),
-              Expanded(child: Text(categoryName)),
-              Text('(${projectsAsync.value?.length ?? 0})', style: const TextStyle(fontSize: 14, color: Colors.black87)),
-              const SizedBox(width: 8),
-              FilledButton.icon(
-                onPressed: () async {
-                  await showDialog(context: context, builder: (context) => InsertOrUpdateProjectHD(category: category));
-                  // final result = await Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (_) => ProjectUpdateScreen(project: {"project_category_id": categoryId})),
-                  // );
-                  // if (result == true) {
-                  //   ref.invalidate(projectListByCategoryProvider(categoryId));
-                  //   ref.invalidate(categoryListProvider(widget.workspaceId));
-                  //   await _loadAllProjects();
-                  //   setState(() {});
-                  // }
-                },
-                icon: const Icon(Icons.add, size: 16, color: Color.fromARGB(255, 81, 80, 80)),
-                label: const Text("Add", style: TextStyle(fontSize: 12, color: Color.fromARGB(255, 81, 80, 80), fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(197, 244, 244, 245),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  minimumSize: const Size(10, 32),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [const Color(0xFF667eea).withOpacity(0.1), const Color(0xFF764ba2).withOpacity(0.1)]),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.folder_rounded, color: const Color(0xFF667eea), size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(categoryName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87)),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${projectsAsync.value?.length ?? 0} projects',
+                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 4),
-              PopupMenuButton<String>(
-                onSelected: (value) async {
-                  if (value == 'edit') {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CategoryEditScreen(workspaceId: widget.workspace.id!, categoryId: categoryId, categoryName: categoryName),
-                      ),
-                    );
-                    if (result == true) {
-                      ref.invalidate(categoryListProvider(widget.workspace.id!));
-                      await _loadAllProjects();
-                    }
-                  } else if (value == 'delete') {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder:
-                          (context) => AlertDialog(
-                            title: const Text('ยืนยันการลบ'),
-                            content: const Text('คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้?'),
-                            actions: [
-                              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ยกเลิก')),
-                              ElevatedButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(57, 253, 253, 253)),
-                                child: const Text('ลบ'),
-                              ),
-                            ],
-                          ),
-                    );
-                    if (confirm == true) {
-                      try {
-                        await ref.read(deleteProjectCategoryControllerProvider.notifier).deleteCategory({'project_category_id': categoryId});
-                        ref.invalidate(categoryListProvider);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ลบหมวดหมู่สำเร็จ')));
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
-                        }
-                      }
-                    }
-                  }
-                },
-                itemBuilder:
-                    (context) => [
-                      const PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(Icons.edit), title: Text('แก้ไขหมวดหมู่'))),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: ListTile(leading: Icon(Icons.delete, color: Colors.red), title: Text('ลบหมวดหมู่', style: TextStyle(color: Colors.red))),
-                      ),
-                    ],
-              ),
+              _buildCategoryActions(category, categoryId, categoryName),
             ],
           ),
           children: [
             projectsAsync.when(
               data: (projects) {
                 if (projects.isEmpty) {
-                  return const Padding(padding: EdgeInsets.all(8.0), child: Text('ไม่มีโปรเจคในหมวดหมู่นี้'));
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.folder_open_rounded, size: 48, color: Colors.grey.shade400),
+                          const SizedBox(height: 12),
+                          Text('ไม่มีโปรเจคในหมวดหมู่นี้', style: TextStyle(color: Colors.grey.shade600, fontSize: 14, fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                    ),
+                  );
                 }
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: projects.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    final project = projects[index];
-                    return _buildProjectItem(project, index);
+                  itemBuilder: (context, projectIndex) {
+                    final project = projects[projectIndex];
+                    return _buildProjectItem(project, projectIndex);
                   },
                 );
               },
-              loading: () => const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())),
-              error: (error, _) => Padding(padding: const EdgeInsets.all(16), child: Text('โหลดโปรเจคล้มเหลว: $error')),
+              loading:
+                  () => Container(
+                    margin: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(32),
+                    child: const Center(child: CircularProgressIndicator(color: Color(0xFF667eea))),
+                  ),
+              error:
+                  (error, _) => Container(
+                    margin: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.error_outline_rounded, color: Colors.red.shade400, size: 32),
+                          const SizedBox(height: 8),
+                          Text('โหลดโปรเจคล้มเหลว: $error', style: TextStyle(color: Colors.red.shade700, fontSize: 14), textAlign: TextAlign.center),
+                        ],
+                      ),
+                    ),
+                  ),
             ),
           ],
         ),
@@ -450,74 +558,257 @@ class _ProjectScreenState extends BaseState<ProjectScreen> {
     );
   }
 
-  Widget _buildProjectItem(ProjectHDModel project, int index) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: index.isEven ? Colors.white : context.primaryColor.withValues(alpha: 0.02),
-        border: Border(bottom: BorderSide(color: const Color.fromARGB(255, 247, 247, 247))),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.folder_outlined, color: Color.fromARGB(255, 127, 190, 254)),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 1,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  project.name ?? '-',
-                  //style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                // Text(
-                //   'ID: ${project.id}',
-                //   style: const TextStyle(fontSize: 12, color: Colors.grey),
-                // ),
-              ],
-            ),
+  Widget _buildCategoryActions(CategoryModel category, String categoryId, String categoryName) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [Color(0xFF667eea), Color(0xFF764ba2)]),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [BoxShadow(color: const Color(0xFF667eea).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
           ),
-          const SizedBox(width: 12),
-          FilledButton.icon(
-            icon: const Icon(Icons.edit, size: 16, color: Colors.black),
-            label: const Text('แก้ไข', style: TextStyle(fontSize: 12, color: Colors.black)),
-            onPressed: () async {
-              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditScreen(project: project)));
-              if (result == true) {
-                ref.invalidate(projectListByCategoryProvider(project.categoryId ?? ''));
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: () async {
+                await showModal(
+                  context: context,
+                  configuration: const FadeScaleTransitionConfiguration(),
+                  builder: (context) => InsertOrUpdateProjectHD(category: category),
+                );
+                ref.invalidate(projectListByCategoryProvider(categoryId));
                 ref.invalidate(categoryListProvider(widget.workspace.id!));
                 await _loadAllProjects();
                 setState(() {});
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(197, 244, 244, 245),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              minimumSize: const Size(10, 32),
-              // ขอบโค้ง
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
-            ),
-          ),
-          const SizedBox(width: 8),
-          FilledButton.icon(
-            icon: const Icon(Icons.open_in_new, size: 16, color: Colors.black),
-            label: const Text('เปิด', style: TextStyle(fontSize: 12, color: Colors.black)),
-            onPressed: () {
-              ref.read(selectProjectIdProvider.notifier).state = project.id;
-              ref.goSubPath(Routes.projectDetail);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(197, 244, 244, 245),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              minimumSize: const Size(10, 32),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4.0), // ปรับตามที่ต้องการ
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.add_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 6),
+                    const Text("Add", style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+                  ],
+                ),
               ),
             ),
           ),
-        ],
+        ),
+        const SizedBox(width: 8),
+        Container(
+          decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(10)),
+          child: PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, color: Colors.grey.shade600, size: 20),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            elevation: 8,
+            itemBuilder:
+                (context) => [
+                  PopupMenuItem(
+                    onTap: () => _showAddCategoryDialog(category),
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_rounded, color: Colors.blue.shade600, size: 20),
+                        const SizedBox(width: 12),
+                        const Text('แก้ไขหมวดหมู่', style: TextStyle(fontWeight: FontWeight.w500)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    onTap: () => _showDeleteCategoryDialog(categoryId),
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_rounded, color: Colors.red.shade600, size: 20),
+                        const SizedBox(width: 12),
+                        Text('ลบหมวดหมู่', style: TextStyle(color: Colors.red.shade600, fontWeight: FontWeight.w500)),
+                      ],
+                    ),
+                  ),
+                ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showDeleteCategoryDialog(String categoryId) async {
+    await showModal(
+      context: context,
+      configuration: const FadeScaleTransitionConfiguration(),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(children: [Icon(Icons.warning_rounded, color: Colors.orange.shade600), const SizedBox(width: 12), const Text('ยืนยันการลบ')]),
+            content: const Text('คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้? การกระทำนี้ไม่สามารถย้อนกลับได้', style: TextStyle(fontSize: 14)),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context, false), child: Text('ยกเลิก', style: TextStyle(color: Colors.grey.shade600))),
+              Container(
+                decoration: BoxDecoration(color: Colors.red.shade600, borderRadius: BorderRadius.circular(8)),
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('ลบ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ],
+          ),
+    ).then((confirmed) async {
+      if (confirmed == true) {
+        try {
+          await ref.read(deleteProjectCategoryControllerProvider.notifier).deleteCategory({'project_category_id': categoryId});
+          ref.invalidate(categoryListProvider(widget.workspace.id!));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Row(children: [Icon(Icons.check_circle, color: Colors.white), SizedBox(width: 8), Text('ลบหมวดหมู่สำเร็จ')]),
+                backgroundColor: Colors.green.shade600,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            String errorMessage = '';
+            if (e.runtimeType == DioException) {
+              DioException err = e as DioException;
+              errorMessage = err.message ?? 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+            }
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [const Icon(Icons.error, color: Colors.white), const SizedBox(width: 8), Expanded(child: Text('เกิดข้อผิดพลาด: $errorMessage'))],
+                ),
+                backgroundColor: Colors.red.shade600,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            );
+          }
+        }
+      }
+    });
+  }
+
+  Widget _buildProjectItem(ProjectHDModel project, int index) {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200 + (index * 50)),
+      curve: Curves.easeOutBack,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: index.isEven ? Colors.white : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
       ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          ref.read(selectProjectIdProvider.notifier).state = project.id;
+          ref.goSubPath(Routes.projectDetail);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [const Color(0xFF667eea).withOpacity(0.1), const Color(0xFF764ba2).withOpacity(0.1)]),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.folder_rounded, color: const Color(0xFF667eea), size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(project.name ?? '-', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
+                    const SizedBox(height: 4),
+                    Text('ID: ${project.id}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.w400)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              _buildProjectActions(project),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProjectActions(ProjectHDModel project) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () async {
+                final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditScreen(project: project)));
+                if (result == true) {
+                  ref.invalidate(projectListByCategoryProvider(project.categoryId ?? ''));
+                  ref.invalidate(categoryListProvider(widget.workspace.id!));
+                  await _loadAllProjects();
+                  setState(() {});
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_rounded, size: 16, color: Colors.grey.shade700),
+                    const SizedBox(width: 6),
+                    Text('แก้ไข', style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [Color(0xFF667eea), Color(0xFF764ba2)]),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [BoxShadow(color: const Color(0xFF667eea).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                ref.read(selectProjectIdProvider.notifier).state = project.id;
+                ref.goSubPath(Routes.projectDetail);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.open_in_new_rounded, size: 16, color: Colors.white),
+                    SizedBox(width: 6),
+                    Text('เปิด', style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
