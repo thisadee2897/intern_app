@@ -21,6 +21,11 @@ _$CategoryModelImpl _$$CategoryModelImplFromJson(Map<String, dynamic> json) =>
       updatedBy: json['updated_by'] == null
           ? null
           : UserModel.fromJson(json['updated_by'] as Map<String, dynamic>),
+      workspaceId: json['workspace_id'] as String?,
+      projects: (json['projects'] as List<dynamic>?)
+              ?.map((e) => ProjectHDModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$CategoryModelImplToJson(_$CategoryModelImpl instance) =>
@@ -34,4 +39,6 @@ Map<String, dynamic> _$$CategoryModelImplToJson(_$CategoryModelImpl instance) =>
       'updated_at': instance.updatedAt,
       'created_by': instance.createdBy,
       'updated_by': instance.updatedBy,
+      'workspace_id': instance.workspaceId,
+      'projects': instance.projects,
     };
