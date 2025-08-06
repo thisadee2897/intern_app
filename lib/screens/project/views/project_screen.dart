@@ -1,21 +1,22 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
-import 'package:project/apis/project_data/get_project_category_unique_name.dart';
 import 'package:project/components/export.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
 import 'package:project/models/category_model.dart';
 import 'package:project/models/project_h_d_model.dart';
+import 'package:project/models/user_login_model.dart';
 import 'package:project/models/workspace_model.dart';
-import 'package:project/screens/project/category/providers/controllers/category_form_controller.dart';
-import 'package:project/screens/project/category/views/category_edit_screen.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
-import 'package:project/screens/project/project_update/view/project_edit_screen.dart';
+import 'package:project/screens/project/project_datail/views/project_detail_screen.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/screens/project/category/providers/controllers/delete_project_category_controller.dart';
+import 'package:project/utils/services/local_storage_service.dart';
 
 import 'widgets/category_dialog.dart';
 import 'widgets/insert_or_update_project.dart';
@@ -33,7 +34,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
   Map<String, bool> categoryExpansionState = {};
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  List<ProjectHDModel> _allProjects = [];
+  // List<ProjectHDModel> _allProjects = [];
   List<ProjectHDModel> _filteredProjects = [];
   OverlayEntry? _overlayEntry;
 
@@ -71,10 +72,11 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     _categoryStaggerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _categoryAnimationController, curve: Curves.easeOutQuart));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(categoryListProvider(widget.workspace.id!));
+      // ref.read(categoryListProvider(widget.workspace.id!));
       _fabAnimationController.forward();
       _searchAnimationController.forward();
       _categoryAnimationController.forward();
+      onRefresh();
     });
 
     _searchController.addListener(_onSearchChanged);
@@ -93,21 +95,21 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
   }
 
   void _onSearchChanged() {
-    final query = _searchController.text.trim();
-    if (query.isNotEmpty) {
-      _filteredProjects =
-          _allProjects.where((project) {
-            final projectName = project.name?.toLowerCase() ?? '';
-            return projectName.contains(query.toLowerCase());
-          }).toList();
-      if (_filteredProjects.isNotEmpty) {
-        _showOverlay();
-      } else {
-        _hideOverlay();
-      }
-    } else {
-      _hideOverlay();
-    }
+    // final query = _searchController.text.trim();
+    // if (query.isNotEmpty) {
+    //   _filteredProjects =
+    //       _allProjects.where((project) {
+    //         final projectName = project.name?.toLowerCase() ?? '';
+    //         return projectName.contains(query.toLowerCase());
+    //       }).toList();
+    //   if (_filteredProjects.isNotEmpty) {
+    //     _showOverlay();
+    //   } else {
+    //     _hideOverlay();
+    //   }
+    // } else {
+    //   _hideOverlay();
+    // }
   }
 
   void _onSearchFocusChanged() {
@@ -233,30 +235,13 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
       builder: (context) => AddCategoryDialog(category: item, workspaceId: widget.workspace.id!),
     ).then((result) {
       if (result == true) {
-        ref.invalidate(categoryListProvider(widget.workspace.id!));
-        _loadAllProjects();
+        ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
       }
     });
   }
 
   onRefresh() async {
-    ref.invalidate(categoryListProvider(widget.workspace.id!));
-    ref.invalidate(projectListByCategoryProvider(''));
-    await _loadAllProjects();
-  }
-
-  Future<void> _loadAllProjects() async {
-    final categoryAsyncValue = ref.read(categoryListProvider(widget.workspace.id!));
-    final categories = categoryAsyncValue.value ?? [];
-    List<ProjectHDModel> allProjects = [];
-    for (var category in categories) {
-      final projectsAsync = ref.read(projectListByCategoryProvider(category.id ?? ''));
-      final projects = projectsAsync.value ?? [];
-      allProjects.addAll(projects);
-    }
-    setState(() {
-      _allProjects = allProjects;
-    });
+    await ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
   }
 
   Widget _buildSearchField() {
@@ -312,7 +297,8 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
   }
 
   Widget _buildBody(BuildContext context, SizingInformation sizingInformation) {
-    final categoryAsyncValue = ref.watch(categoryListProvider(widget.workspace.id!));
+    // final categoryAsyncValue = ref.watch(categoryListProvider(widget.workspace.id!));
+    final stateCategory = ref.watch(categoryProvider);
     EdgeInsets padding = const EdgeInsets.all(16);
     if (sizingInformation.isMobile) {
       padding = const EdgeInsets.symmetric(horizontal: 4, vertical: 4);
@@ -331,7 +317,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         title: Text(widget.workspace.name ?? '', style: const TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.w700)),
         centerTitle: false,
         actions: [
-          _buildSearchField(),
+          // _buildSearchField(),
           const SizedBox(width: 12),
           ScaleTransition(
             scale: _fabScaleAnimation,
@@ -365,24 +351,19 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
           const SizedBox(width: 16),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.grey.shade50, Colors.white]),
-        ),
-        child: RefreshIndicator(
-          onRefresh: () async {
-            await onRefresh();
-          },
-          color: const Color(0xFF667eea),
-          backgroundColor: Colors.white,
-          child: categoryAsyncValue.appWhen(
-            dataBuilder: (categories) {
-              // กรณีมีข้อมูล → โหลด project ทุกหมวดหมู่
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _loadAllProjects();
-              });
-
-              return CustomScrollView(
+      body: stateCategory.appWhen(
+        dataBuilder: (data) {
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.grey.shade50, Colors.white]),
+            ),
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await onRefresh();
+              },
+              color: const Color(0xFF667eea),
+              backgroundColor: Colors.white,
+              child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
                   SliverToBoxAdapter(child: SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top + 20)),
@@ -390,12 +371,9 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                     padding: padding,
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
-                        final category = categories[index];
+                        final category = data[index];
                         final categoryId = category.id ?? '0';
-                        final categoryName = category.name ?? '-';
                         final isExpanded = categoryExpansionState[categoryId] ?? false;
-                        final projectAsyncValue = ref.watch(projectListByCategoryProvider(categoryId));
-
                         return FadeTransition(
                           opacity: _categoryStaggerAnimation,
                           child: SlideTransition(
@@ -405,38 +383,32 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                             ).animate(CurvedAnimation(parent: _categoryAnimationController, curve: Interval(index * 0.1, 1.0, curve: Curves.easeOutBack))),
                             child: _buildCategoryTile(
                               context,
-                              categoryName: categoryName,
-                              categoryId: categoryId,
                               isExpanded: isExpanded,
                               onExpansionChanged: (expanded) {
                                 setState(() => categoryExpansionState[categoryId] = expanded);
                               },
-                              projectsAsync: projectAsyncValue,
                               category: category,
                               index: index,
                             ),
                           ),
                         );
-                      }, childCount: categories.length),
+                      }, childCount: data.length),
                     ),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 100)),
                 ],
-              );
-            },
-          ),
-        ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildCategoryTile(
     BuildContext context, {
-    required String categoryName,
-    required String categoryId,
     required bool isExpanded,
     required ValueChanged<bool> onExpansionChanged,
-    required AsyncValue<List<ProjectHDModel>> projectsAsync,
     required CategoryModel category,
     required int index,
   }) {
@@ -480,77 +452,40 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(categoryName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87)),
+                    Text(category.name!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87)),
                     const SizedBox(height: 4),
-                    Text(
-                      '${projectsAsync.value?.length ?? 0} projects',
-                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
-                    ),
+                    Text('${category.projects.length} projects', style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),
-              _buildCategoryActions(category, categoryId, categoryName),
+              _buildCategoryActions(category),
             ],
           ),
           children: [
-            projectsAsync.when(
-              data: (projects) {
-                if (projects.isEmpty) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Icon(Icons.folder_open_rounded, size: 48, color: Colors.grey.shade400),
-                          const SizedBox(height: 12),
-                          Text('ไม่มีโปรเจคในหมวดหมู่นี้', style: TextStyle(color: Colors.grey.shade600, fontSize: 14, fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: projects.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, projectIndex) {
-                    final project = projects[projectIndex];
-                    return _buildProjectItem(project, projectIndex);
-                  },
-                );
+            if (category.projects.isEmpty)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.folder_open_rounded, size: 48, color: Colors.grey.shade400),
+                      const SizedBox(height: 12),
+                      Text('ไม่มีโปรเจคในหมวดหมู่นี้', style: TextStyle(color: Colors.grey.shade600, fontSize: 14, fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                ),
+              ),
+            ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: category.projects.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, projectIndex) {
+                final project = category.projects[projectIndex];
+                return _buildProjectItem(project, projectIndex, category);
               },
-              loading:
-                  () => Container(
-                    margin: const EdgeInsets.all(20),
-                    padding: const EdgeInsets.all(32),
-                    child: const Center(child: CircularProgressIndicator(color: Color(0xFF667eea))),
-                  ),
-              error:
-                  (error, _) => Container(
-                    margin: const EdgeInsets.all(20),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.shade200),
-                    ),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Icon(Icons.error_outline_rounded, color: Colors.red.shade400, size: 32),
-                          const SizedBox(height: 8),
-                          Text('โหลดโปรเจคล้มเหลว: $error', style: TextStyle(color: Colors.red.shade700, fontSize: 14), textAlign: TextAlign.center),
-                        ],
-                      ),
-                    ),
-                  ),
             ),
           ],
         ),
@@ -558,7 +493,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     );
   }
 
-  Widget _buildCategoryActions(CategoryModel category, String categoryId, String categoryName) {
+  Widget _buildCategoryActions(CategoryModel category) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -574,15 +509,13 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
             child: InkWell(
               borderRadius: BorderRadius.circular(10),
               onTap: () async {
+                UserLoginModel userLogin = await ref.read(localStorageServiceProvider).getUserLogin();
                 await showModal(
                   context: context,
                   configuration: const FadeScaleTransitionConfiguration(),
-                  builder: (context) => InsertOrUpdateProjectHD(category: category),
+                  builder:
+                      (context) => InsertOrUpdateProjectHD(category: category, projectHDModel: ProjectHDModel(id: '0', active: true, leader: userLogin.user)),
                 );
-                ref.invalidate(projectListByCategoryProvider(categoryId));
-                ref.invalidate(categoryListProvider(widget.workspace.id!));
-                await _loadAllProjects();
-                setState(() {});
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -591,7 +524,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                   children: [
                     const Icon(Icons.add_rounded, size: 16, color: Colors.white),
                     const SizedBox(width: 6),
-                    const Text("Add", style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+                    const Text("Add project", style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
@@ -619,7 +552,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                     ),
                   ),
                   PopupMenuItem(
-                    onTap: () => _showDeleteCategoryDialog(categoryId),
+                    onTap: () => _showDeleteCategoryDialog(category.id!),
                     value: 'delete',
                     child: Row(
                       children: [
@@ -661,7 +594,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
       if (confirmed == true) {
         try {
           await ref.read(deleteProjectCategoryControllerProvider.notifier).deleteCategory({'project_category_id': categoryId});
-          ref.invalidate(categoryListProvider(widget.workspace.id!));
+
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -695,7 +628,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     });
   }
 
-  Widget _buildProjectItem(ProjectHDModel project, int index) {
+  Widget _buildProjectItem(ProjectHDModel project, int index, CategoryModel category) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 200 + (index * 50)),
       curve: Curves.easeOutBack,
@@ -710,7 +643,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           ref.read(selectProjectIdProvider.notifier).state = project.id;
-          ref.goSubPath(Routes.projectDetail);
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -736,7 +669,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                 ),
               ),
               const SizedBox(width: 12),
-              _buildProjectActions(project),
+              _buildProjectActions(project, category),
             ],
           ),
         ),
@@ -744,7 +677,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     );
   }
 
-  Widget _buildProjectActions(ProjectHDModel project) {
+  Widget _buildProjectActions(ProjectHDModel project, CategoryModel category) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -756,13 +689,11 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: () async {
-                final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditScreen(project: project)));
-                if (result == true) {
-                  ref.invalidate(projectListByCategoryProvider(project.categoryId ?? ''));
-                  ref.invalidate(categoryListProvider(widget.workspace.id!));
-                  await _loadAllProjects();
-                  setState(() {});
-                }
+                await showModal(
+                  context: context,
+                  configuration: const FadeScaleTransitionConfiguration(),
+                  builder: (context) => InsertOrUpdateProjectHD(category: category, projectHDModel: project),
+                );
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -771,7 +702,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                   children: [
                     Icon(Icons.edit_rounded, size: 16, color: Colors.grey.shade700),
                     const SizedBox(width: 6),
-                    Text('แก้ไข', style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+                    Text('Edit Project', style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
@@ -792,7 +723,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
               borderRadius: BorderRadius.circular(8),
               onTap: () {
                 ref.read(selectProjectIdProvider.notifier).state = project.id;
-                ref.goSubPath(Routes.projectDetail);
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

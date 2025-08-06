@@ -38,6 +38,10 @@ mixin _$CategoryModel {
   UserModel? get createdBy => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_by')
   UserModel? get updatedBy => throw _privateConstructorUsedError;
+  @JsonKey(name: 'workspace_id')
+  String? get workspaceId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'projects')
+  List<ProjectHDModel> get projects => throw _privateConstructorUsedError;
 
   /// Serializes this CategoryModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -64,7 +68,9 @@ abstract class $CategoryModelCopyWith<$Res> {
       @JsonKey(name: 'created_at') String? createdAt,
       @JsonKey(name: 'updated_at') String? updatedAt,
       @JsonKey(name: 'created_by') UserModel? createdBy,
-      @JsonKey(name: 'updated_by') UserModel? updatedBy});
+      @JsonKey(name: 'updated_by') UserModel? updatedBy,
+      @JsonKey(name: 'workspace_id') String? workspaceId,
+      @JsonKey(name: 'projects') List<ProjectHDModel> projects});
 
   $UserModelCopyWith<$Res>? get createdBy;
   $UserModelCopyWith<$Res>? get updatedBy;
@@ -94,6 +100,8 @@ class _$CategoryModelCopyWithImpl<$Res, $Val extends CategoryModel>
     Object? updatedAt = freezed,
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
+    Object? workspaceId = freezed,
+    Object? projects = null,
   }) {
     return _then(_value.copyWith(
       tableName: freezed == tableName
@@ -132,6 +140,14 @@ class _$CategoryModelCopyWithImpl<$Res, $Val extends CategoryModel>
           ? _value.updatedBy
           : updatedBy // ignore: cast_nullable_to_non_nullable
               as UserModel?,
+      workspaceId: freezed == workspaceId
+          ? _value.workspaceId
+          : workspaceId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      projects: null == projects
+          ? _value.projects
+          : projects // ignore: cast_nullable_to_non_nullable
+              as List<ProjectHDModel>,
     ) as $Val);
   }
 
@@ -181,7 +197,9 @@ abstract class _$$CategoryModelImplCopyWith<$Res>
       @JsonKey(name: 'created_at') String? createdAt,
       @JsonKey(name: 'updated_at') String? updatedAt,
       @JsonKey(name: 'created_by') UserModel? createdBy,
-      @JsonKey(name: 'updated_by') UserModel? updatedBy});
+      @JsonKey(name: 'updated_by') UserModel? updatedBy,
+      @JsonKey(name: 'workspace_id') String? workspaceId,
+      @JsonKey(name: 'projects') List<ProjectHDModel> projects});
 
   @override
   $UserModelCopyWith<$Res>? get createdBy;
@@ -211,6 +229,8 @@ class __$$CategoryModelImplCopyWithImpl<$Res>
     Object? updatedAt = freezed,
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
+    Object? workspaceId = freezed,
+    Object? projects = null,
   }) {
     return _then(_$CategoryModelImpl(
       tableName: freezed == tableName
@@ -249,6 +269,14 @@ class __$$CategoryModelImplCopyWithImpl<$Res>
           ? _value.updatedBy
           : updatedBy // ignore: cast_nullable_to_non_nullable
               as UserModel?,
+      workspaceId: freezed == workspaceId
+          ? _value.workspaceId
+          : workspaceId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      projects: null == projects
+          ? _value._projects
+          : projects // ignore: cast_nullable_to_non_nullable
+              as List<ProjectHDModel>,
     ));
   }
 }
@@ -265,7 +293,11 @@ class _$CategoryModelImpl implements _CategoryModel {
       @JsonKey(name: 'created_at') this.createdAt,
       @JsonKey(name: 'updated_at') this.updatedAt,
       @JsonKey(name: 'created_by') this.createdBy,
-      @JsonKey(name: 'updated_by') this.updatedBy});
+      @JsonKey(name: 'updated_by') this.updatedBy,
+      @JsonKey(name: 'workspace_id') this.workspaceId,
+      @JsonKey(name: 'projects')
+      final List<ProjectHDModel> projects = const []})
+      : _projects = projects;
 
   factory _$CategoryModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$CategoryModelImplFromJson(json);
@@ -297,10 +329,21 @@ class _$CategoryModelImpl implements _CategoryModel {
   @override
   @JsonKey(name: 'updated_by')
   final UserModel? updatedBy;
+  @override
+  @JsonKey(name: 'workspace_id')
+  final String? workspaceId;
+  final List<ProjectHDModel> _projects;
+  @override
+  @JsonKey(name: 'projects')
+  List<ProjectHDModel> get projects {
+    if (_projects is EqualUnmodifiableListView) return _projects;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_projects);
+  }
 
   @override
   String toString() {
-    return 'CategoryModel(tableName: $tableName, id: $id, name: $name, description: $description, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy)';
+    return 'CategoryModel(tableName: $tableName, id: $id, name: $name, description: $description, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy, workspaceId: $workspaceId, projects: $projects)';
   }
 
   @override
@@ -322,13 +365,27 @@ class _$CategoryModelImpl implements _CategoryModel {
             (identical(other.createdBy, createdBy) ||
                 other.createdBy == createdBy) &&
             (identical(other.updatedBy, updatedBy) ||
-                other.updatedBy == updatedBy));
+                other.updatedBy == updatedBy) &&
+            (identical(other.workspaceId, workspaceId) ||
+                other.workspaceId == workspaceId) &&
+            const DeepCollectionEquality().equals(other._projects, _projects));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, tableName, id, name, description,
-      active, createdAt, updatedAt, createdBy, updatedBy);
+  int get hashCode => Object.hash(
+      runtimeType,
+      tableName,
+      id,
+      name,
+      description,
+      active,
+      createdAt,
+      updatedAt,
+      createdBy,
+      updatedBy,
+      workspaceId,
+      const DeepCollectionEquality().hash(_projects));
 
   /// Create a copy of CategoryModel
   /// with the given fields replaced by the non-null parameter values.
@@ -356,7 +413,9 @@ abstract class _CategoryModel implements CategoryModel {
           @JsonKey(name: 'created_at') final String? createdAt,
           @JsonKey(name: 'updated_at') final String? updatedAt,
           @JsonKey(name: 'created_by') final UserModel? createdBy,
-          @JsonKey(name: 'updated_by') final UserModel? updatedBy}) =
+          @JsonKey(name: 'updated_by') final UserModel? updatedBy,
+          @JsonKey(name: 'workspace_id') final String? workspaceId,
+          @JsonKey(name: 'projects') final List<ProjectHDModel> projects}) =
       _$CategoryModelImpl;
 
   factory _CategoryModel.fromJson(Map<String, dynamic> json) =
@@ -389,6 +448,12 @@ abstract class _CategoryModel implements CategoryModel {
   @override
   @JsonKey(name: 'updated_by')
   UserModel? get updatedBy;
+  @override
+  @JsonKey(name: 'workspace_id')
+  String? get workspaceId;
+  @override
+  @JsonKey(name: 'projects')
+  List<ProjectHDModel> get projects;
 
   /// Create a copy of CategoryModel
   /// with the given fields replaced by the non-null parameter values.

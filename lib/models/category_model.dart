@@ -1,5 +1,6 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:project/models/project_h_d_model.dart';
 import 'package:project/models/user_model.dart';
 
 part 'category_model.freezed.dart';
@@ -17,6 +18,8 @@ class CategoryModel with _$CategoryModel {
   @JsonKey(name: 'updated_at') String? updatedAt,
   @JsonKey(name: 'created_by') UserModel? createdBy,
   @JsonKey(name: 'updated_by') UserModel? updatedBy,
+  @JsonKey(name: 'workspace_id') String? workspaceId,
+  @JsonKey(name: 'projects') @Default([]) List<ProjectHDModel> projects,
   }) = _CategoryModel;
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) => _$CategoryModelFromJson(json);

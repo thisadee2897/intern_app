@@ -63,25 +63,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             navigatorKey: _shellNavigatorHomeKey,
-            routes: [
-              GoRoute(
-                path: Routes.home,
-                pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()),
-                // routes: [
-                //   GoRoute(
-                //     path: Routes.project,
-                //     pageBuilder: (context, state) => const NoTransitionPage(child: ProjectScreen()),
-                //     routes: [
-                //       GoRoute(
-                //         path: Routes.projectDetail,
-                //         pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()),
-                //         routes: [GoRoute(path: Routes.projectDetail, pageBuilder: (context, state) => NoTransitionPage(child: ProjectDetailScreen()))],
-                //       ),
-                //     ],
-                //   ),
-                // ],
-              ),
-            ],
+            routes: [GoRoute(path: Routes.home, pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()))],
           ),
           StatefulShellBranch(
             navigatorKey: _shellNavigatorSettingsKey,
