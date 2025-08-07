@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/apis/project_data/get_back_log.dart';
 import 'package:project/apis/master_data/insert_or_update_sprint.dart';
+import 'package:project/models/project_h_d_model.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/models/task_model.dart';
 import 'package:project/models/task_status_model.dart';
@@ -131,6 +132,9 @@ final sprintProvider = StateNotifierProvider<SprintNotifier, AsyncValue<List<Spr
 final insertUpdateSprintProvider = StateNotifierProvider<InsertUpdateSprintNotifier, AsyncValue<SprintModel?>>((ref) => InsertUpdateSprintNotifier(ref));
 
 final selectProjectIdProvider = StateProvider<String?>((ref) => null); //  Provider สำหรับเลือก Project ID
+
+final projectSelectingProvider = StateProvider<ProjectHDModel>((ref) => ProjectHDModel());
+final sprintSelectingProvider = StateProvider<SprintModel>((ref) => SprintModel());
 
 // final apiDeleteSprint = Provider((ref) => DeleteSprintApi()); //  Provider สำหรับ API ลบ
 final apiDeleteSprint = Provider<DeleteSprintApi>((ref) => DeleteSprintApi(ref: ref));

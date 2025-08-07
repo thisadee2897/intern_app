@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -21,6 +22,7 @@ import 'package:project/utils/extension/date.dart';
 import 'package:project/utils/extension/hex_color.dart';
 
 import 'backlog_widget.dart';
+import 'insert_or_update_task.dart';
 
 class BacklogGroupWidget extends ConsumerStatefulWidget {
   final bool isExpanded;
@@ -36,6 +38,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   bool isExpanding = false;
   late TextEditingController _sprintNameController;
   late TextEditingController _sprintGoalController;
+  late TextEditingController _taskNameController;
 
   @override
   void initState() {
@@ -44,6 +47,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _sprintNameController = TextEditingController();
       _sprintGoalController = TextEditingController();
+      _taskNameController = TextEditingController();
     });
   }
 
@@ -63,6 +67,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
     routeObserver.unsubscribe(this);
     _sprintNameController.dispose();
     _sprintGoalController.dispose();
+    _taskNameController.dispose();
     super.dispose();
   }
 
@@ -94,8 +99,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     return _buildTaskTile(task);
                   },
                 ),
-                const Divider(thickness: 1, height: 25),
-                _buildCreateButton(),
+                // _buildCreateButton(data),
               ],
             ],
           ),
@@ -319,18 +323,23 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   }
 
   /// ปุ่มสำหรับสร้างงานใหม่
-  Widget _buildCreateButton() {
+  Widget _buildCreateButton(SprintModel sprint) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: OutlinedButton(
-        onPressed: _handleCreateTask,
+        onPressed: () async {
+          await showModal(
+            context: context,
+            configuration: const FadeScaleTransitionConfiguration(),
+            builder: (context) => InsertOrUpdateTask(
+              task: TaskModel(),
+              projectHD: ref.read(projectSelectingProvider),
+            ),
+          );
+        },
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.add, size: 18, color: Colors.grey[700]),
-            const SizedBox(width: 4),
-            Text('Create', style: TextStyle(color: Colors.grey[800])),
-          ],
+          children: [Icon(Icons.add, size: 18, color: Colors.grey[700]), const SizedBox(width: 4), Text('Create', style: TextStyle(color: Colors.grey[800]))],
         ),
       ),
     );
@@ -437,13 +446,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-
           ...data.countStatus.map((status) {
-            return CountWorkTypeWidget(
-              title: status.name ?? 'ไม่ระบุ',
-              count: '${status.count}',
-              color: HexColor.fromHex(status.color ?? '#CCCCCC'),
-            );
+            return CountWorkTypeWidget(title: status.name ?? 'ไม่ระบุ', count: '${status.count}', color: HexColor.fromHex(status.color ?? '#CCCCCC'));
           }),
           // // แสดง counter ของแต่ละสถานะ
           // CountWorkTypeWidget(title: 'todo', count: '0 of 0'),

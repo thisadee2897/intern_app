@@ -23,21 +23,6 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
         appBar: AppBar(
           title: const Text('Project Detail'),
           shape: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1.0)),
-
-          // ถ้าตรงการปุ่ม icon ถังขยะบน AppBar ให้จัดการ Sprint ทั้งหมดจัดการได้ที่ตรงนี้
-          actions: [
-            // IconButton(
-            //   icon: const Icon(Icons.delete),
-            //   tooltip: 'Delete Sprint',
-            //   onPressed: () {
-            //     // สมมติทดสอบส่งค่า sprintId/sprintName จริงได้ตามโปรเจ็กต์
-            //     _showDeleteSprintDialog(
-            //       sprintId: '1',
-            //       sprintName: 'Sprint 1',
-            //     );
-            //   },
-            // ),
-          ],
           bottom: TabBar(
             indicatorColor: Theme.of(context).colorScheme.primary,
             labelColor: Theme.of(context).colorScheme.primary,
