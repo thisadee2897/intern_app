@@ -643,6 +643,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           ref.read(selectProjectIdProvider.notifier).state = project.id;
+          ref.read(projectSelectingProvider.notifier).state = project; // เก็บค่าโปรเจค ก่อนเปิดหน้ารายละเอียด
           Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
         },
         child: Padding(

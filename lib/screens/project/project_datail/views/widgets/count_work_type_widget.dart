@@ -18,7 +18,7 @@ class CountWorkTypeWidget extends StatelessWidget {
           return Tooltip(
             message: "$title : $count (story points)", 
             child: Center(
-              child: Text("0", style: TextStyle(color: Colors.grey))
+              child: Text(count, style: TextStyle(color: Colors.grey))
             ),
           );
         },

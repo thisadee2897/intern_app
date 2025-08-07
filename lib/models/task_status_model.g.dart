@@ -15,6 +15,7 @@ _$TaskStatusModelImpl _$$TaskStatusModelImplFromJson(
       description: json['description'] as String?,
       color: json['color'] as String?,
       active: json['active'] as bool?,
+      count: (json['count'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$TaskStatusModelImplToJson(
@@ -26,4 +27,5 @@ Map<String, dynamic> _$$TaskStatusModelImplToJson(
       'description': instance.description,
       'color': instance.color,
       'active': instance.active,
+      'count': instance.count,
     };
