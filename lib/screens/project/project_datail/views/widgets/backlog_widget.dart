@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
 import 'package:project/models/sprint_model.dart';
+import 'package:project/screens/project/project_datail/views/widgets/task_detail_widget.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import '../../providers/controllers/delete_comment_controller.dart';
 import '../../providers/controllers/master_task_status_controller.dart';
 import 'backlog_group_widget.dart';
+
+final showTaskDetailProvider = StateProvider<bool>((ref) => false);
 
 /// Provider สำหรับจัดการ Sprint ที่เลือก
 final selectNextSprint = StateProvider<SprintModel?>((ref) => null);
@@ -21,7 +24,7 @@ class BacklogWidget extends BaseStatefulWidget {
   BaseState<BacklogWidget> createState() => _BacklogWidgetState();
 }
 
-class _BacklogWidgetState extends BaseState<BacklogWidget> {
+class _BacklogWidgetState extends BaseState<BacklogWidget> with TickerProviderStateMixin {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -44,22 +47,25 @@ class _BacklogWidgetState extends BaseState<BacklogWidget> {
     final state = ref.watch(sprintProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
-        return SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: state.when(
-            data: (datas) {
-              return ListView.builder(
-                itemCount: datas.length,
-                itemBuilder: (context, index) {
-                  SprintModel item = datas[index];
-                  return BacklogGroupWidget(item: item);
+        return Row(
+          children: [
+            Expanded(
+              child: state.when(
+                data: (datas) {
+                  return ListView.builder(
+                    itemCount: datas.length,
+                    itemBuilder: (context, index) {
+                      SprintModel item = datas[index];
+                      return BacklogGroupWidget(item: item);
+                    },
+                  );
                 },
-              );
-            },
-            error: (err, stx) => Center(child: Text('Error: ${err.toString()}', style: const TextStyle(color: Colors.red))),
-            loading: () => const Center(child: CircularProgressIndicator()),
-          ),
+                error: (err, stx) => Center(child: Text('Error: ${err.toString()}', style: const TextStyle(color: Colors.red))),
+                loading: () => const Center(child: CircularProgressIndicator()),
+              ),
+            ),
+            TaskDetailWidget(),
+          ],
         );
       },
     );

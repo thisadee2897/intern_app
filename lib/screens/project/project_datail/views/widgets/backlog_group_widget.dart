@@ -8,10 +8,12 @@ import 'package:project/components/form_startdate_and_enddate_widget.dart';
 import 'package:project/models/task_model.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/models/task_status_model.dart';
+import 'package:project/models/user_login_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/delete_comment_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/delete_task_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/master_task_status_controller.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/task_detail_controller.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
 import 'package:project/screens/project/project_datail/views/widgets/detil_task_screen.dart';
 import 'package:project/screens/project/project_datail/views/widgets/route_observer.dart';
@@ -20,9 +22,12 @@ import 'package:project/screens/project/sprint/views/widgets/insert_update_sprin
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/date.dart';
 import 'package:project/utils/extension/hex_color.dart';
+import 'package:project/utils/services/local_storage_service.dart';
 
 import 'backlog_widget.dart';
-import 'insert_or_update_task.dart';
+
+final selecttingSprintProvider = StateProvider<SprintModel?>((ref) => null);
+final inputTaskNameProvider = StateProvider<String>((ref) => '');
 
 class BacklogGroupWidget extends ConsumerStatefulWidget {
   final bool isExpanded;
@@ -48,6 +53,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       _sprintNameController = TextEditingController();
       _sprintGoalController = TextEditingController();
       _taskNameController = TextEditingController();
+      ref.read(inputTaskNameProvider.notifier).state = '';
+      print('BacklogGroupWidget initialized');
     });
   }
 
@@ -74,6 +81,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   @override
   Widget build(BuildContext context) {
     final data = widget.item;
+    final selecting = ref.watch(selecttingSprintProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
         // ตรวจสอบว่าเป็นจอเล็กหรือไม่
@@ -99,13 +107,60 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     return _buildTaskTile(task);
                   },
                 ),
-                // _buildCreateButton(data),
+                // Logic input
+                if (selecting == data)
+                  TextField(
+                    enabled: !ref.watch(insertOrUpdateTaskControllerProvider).isLoading,
+                    autofocus: true,
+                    onTapOutside: (event) => ref.read(selecttingSprintProvider.notifier).state = null,
+                    onSubmitted: (value) async {
+                      await onSubmittedTask(value);
+                    },
+                    decoration: InputDecoration(
+                      // loading state
+                      prefix: ref.watch(insertOrUpdateTaskControllerProvider).isLoading
+                          ? const CircularProgressIndicator( color: Colors.blue)
+                          : null,
+                    ),
+                    controller: _taskNameController,
+                    onChanged: (value) => ref.read(inputTaskNameProvider.notifier).state = value,
+                  ),
+                // Logic create button
+                if (selecting != data) _buildCreateButton(data),
               ],
             ],
           ),
         );
       },
     );
+  }
+
+  Future<void> onSubmittedTask(String inputText) async {
+    UserLoginModel userLogin = await ref.read(localStorageServiceProvider).getUserLogin();
+    final taskJson = {
+      "task_id": "0",
+      "project_hd_id": ref.read(selectProjectIdProvider)!,
+      "sprint_id": ref.read(selecttingSprintProvider)!.id,
+      "master_priority_id": "1",
+      "master_task_status_id": "1",
+      "master_type_of_work_id": "1",
+      "task_name": inputText,
+      "task_description": "",
+      "task_assigned_to": userLogin.user!.id,
+      "task_start_date": null,
+      "task_end_date": null,
+      "task_is_active": true,
+    };
+    try {
+      await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(body: taskJson);
+      if (!mounted) return;
+      ref.read(sprintProvider.notifier).getWithOutLoading();
+      _taskNameController.clear();
+      ref.read(inputTaskNameProvider.notifier).state = '';
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: ${e.toString()}')));
+    }
   }
 
   /// สร้าง Header ของกล่อง backlog/sprint
@@ -179,10 +234,15 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
         title: Text(task.name ?? '-', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
         // subtitle: Text(task.description ?? '', style: const TextStyle(fontSize: 14, color: Colors.black54)),
         leading: const Icon(Icons.check_box_outlined, color: Color.fromARGB(255, 77, 100, 231), size: 20),
-        onTap: () => _navigateToCommentScreen(task),
+        // onTap: () => _navigateToCommentScreen(task),
+        onTap: () {
+          ref.read(showTaskDetailProvider.notifier).state = true;
+          ref.read(taskDetailProvider.notifier).getTaskDetail(task.id!);
+          ref.read(commentTaskProvider.notifier).getCommentTask(task.id!);
+        },
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [_buildTaskStatusDropdown(task, projectHdId), Gap(8), _buildAssigneeInfo(task), _buildTaskPopupMenu(task, projectHdId)],
+          children: [_buildTaskStatusDropdown(task, projectHdId), Gap(8), _buildAssigneeInfo(task)],
         ),
       ),
     );
@@ -207,9 +267,9 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   }
 
   /// Navigate ไปยังหน้า Comment
-  void _navigateToCommentScreen(TaskModel task) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => CommentScreen(task: task)));
-  }
+  // void _navigateToCommentScreen(TaskModel task) {
+  //   Navigator.push(context, MaterialPageRoute(builder: (_) => CommentScreen(task: task)));
+  // }
 
   /// Dropdown สำหรับเปลี่ยนสถานะของ task
   Widget _buildTaskStatusDropdown(TaskModel task, String projectHdId) {
@@ -285,37 +345,37 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   }
 
   /// เมนูเพิ่มเติมของแต่ละงาน (comment, edit, delete)
-  Widget _buildTaskPopupMenu(TaskModel task, String projectHdId) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: PopupMenuButton<String>(
-        tooltip: 'ตัวเลือกเพิ่มเติม',
-        onSelected: (value) => _handleTaskMenuAction(value, task, projectHdId),
-        itemBuilder:
-            (context) => const [
-              PopupMenuItem(value: 'comment', child: ListTile(leading: Icon(Icons.comment), title: Text('ดูความคิดเห็น'))),
-              PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(Icons.edit), title: Text('แก้ไขงาน'))),
-              PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete_outline), title: Text('ลบงาน'))),
-            ],
-      ),
-    );
-  }
+  // Widget _buildTaskPopupMenu(TaskModel task, String projectHdId) {
+  //   return SizedBox(
+  //     width: 48,
+  //     height: 48,
+  //     child: PopupMenuButton<String>(
+  //       tooltip: 'ตัวเลือกเพิ่มเติม',
+  //       onSelected: (value) => _handleTaskMenuAction(value, task, projectHdId),
+  //       itemBuilder:
+  //           (context) => const [
+  //             PopupMenuItem(value: 'comment', child: ListTile(leading: Icon(Icons.comment), title: Text('ดูความคิดเห็น'))),
+  //             PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(Icons.edit), title: Text('แก้ไขงาน'))),
+  //             PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete_outline), title: Text('ลบงาน'))),
+  //           ],
+  //     ),
+  //   );
+  // }
 
   /// จัดการ action ของเมนู Task
-  Future<void> _handleTaskMenuAction(String action, TaskModel task, String projectHdId) async {
-    switch (action) {
-      case 'comment':
-        _navigateToCommentScreen(task);
-        break;
-      case 'edit':
-        await _navigateToEditTask(task, projectHdId);
-        break;
-      case 'delete':
-        await _deleteTask(task);
-        break;
-    }
-  }
+  // Future<void> _handleTaskMenuAction(String action, TaskModel task, String projectHdId) async {
+  //   switch (action) {
+  //     case 'comment':
+  //       _navigateToCommentScreen(task);
+  //       break;
+  //     case 'edit':
+  //       await _navigateToEditTask(task, projectHdId);
+  //       break;
+  //     case 'delete':
+  //       await _deleteTask(task);
+  //       break;
+  //   }
+  // }
 
   /// Navigate ไปยังหน้าแก้ไข Task
   Future<void> _navigateToEditTask(TaskModel task, String projectHdId) async {
@@ -328,14 +388,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       cursor: SystemMouseCursors.click,
       child: OutlinedButton(
         onPressed: () async {
-          await showModal(
-            context: context,
-            configuration: const FadeScaleTransitionConfiguration(),
-            builder: (context) => InsertOrUpdateTask(
-              task: TaskModel(),
-              projectHD: ref.read(projectSelectingProvider),
-            ),
-          );
+          _taskNameController.text = ref.read(inputTaskNameProvider);
+          ref.read(selecttingSprintProvider.notifier).state = sprint;
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,

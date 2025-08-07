@@ -28,6 +28,17 @@ class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
       });
     }
   }
+  Future<void> getWithOutLoading() async {
+    String? id = ref.read(selectProjectIdProvider);
+    if (id == null) {
+      return;
+    } else {
+      state = await AsyncValue.guard(() async {
+        List<SprintModel> response = await ref.read(apiBacklog).get(projectId: id);
+        return response;
+      });
+    }
+  }
 
   Future<void> updateStatusTask(TaskStatusModel model, TaskModel item) async {
     try {
