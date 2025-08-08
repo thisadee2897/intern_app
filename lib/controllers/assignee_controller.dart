@@ -18,3 +18,13 @@ class ListAssignNotifier extends StateNotifier<AsyncValue<List<UserModel>>> {
     }
   }
 }
+
+
+final dropdownListAssignProvider = Provider<List<String>>((ref) {
+  final listAssign = ref.watch(listAssignProvider);
+  return listAssign.when(
+    data: (data) => data.map((e) => e.name ?? '').toList(),
+    loading: () => [],
+    error: (_, __) => [],
+  );
+});

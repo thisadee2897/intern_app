@@ -18,3 +18,12 @@ class ListTypeOfWorkNotifier extends StateNotifier<AsyncValue<List<TypeOfWorkMod
     }
   }
 }
+
+final dropdownListTypeOfWorkProvider = Provider<List<String>>((ref) {
+  final listTypeOfWork = ref.watch(listTypeOfWorkProvider);
+  return listTypeOfWork.when(
+    data: (data) => data.map((e) => e.name ?? '').toList(),
+    loading: () => [],
+    error: (_, __) => [],
+  );
+});

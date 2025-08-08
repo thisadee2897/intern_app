@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/apis/project_data/get_comment_api.dart';
-
 import 'package:project/apis/project_data/get_project_category_unique_name.dart';
 import 'package:project/apis/project_data/get_task_detail.dart';
 import 'package:project/models/comment_model.dart';
@@ -9,6 +8,8 @@ import 'package:project/models/task_model.dart';
 import 'package:project/models/task_status_model.dart';
 import 'package:project/models/type_of_work_model.dart';
 import 'package:project/models/user_model.dart';
+
+import 'insert_controller.dart';
 
 final taskDetailProvider = StateNotifierProvider<TaskDetailNotifier, AsyncValue<TaskModel>>((ref) => TaskDetailNotifier(ref));
 
@@ -64,6 +65,7 @@ class TaskDetailNotifier extends StateNotifier<AsyncValue<TaskModel>> {
       state = AsyncValue.error(e, st);
     }
   }
+  
   // Update Priority
   Future<void> updatePriority(PriorityModel item) async {
     try {
@@ -71,6 +73,89 @@ class TaskDetailNotifier extends StateNotifier<AsyncValue<TaskModel>> {
       if (currentData != null) {
         final updatedData = currentData.copyWith(priority: item);
         state = AsyncValue.data(updatedData);
+      }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  // Update Task Name
+  Future<void> updateTaskName(String name) async {
+    try {
+      final currentData = state.valueOrNull;
+      if (currentData != null) {
+        final updatedData = currentData.copyWith(name: name);
+        state = AsyncValue.data(updatedData);
+      }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  // Update Description
+  Future<void> updateDescription(String description) async {
+    try {
+      final currentData = state.valueOrNull;
+      if (currentData != null) {
+        final updatedData = currentData.copyWith(description: description);
+        state = AsyncValue.data(updatedData);
+      }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  // Update Start Date
+  Future<void> updateStartDate(DateTime startDate) async {
+    try {
+      final currentData = state.valueOrNull;
+      if (currentData != null) {
+        final updatedData = currentData.copyWith(taskStartDate: startDate.toIso8601String());
+        state = AsyncValue.data(updatedData);
+      }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  // Update End Date
+  Future<void> updateEndDate(DateTime endDate) async {
+    try {
+      final currentData = state.valueOrNull;
+      if (currentData != null) {
+        final updatedData = currentData.copyWith(taskEndDate: endDate.toIso8601String());
+        state = AsyncValue.data(updatedData);
+      }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+  // Update Task to API
+  Future<void> updateTaskData() async {
+    try {
+      final currentData = state.valueOrNull;
+      if (currentData != null) {
+        try {
+          await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(
+            body: {
+              "task_id": currentData.id!,
+              "project_hd_id": currentData.projectHd!.id,
+              "sprint_id": currentData.sprint?.id,
+              "master_priority_id": currentData.priority?.id,
+              "master_task_status_id": currentData.taskStatus?.id,
+              "master_type_of_work_id": currentData.typeOfWork?.id,
+              "task_name": currentData.name ?? "",
+              "task_description": currentData.description ?? "",
+              "task_assigned_to": currentData.assignedTo?.id,
+              "task_start_date": currentData.taskStartDate,
+              "task_end_date": currentData.taskEndDate,
+              "task_is_active": true,
+            },
+          );
+          state = AsyncValue.data(currentData);
+        } catch (e) {
+          print("❌ อัปเดต status ผิดพลาด: $e");
+        }
       }
     } catch (e, st) {
       state = AsyncValue.error(e, st);

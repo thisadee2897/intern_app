@@ -18,9 +18,7 @@ class DateDetailRowWidget extends StatelessWidget {
         children: [
           SizedBox(width: 120, child: Text(title, style: TextStyle(color: Colors.grey.shade700, fontSize: 14))),
           Expanded(child: SizedBox(height: 40, child: SmartDateFieldPicker(
-            pickerDecoration:PickerDecoration(
-              // width:460,
-            ),
+           
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.only(left: 12, right: 12, top: 0, bottom: 0),
               

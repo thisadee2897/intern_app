@@ -19,3 +19,12 @@ class ListTaskStatusNotifier extends StateNotifier<AsyncValue<List<TaskStatusMod
     }
   }
 }
+
+final dropdownListTaskStatusProvider = Provider<List<String>>((ref) {
+  final listTaskStatus = ref.watch(listTaskStatusProvider);
+  return listTaskStatus.when(
+    data: (data) => data.map((e) => e.name ?? '').toList(),
+    loading: () => [],
+    error: (_, __) => [],
+  );
+});

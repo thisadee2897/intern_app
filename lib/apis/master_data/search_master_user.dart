@@ -11,10 +11,8 @@ class SearchMasterUserApi {
     try {
       Response response = await ref.read(apiClientProvider).get(_path, queryParameters: {'search': ''});
       List<Map<String, dynamic>> datas = List<Map<String, dynamic>>.from(response.data);
-      print("SearchMasterUserApi get() response: $datas");
       return datas.map((data) => UserModel.fromJson(data)).toList();
     } catch (e) {
-      print("SearchMasterUserApi get() error: $e");
       rethrow;
     }
   }

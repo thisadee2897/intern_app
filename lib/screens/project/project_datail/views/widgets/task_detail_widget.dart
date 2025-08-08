@@ -39,16 +39,11 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
   OverlayPortalController startDateController = OverlayPortalController();
   OverlayPortalController endDateController = OverlayPortalController();
   TextEditingController descriptionController = TextEditingController();
+  TextEditingController taskNameController = TextEditingController();
   final FocusNode _editorFocusNode = FocusNode();
   final ScrollController _editorScrollController = ScrollController();
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final taskDetail = ref.read(taskDetailProvider);
-      if (taskDetail.value != null) {
-        descriptionController.text = taskDetail.value!.description ?? '';
-      }
-    });
     super.initState();
   }
 
@@ -56,6 +51,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
   void dispose() {
     super.dispose();
     descriptionController.dispose();
+    taskNameController.dispose();
   }
 
   @override
@@ -63,6 +59,45 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
     final state = ref.watch(taskDetailProvider);
     final stateComment = ref.watch(commentTaskProvider);
     final insertState = ref.watch(insertCommentTaskControllerProvider);
+    //  Listen to startDate and End Date changes
+    ref.listen<AsyncValue<TaskModel>>(taskDetailProvider, (previous, next) {
+      next.whenData((taskDetail) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (taskDetail.taskStartDate != null && startDateController.text != taskDetail.taskStartDate!.dateTimeTHFormApi) {
+            startDateController.text = taskDetail.taskStartDate!.dateTimeTHFormApi;
+          }
+          if (taskDetail.taskEndDate != null && endDateController.text != taskDetail.taskEndDate!.dateTimeTHFormApi) {
+            endDateController.text = taskDetail.taskEndDate!.dateTimeTHFormApi;
+          }
+        });
+      });
+    });
+
+    // Listen to taskDetailProvider changes and update controllers
+    ref.listen<AsyncValue<TaskModel>>(taskDetailProvider, (previous, next) {
+      next.whenData((taskDetail) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (taskDetail.description != null && descriptionController.text != taskDetail.description!) {
+            descriptionController.text = taskDetail.description!;
+          }
+          if (taskDetail.name != null && taskNameController.text != taskDetail.name!) {
+            taskNameController.text = taskDetail.name!;
+          }
+        });
+      });
+    });
+
+    // Initial setup when data is first available
+    state.whenData((data) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (data.description != null && descriptionController.text.isEmpty && data.description!.isNotEmpty) {
+          descriptionController.text = data.description!;
+        }
+        if (data.name != null && taskNameController.text.isEmpty && data.name!.isNotEmpty) {
+          taskNameController.text = data.name!;
+        }
+      });
+    });
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
@@ -80,12 +115,40 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(data.name ?? 'Untitled Task', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        ref.read(showTaskDetailProvider.notifier).state = false;
-                      },
+                    // Text(data.name ?? 'Untitled Task', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          controller: taskNameController,
+                          decoration: InputDecoration(border: InputBorder.none, hintText: 'Task Name', hintStyle: TextStyle(color: Colors.grey.shade600)),
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        //update button
+                        TextButton(
+                          onPressed: () async {
+                            try {
+                              await _updateTaskName();
+                              await _updateDescription();
+                              await ref.read(taskDetailProvider.notifier).updateTaskData();
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Task updated successfully')));
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating task: $e')));
+                            }
+                          },
+                          child: const Text('Update'),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            ref.read(showTaskDetailProvider.notifier).state = false;
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -105,12 +168,13 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                         Row(
                           children: [
                             const Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                            // Edit button
-                            IconButton(
-                              icon: const Icon(Icons.edit, size: 16),
-                              onPressed: () {
-                                // Handle edit action
-                              },
+                            const Spacer(),
+                            // Update Description button
+                            TextButton.icon(
+                              onPressed: _updateDescription,
+                              icon: const Icon(Icons.save, size: 16),
+                              label: const Text('Save Description'),
+                              style: TextButton.styleFrom(textStyle: const TextStyle(fontSize: 12)),
                             ),
                           ],
                         ),
@@ -144,7 +208,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 title: 'Assignee',
                                 dropDownKey: assigneeKey,
                                 selectedItem: data.assignedTo?.name,
-                                items: ref.watch(listAssignProvider).value!.map((e) => e.name!).toList(),
+                                items: ref.watch(dropdownListAssignProvider),
                                 onSaved: (item) {
                                   UserModel assignee = ref.read(listAssignProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updateAssignee(assignee);
@@ -156,7 +220,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 title: 'Priority',
                                 dropDownKey: priorityKey,
                                 selectedItem: data.priority?.name,
-                                items: ref.watch(listPriorityProvider).value!.map((e) => e.name!).toList(),
+                                items: ref.watch(dropdownListPriorityProvider),
                                 onSaved: (item) {
                                   PriorityModel priority = ref.read(listPriorityProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updatePriority(priority);
@@ -169,7 +233,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 title: 'Task status',
                                 dropDownKey: taskStatusDownKey,
                                 selectedItem: data.taskStatus?.name,
-                                items: ref.watch(listTaskStatusProvider).value!.map((e) => e.name!).toList(),
+                                items: ref.watch(dropdownListTaskStatusProvider),
                                 onSaved: (item) {
                                   TaskStatusModel taskStatus = ref.read(listTaskStatusProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updateTaskStatus(taskStatus);
@@ -181,14 +245,30 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 title: 'Type Of Work',
                                 dropDownKey: typeOfWorkDownKey,
                                 selectedItem: data.typeOfWork!.name,
-                                items: ref.watch(listTypeOfWorkProvider).value!.map((e) => e.name!).toList(),
+                                items: ref.watch(dropdownListTypeOfWorkProvider),
                                 onSaved: (value) {
                                   TypeOfWorkModel item = ref.read(listTypeOfWorkProvider).value!.firstWhere((e) => e.name == value);
                                   ref.read(taskDetailProvider.notifier).updateTypeOfWork(item);
                                 },
                               ),
-                              DateDetailRowWidget(title: 'Start Date', controller: startDateController, onDateSelected: (value) {}),
-                              DateDetailRowWidget(title: 'End Date', controller: endDateController, onDateSelected: (value) {}),
+                              DateDetailRowWidget(
+                                title: 'Start Date',
+                                controller: startDateController,
+                                onDateSelected: (value) {
+                                  if (value != null) {
+                                    ref.read(taskDetailProvider.notifier).updateStartDate(value);
+                                  }
+                                },
+                              ),
+                              DateDetailRowWidget(
+                                title: 'End Date',
+                                controller: endDateController,
+                                onDateSelected: (value) {
+                                  if (value != null) {
+                                    ref.read(taskDetailProvider.notifier).updateEndDate(value);
+                                  }
+                                },
+                              ),
                               _buildDetailRow('Created At', data.createdAt ?? 'None'),
                               //created_by
                               _buildDetailRow('Created By', data.createdBy?.name ?? 'Unknown'),
@@ -388,6 +468,34 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
+  }
+
+  Future<void> _updateTaskName() async {
+    final taskName = taskNameController.text.trim();
+    if (taskName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('กรุณากรอกชื่อ Task')));
+      return;
+    }
+
+    try {
+      // สมมติว่ามี method สำหรับ update task name ใน taskDetailProvider
+      await ref.read(taskDetailProvider.notifier).updateTaskName(taskName);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('อัพเดทชื่อ Task สำเร็จ')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+    }
+  }
+
+  Future<void> _updateDescription() async {
+    final description = descriptionController.text.trim();
+
+    try {
+      // สมมติว่ามี method สำหรับ update description ใน taskDetailProvider
+      await ref.read(taskDetailProvider.notifier).updateDescription(description);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('อัพเดท Description สำเร็จ')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+    }
   }
 
   Future<void> _submitComment() async {

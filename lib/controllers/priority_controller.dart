@@ -17,3 +17,13 @@ class ListPriorityNotifier extends StateNotifier<AsyncValue<List<PriorityModel>>
     }
   }
 }
+
+
+final dropdownListPriorityProvider = Provider<List<String>>((ref) {
+  final listPriority = ref.watch(listPriorityProvider);
+  return listPriority.when(
+    data: (data) => data.map((e) => e.name ?? '').toList(),
+    loading: () => [],
+    error: (_, __) => [],
+  );
+});

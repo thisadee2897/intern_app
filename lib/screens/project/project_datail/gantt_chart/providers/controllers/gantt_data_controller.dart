@@ -30,7 +30,7 @@ final minGanttDateProvider = Provider<DateTimeRange>((ref) {
         return DateTimeRange(start: DateTime.now(), end: DateTime.now());
       }
       List<DateTime> allDates =
-          data.expand((sprint) => sprint.tasks!.map((task) => DateTime.parse(task.taskStartDate ?? (DateTime.now().toString())))).toList();
+          data.expand((sprint) => sprint.tasks.map((task) => DateTime.parse(task.taskStartDate ?? (DateTime.now().toString())))).toList();
       DateTime minDate = allDates.reduce((a, b) => a.isBefore(b) ? a : b);
       DateTime maxDate = allDates.reduce((a, b) => a.isAfter(b) ? a : b);
       return DateTimeRange(start: minDate, end: maxDate);
