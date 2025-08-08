@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -10,14 +9,11 @@ import 'package:project/models/sprint_model.dart';
 import 'package:project/models/task_status_model.dart';
 import 'package:project/models/user_login_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/delete_comment_controller.dart';
-import 'package:project/screens/project/project_datail/providers/controllers/delete_task_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/master_task_status_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_detail_controller.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
-import 'package:project/screens/project/project_datail/views/widgets/detil_task_screen.dart';
 import 'package:project/screens/project/project_datail/views/widgets/route_observer.dart';
-import 'package:project/screens/project/project_datail/views/widgets/task_screen.dart';
 import 'package:project/screens/project/sprint/views/widgets/insert_update_sprint.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/date.dart';
@@ -376,10 +372,6 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   //   }
   // }
 
-  /// Navigate ไปยังหน้าแก้ไข Task
-  Future<void> _navigateToEditTask(TaskModel task, String projectHdId) async {
-    await Navigator.push(context, MaterialPageRoute(builder: (_) => AddTaskScreen(projectHdId: projectHdId, sprintId: widget.item.id, task: task)));
-  }
 
   /// ปุ่มสำหรับสร้างงานใหม่
   Widget _buildCreateButton(SprintModel sprint) {
@@ -399,85 +391,9 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   }
 
   /// จัดการการสร้าง Task ใหม่
-  Future<void> _handleCreateTask() async {
-    final projectHDId = ref.read(selectProjectIdProvider);
 
-    if (projectHDId == null) {
-      _showErrorMessage('โปรดเลือกโปรเจกต์ก่อน');
-      return;
-    }
-    await Navigator.push(context, MaterialPageRoute(builder: (_) => AddTaskScreen(projectHdId: projectHDId, sprintId: widget.item.id)));
-  }
 
-  /// ฟังก์ชันสำหรับลบ Task พร้อม dialog ยืนยัน
-  Future<void> _deleteTask(TaskModel task) async {
-    final confirm = await _showDeleteConfirmDialog(task);
 
-    if (confirm == true && mounted) {
-      await _performDeleteTask(task);
-    }
-  }
-
-  /// แสดง Dialog ยืนยันการลบ
-  Future<bool?> _showDeleteConfirmDialog(TaskModel task) {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (BuildContext dialogContext) => AlertDialog(
-            title: const Text('ยืนยันการลบ'),
-            content: Text('คุณต้องการลบงาน "${task.name}" หรือไม่?'),
-            actions: [
-              TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('ยกเลิก')),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: const Text('ลบ'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  /// ดำเนินการลบ Task
-  Future<void> _performDeleteTask(TaskModel task) async {
-    try {
-      // แสดง loading snackbar
-      _showLoadingSnackBar('กำลังลบงาน...');
-
-      // ลบ Task
-      await ref.read(deleteTaskControllerProvider.notifier).deleteTask(task.id ?? '');
-
-      if (!mounted) return;
-
-      // ซ่อน loading และแสดงความสำเร็จ
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      _showSuccessSnackBar('ลบงาน "${task.name}" สำเร็จ');
-    } catch (e) {
-      if (!mounted) return;
-
-      // ซ่อน loading และแสดง error
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      _showErrorSnackBar('เกิดข้อผิดพลาดในการลบงาน: ${e.toString()}');
-    }
-  }
-
-  /// แสดง Loading SnackBar
-  void _showLoadingSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))),
-            const SizedBox(width: 16),
-            Text(message),
-          ],
-        ),
-        duration: const Duration(seconds: 1),
-      ),
-    );
-  }
 
   /// แสดง Success SnackBar
   void _showSuccessSnackBar(String message) {

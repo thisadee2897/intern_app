@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -19,6 +21,7 @@ import 'package:project/screens/project/sprint/providers/controllers/sprint_cont
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/utils/extension/date_string_to_format_th.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../providers/controllers/delete_task_controller.dart';
 import '../../providers/controllers/insert_comment_task_controller.dart';
 import 'backlog_widget.dart';
 import 'date_detail_row_widget.dart';
@@ -59,21 +62,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
     final state = ref.watch(taskDetailProvider);
     final stateComment = ref.watch(commentTaskProvider);
     final insertState = ref.watch(insertCommentTaskControllerProvider);
-    //  Listen to startDate and End Date changes
-    ref.listen<AsyncValue<TaskModel>>(taskDetailProvider, (previous, next) {
-      next.whenData((taskDetail) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (taskDetail.taskStartDate != null && startDateController.text != taskDetail.taskStartDate!.dateTimeTHFormApi) {
-            startDateController.text = taskDetail.taskStartDate!.dateTimeTHFormApi;
-          }
-          if (taskDetail.taskEndDate != null && endDateController.text != taskDetail.taskEndDate!.dateTimeTHFormApi) {
-            endDateController.text = taskDetail.taskEndDate!.dateTimeTHFormApi;
-          }
-        });
-      });
-    });
 
-    // Listen to taskDetailProvider changes and update controllers
     ref.listen<AsyncValue<TaskModel>>(taskDetailProvider, (previous, next) {
       next.whenData((taskDetail) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -87,7 +76,6 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
       });
     });
 
-    // Initial setup when data is first available
     state.whenData((data) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (data.description != null && descriptionController.text.isEmpty && data.description!.isNotEmpty) {
@@ -108,14 +96,12 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
         data: (data) {
           return Column(
             children: [
-              // Header with close button
               Container(
                 height: 60,
                 decoration: BoxDecoration(color: Colors.white, border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1))),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Text(data.name ?? 'Untitled Task', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -128,13 +114,13 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                     ),
                     Row(
                       children: [
-                        //update button
                         TextButton(
                           onPressed: () async {
                             try {
                               await _updateTaskName();
                               await _updateDescription();
                               await ref.read(taskDetailProvider.notifier).updateTaskData();
+                              ScaffoldMessenger.of(context).clearSnackBars();
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Task updated successfully')));
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating task: $e')));
@@ -153,7 +139,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                   ],
                 ),
               ),
-              // Content
+
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16, right: 16),
@@ -164,29 +150,13 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                         TitleForTask(title: 'Project', value: data.projectHd?.name ?? 'No Project'),
                         TitleForTask(title: 'Sprint', value: data.sprint?.name ?? 'No Sprint'),
                         Gap(12),
-                        // Description section
-                        Row(
-                          children: [
-                            const Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                            const Spacer(),
-                            // Update Description button
-                            TextButton.icon(
-                              onPressed: _updateDescription,
-                              icon: const Icon(Icons.save, size: 16),
-                              label: const Text('Save Description'),
-                              style: TextButton.styleFrom(textStyle: const TextStyle(fontSize: 12)),
-                            ),
-                          ],
-                        ),
+
+                        Row(children: [const Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)), const Spacer()]),
                         const SizedBox(height: 8),
-                        // Text(
-                        //   data.description?.isNotEmpty == true ? data.description! : 'Add a description...',
-                        //   style: TextStyle(color: data.description?.isNotEmpty == true ? Colors.black87 : Colors.grey.shade600),
-                        // ),
+
                         TextField(maxLines: 10, controller: descriptionController),
                         const SizedBox(height: 24),
 
-                        // Details section
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)),
@@ -197,13 +167,36 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text('Details', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                                  Icon(Icons.settings, size: 16, color: Colors.grey.shade600),
+                                  // Delete Task And Show Dialog confirmation
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, color: Colors.grey),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text('Confirm Delete'),
+                                            content: const Text('Are you sure you want to delete this task?'),
+                                            actions: [
+                                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                                              TextButton(
+                                                onPressed: () async {
+                                                  await ref.read(deleteTaskControllerProvider.notifier).deleteTask(data.id!);
+                                                  Navigator.pop(context);
+                                                  ref.read(showTaskDetailProvider.notifier).state = false;
+                                                  ref.read(sprintProvider.notifier).get();
+                                                },
+                                                child: const Text('Delete'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 16),
-
-                              // Assignee
-                              // _buildDetailRow('Assignee', data.assignedTo?.name ?? 'Unassigned', isAssignee: true, hasAssignee: data.assignedTo != null),
                               DetailRowWidget<String>(
                                 title: 'Assignee',
                                 dropDownKey: assigneeKey,
@@ -212,7 +205,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 onSaved: (item) {
                                   UserModel assignee = ref.read(listAssignProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updateAssignee(assignee);
-                                  // showSnackbar  item
+
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
                                 },
                               ),
@@ -224,11 +217,11 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 onSaved: (item) {
                                   PriorityModel priority = ref.read(listPriorityProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updatePriority(priority);
-                                  // showSnackbar  item
+
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
                                 },
                               ),
-                              // Parent
+
                               DetailRowWidget<String>(
                                 title: 'Task status',
                                 dropDownKey: taskStatusDownKey,
@@ -237,7 +230,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 onSaved: (item) {
                                   TaskStatusModel taskStatus = ref.read(listTaskStatusProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updateTaskStatus(taskStatus);
-                                  // showSnackbar  item
+
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
                                 },
                               ),
@@ -253,6 +246,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                               ),
                               DateDetailRowWidget(
                                 title: 'Start Date',
+                                initialDate: data.taskStartDate != null ? DateTime.tryParse(data.taskStartDate!) : null,
                                 controller: startDateController,
                                 onDateSelected: (value) {
                                   if (value != null) {
@@ -262,6 +256,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                               ),
                               DateDetailRowWidget(
                                 title: 'End Date',
+                                initialDate: data.taskEndDate != null ? DateTime.tryParse(data.taskEndDate!) : null,
                                 controller: endDateController,
                                 onDateSelected: (value) {
                                   if (value != null) {
@@ -269,10 +264,10 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                   }
                                 },
                               ),
-                              _buildDetailRow('Created At', data.createdAt ?? 'None'),
-                              //created_by
+                              _buildDetailRow('Created At', data.createdAt.dateTimeTHFormApi),
+
                               _buildDetailRow('Created By', data.createdBy?.name ?? 'Unknown'),
-                              //active
+
                               _buildDetailRow('Active', data.active == true ? 'Yes' : 'No'),
                             ],
                           ),
@@ -371,7 +366,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                   keepStyleOnNewLine: true,
                                 );
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -388,9 +383,55 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(item.createBy?.name ?? '-', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                            Tooltip(message: item.createdAt!.dateTimeTHFormApi, child: Text(timeago.format(DateTime.parse(item.createdAt!)))),
-                                            // Text(item.createdAt.toString(), style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Column(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  children: [
+                                                    Text(item.createBy?.name ?? '-', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                    Tooltip(
+                                                      message: item.createdAt!.dateTimeTHFormApi,
+                                                      child: Text(
+                                                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                                                        timeago.format(DateTime.parse(item.createdAt!)),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.delete_outline, color: Colors.black45),
+                                                  onPressed: () async {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) {
+                                                        return AlertDialog(
+                                                          title: const Text('Confirm Delete'),
+                                                          content: const Text('Are you sure you want to delete this comment?'),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(context).pop();
+                                                              },
+                                                              child: const Text('Cancel'),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () async {
+                                                                Navigator.of(context).pop();
+                                                                await ref.read(deleteCommentTaskControllerProvider.notifier).deleteComment(item.id!);
+                                                                ref.read(commentTaskProvider.notifier).getCommentTask(state.value!.id!);
+                                                              },
+                                                              child: const Text('Delete'),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+
                                             Container(
                                               margin: const EdgeInsets.only(top: 4),
                                               decoration: BoxDecoration(
@@ -408,39 +449,6 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                                   expands: false,
                                                   embedBuilders: [],
                                                 ),
-                                              ),
-                                            ),
-                                            Align(
-                                              alignment: Alignment.centerRight,
-                                              child: IconButton(
-                                                icon: const Icon(Icons.delete, color: Colors.red),
-                                                onPressed: () async {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext context) {
-                                                      return AlertDialog(
-                                                        title: const Text('Confirm Delete'),
-                                                        content: const Text('Are you sure you want to delete this comment?'),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(context).pop();
-                                                            },
-                                                            child: const Text('Cancel'),
-                                                          ),
-                                                          TextButton(
-                                                            onPressed: () async {
-                                                              Navigator.of(context).pop();
-                                                              await ref.read(deleteCommentTaskControllerProvider.notifier).deleteComment(item.id!);
-                                                              ref.read(commentTaskProvider.notifier).getCommentTask(state.value!.id!);
-                                                            },
-                                                            child: const Text('Delete'),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  );
-                                                },
                                               ),
                                             ),
                                           ],
@@ -473,15 +481,14 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
   Future<void> _updateTaskName() async {
     final taskName = taskNameController.text.trim();
     if (taskName.isEmpty) {
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('กรุณากรอกชื่อ Task')));
       return;
     }
-
     try {
-      // สมมติว่ามี method สำหรับ update task name ใน taskDetailProvider
       await ref.read(taskDetailProvider.notifier).updateTaskName(taskName);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('อัพเดทชื่อ Task สำเร็จ')));
     } catch (e) {
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
     }
   }
@@ -490,17 +497,16 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
     final description = descriptionController.text.trim();
 
     try {
-      // สมมติว่ามี method สำหรับ update description ใน taskDetailProvider
       await ref.read(taskDetailProvider.notifier).updateDescription(description);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('อัพเดท Description สำเร็จ')));
     } catch (e) {
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
     }
   }
 
   Future<void> _submitComment() async {
     final deltaJson = _controller.document.toDelta().toJson();
-    // เช็คว่ามีข้อความจริง
+
     final hasText = deltaJson.any((op) => op['insert'] != null && op['insert'].toString().trim().isNotEmpty);
     if (!hasText) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('กรุณากรอกข้อความก่อนส่ง')));

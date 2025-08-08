@@ -4,14 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:project/components/export.dart';
-import 'package:project/config/routes/route_config.dart';
-import 'package:project/config/routes/route_helper.dart';
 import 'package:project/models/category_model.dart';
 import 'package:project/models/project_h_d_model.dart';
 import 'package:project/models/user_login_model.dart';
 import 'package:project/models/workspace_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
-import 'package:project/screens/project/project_datail/providers/controllers/project_controller.dart';
 import 'package:project/screens/project/project_datail/views/project_detail_screen.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
@@ -35,7 +32,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   // List<ProjectHDModel> _allProjects = [];
-  List<ProjectHDModel> _filteredProjects = [];
   OverlayEntry? _overlayEntry;
 
   // Animation Controllers
@@ -44,8 +40,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
   late AnimationController _categoryAnimationController;
 
   late Animation<double> _fabScaleAnimation;
-  late Animation<double> _searchFadeAnimation;
-  late Animation<Offset> _searchSlideAnimation;
   late Animation<double> _categoryStaggerAnimation;
 
   @override
@@ -62,12 +56,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     // Initialize Animations
     _fabScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _fabAnimationController, curve: Curves.elasticOut));
 
-    _searchFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _searchAnimationController, curve: Curves.easeInOut));
 
-    _searchSlideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, -1.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _searchAnimationController, curve: Curves.easeOutBack));
 
     _categoryStaggerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _categoryAnimationController, curve: Curves.easeOutQuart));
 
@@ -122,11 +111,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     }
   }
 
-  void _showOverlay() {
-    _removeOverlay();
-    _overlayEntry = OverlayEntry(builder: (context) => _buildSearchSuggestions());
-    Overlay.of(context).insert(_overlayEntry!);
-  }
 
   void _hideOverlay() {
     _removeOverlay();
@@ -137,91 +121,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     _overlayEntry = null;
   }
 
-  Widget _buildSearchSuggestions() {
-    return Positioned(
-      top: kToolbarHeight + MediaQuery.of(context).padding.top + 8,
-      left: 16,
-      right: 16,
-      child: SlideTransition(
-        position: _searchSlideAnimation,
-        child: FadeTransition(
-          opacity: _searchFadeAnimation,
-          child: Material(
-            elevation: 8,
-            borderRadius: BorderRadius.circular(16),
-            shadowColor: Colors.black26,
-            child: Container(
-              constraints: const BoxConstraints(maxHeight: 400),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8))],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  shrinkWrap: true,
-                  itemCount: _filteredProjects.length,
-                  itemBuilder: (context, index) {
-                    final project = _filteredProjects[index];
-                    return AnimatedContainer(
-                      duration: Duration(milliseconds: 200 + (index * 50)),
-                      curve: Curves.easeOutBack,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          _searchController.clear();
-                          _hideOverlay();
-                          _searchFocusNode.unfocus();
-                          Future.delayed(const Duration(milliseconds: 100), () {
-                            ref.read(selectProjectIdProvider.notifier).state = project.id;
-                            ref.goSubPath(Routes.projectDetail);
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                          decoration: BoxDecoration(
-                            border: Border(bottom: BorderSide(color: index == _filteredProjects.length - 1 ? Colors.transparent : Colors.grey.shade100)),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
-                                child: const Icon(Icons.folder_outlined, color: Colors.blueAccent, size: 20),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(project.name ?? '-', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
-                                    const SizedBox(height: 4),
-                                    Text('ID: ${project.id}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8)),
-                                child: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey.shade600),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   // สร้าง Dialog สวยๆ สำหรับเพิ่ม Category
   Future<void> _showAddCategoryDialog(CategoryModel item) async {
@@ -243,59 +142,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
   onRefresh() async {
     await ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
   }
-
-  Widget _buildSearchField() {
-    return SlideTransition(
-      position: _searchSlideAnimation,
-      child: FadeTransition(
-        opacity: _searchFadeAnimation,
-        child: Container(
-          width: 220,
-          height: 44,
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))],
-          ),
-          child: TextField(
-            controller: _searchController,
-            focusNode: _searchFocusNode,
-            decoration: InputDecoration(
-              hintText: 'ค้นหาโปรเจค...',
-              hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade500, fontWeight: FontWeight.w400),
-              prefixIcon: Container(padding: const EdgeInsets.all(12), child: Icon(Icons.search_rounded, color: Colors.grey.shade500, size: 20)),
-              suffixIcon:
-                  _searchController.text.isNotEmpty
-                      ? IconButton(
-                        icon: Icon(Icons.clear_rounded, color: Colors.grey.shade500, size: 20),
-                        onPressed: () {
-                          _searchController.clear();
-                          _hideOverlay();
-                        },
-                      )
-                      : null,
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            onSubmitted: (value) {
-              if (_filteredProjects.isNotEmpty) {
-                final firstProject = _filteredProjects.first;
-                _searchController.clear();
-                _hideOverlay();
-                _searchFocusNode.unfocus();
-                ref.read(selectProjectIdProvider.notifier).state = firstProject.id;
-                ref.goSubPath(Routes.projectDetail);
-              }
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildBody(BuildContext context, SizingInformation sizingInformation) {
     // final categoryAsyncValue = ref.watch(categoryListProvider(widget.workspace.id!));
     final stateCategory = ref.watch(categoryProvider);
