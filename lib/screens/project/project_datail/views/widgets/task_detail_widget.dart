@@ -1,13 +1,27 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:gap/gap.dart';
 import 'package:project/components/export.dart';
+import 'package:project/controllers/assignee_controller.dart';
+import 'package:project/controllers/priority_controller.dart';
+import 'package:project/controllers/task_status_controller.dart';
+import 'package:project/controllers/type_of_work_controller.dart';
+import 'package:project/models/priority_model.dart';
+import 'package:project/models/task_model.dart';
+import 'package:project/models/task_status_model.dart';
+import 'package:project/models/type_of_work_model.dart';
+import 'package:project/models/user_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/delete_comment_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_detail_controller.dart';
+import 'package:project/screens/project/project_datail/views/widgets/detail_row_widget.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
+import 'package:project/utils/extension/date_string_to_format_th.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import '../../providers/controllers/insert_comment_task_controller.dart';
 import 'backlog_widget.dart';
+import 'date_detail_row_widget.dart';
 
 class TaskDetailWidget extends ConsumerStatefulWidget {
   const TaskDetailWidget({super.key});
@@ -18,9 +32,33 @@ class TaskDetailWidget extends ConsumerStatefulWidget {
 
 class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
   final QuillController _controller = QuillController.basic();
-  @override
+  final assigneeKey = GlobalKey<DropdownSearchState>();
+  final priorityKey = GlobalKey<DropdownSearchState>();
+  final taskStatusDownKey = GlobalKey<DropdownSearchState>();
+  final typeOfWorkDownKey = GlobalKey<DropdownSearchState>();
+  OverlayPortalController startDateController = OverlayPortalController();
+  OverlayPortalController endDateController = OverlayPortalController();
+  TextEditingController descriptionController = TextEditingController();
   final FocusNode _editorFocusNode = FocusNode();
   final ScrollController _editorScrollController = ScrollController();
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final taskDetail = ref.read(taskDetailProvider);
+      if (taskDetail.value != null) {
+        descriptionController.text = taskDetail.value!.description ?? '';
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    descriptionController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final state = ref.watch(taskDetailProvider);
     final stateComment = ref.watch(commentTaskProvider);
@@ -28,7 +66,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
-      width: ref.watch(showTaskDetailProvider) ? 790 : 0,
+      width: ref.watch(showTaskDetailProvider) ? 495 : 0,
       height: double.infinity,
       color: Colors.white,
       child: state.when(
@@ -64,12 +102,24 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                         TitleForTask(title: 'Sprint', value: data.sprint?.name ?? 'No Sprint'),
                         Gap(12),
                         // Description section
-                        const Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                        const SizedBox(height: 8),
-                        Text(
-                          data.description?.isNotEmpty == true ? data.description! : 'Add a description...',
-                          style: TextStyle(color: data.description?.isNotEmpty == true ? Colors.black87 : Colors.grey.shade600),
+                        Row(
+                          children: [
+                            const Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                            // Edit button
+                            IconButton(
+                              icon: const Icon(Icons.edit, size: 16),
+                              onPressed: () {
+                                // Handle edit action
+                              },
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 8),
+                        // Text(
+                        //   data.description?.isNotEmpty == true ? data.description! : 'Add a description...',
+                        //   style: TextStyle(color: data.description?.isNotEmpty == true ? Colors.black87 : Colors.grey.shade600),
+                        // ),
+                        TextField(maxLines: 10, controller: descriptionController),
                         const SizedBox(height: 24),
 
                         // Details section
@@ -89,19 +139,56 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                               const SizedBox(height: 16),
 
                               // Assignee
-                              _buildDetailRow('Assignee', data.assignedTo?.name ?? 'Unassigned', isAssignee: true, hasAssignee: data.assignedTo != null),
-
-                              // Labels
-                              _buildDetailRow('Priority', data.priority?.name ?? 'None'),
-
+                              // _buildDetailRow('Assignee', data.assignedTo?.name ?? 'Unassigned', isAssignee: true, hasAssignee: data.assignedTo != null),
+                              DetailRowWidget<String>(
+                                title: 'Assignee',
+                                dropDownKey: assigneeKey,
+                                selectedItem: data.assignedTo?.name,
+                                items: ref.watch(listAssignProvider).value!.map((e) => e.name!).toList(),
+                                onSaved: (item) {
+                                  UserModel assignee = ref.read(listAssignProvider).value!.firstWhere((e) => e.name == item);
+                                  ref.read(taskDetailProvider.notifier).updateAssignee(assignee);
+                                  // showSnackbar  item
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
+                                },
+                              ),
+                              DetailRowWidget<String>(
+                                title: 'Priority',
+                                dropDownKey: priorityKey,
+                                selectedItem: data.priority?.name,
+                                items: ref.watch(listPriorityProvider).value!.map((e) => e.name!).toList(),
+                                onSaved: (item) {
+                                  PriorityModel priority = ref.read(listPriorityProvider).value!.firstWhere((e) => e.name == item);
+                                  ref.read(taskDetailProvider.notifier).updatePriority(priority);
+                                  // showSnackbar  item
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
+                                },
+                              ),
                               // Parent
-                              _buildDetailRow('Task Status', data.taskStatus?.name ?? 'None'),
-
-                              // Team
-                              _buildDetailRow('Type Of Work', data.typeOfWork?.name ?? 'None'),
-                              _buildDetailRow('Start Date', data.taskStartDate ?? 'None'),
-
-                              _buildDetailRow('End Date', data.taskEndDate ?? 'None'),
+                              DetailRowWidget<String>(
+                                title: 'Task status',
+                                dropDownKey: taskStatusDownKey,
+                                selectedItem: data.taskStatus?.name,
+                                items: ref.watch(listTaskStatusProvider).value!.map((e) => e.name!).toList(),
+                                onSaved: (item) {
+                                  TaskStatusModel taskStatus = ref.read(listTaskStatusProvider).value!.firstWhere((e) => e.name == item);
+                                  ref.read(taskDetailProvider.notifier).updateTaskStatus(taskStatus);
+                                  // showSnackbar  item
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
+                                },
+                              ),
+                              DetailRowWidget<String>(
+                                title: 'Type Of Work',
+                                dropDownKey: typeOfWorkDownKey,
+                                selectedItem: data.typeOfWork!.name,
+                                items: ref.watch(listTypeOfWorkProvider).value!.map((e) => e.name!).toList(),
+                                onSaved: (value) {
+                                  TypeOfWorkModel item = ref.read(listTypeOfWorkProvider).value!.firstWhere((e) => e.name == value);
+                                  ref.read(taskDetailProvider.notifier).updateTypeOfWork(item);
+                                },
+                              ),
+                              DateDetailRowWidget(title: 'Start Date', controller: startDateController, onDateSelected: (value) {}),
+                              DateDetailRowWidget(title: 'End Date', controller: endDateController, onDateSelected: (value) {}),
                               _buildDetailRow('Created At', data.createdAt ?? 'None'),
                               //created_by
                               _buildDetailRow('Created By', data.createdBy?.name ?? 'Unknown'),
@@ -110,11 +197,33 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                             ],
                           ),
                         ),
-                        Padding(
+                        Container(
+                          margin: const EdgeInsets.only(top: 16),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.all(Radius.circular(20))),
                           child: Column(
                             children: [
-                              QuillSimpleToolbar(controller: _controller),
+                              QuillSimpleToolbar(
+                                controller: _controller,
+                                config: QuillSimpleToolbarConfig(
+                                  showItalicButton: false,
+                                  showUnderLineButton: false,
+                                  showSubscript: false,
+                                  showSuperscript: false,
+                                  showUndo: false,
+                                  showRedo: false,
+                                  showHeaderStyle: false,
+                                  showBackgroundColorButton: false,
+                                  showInlineCode: false,
+                                  showSearchButton: false,
+                                  showQuote: false,
+                                  showFontFamily: false,
+                                  showStrikeThrough: false,
+                                  showIndent: false,
+                                  showFontSize: false,
+                                  showListBullets: false,
+                                ),
+                              ),
                               const SizedBox(height: 5),
                               StreamBuilder(
                                 stream: _controller.document.changes,
@@ -136,7 +245,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                     duration: const Duration(milliseconds: 120),
                                     curve: Curves.ease,
                                     height: _getEditorHeight(),
-                                    decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(6)),
+                                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
                                     child: QuillEditor(
                                       controller: _controller,
                                       focusNode: _editorFocusNode,
@@ -147,7 +256,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                         embedBuilders: [],
                                         scrollable: true,
                                         expands: false,
-                                        searchConfig: QuillSearchConfig()
+                                        searchConfig: QuillSearchConfig(),
                                       ),
                                     ),
                                   );
@@ -170,6 +279,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                         stateComment.appWhen(
                           dataBuilder: (data) {
                             return ListView.builder(
+                              reverse: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: data.length,
                               shrinkWrap: true,
@@ -199,7 +309,8 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(item.createBy?.name ?? '-', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                            Text(item.createdAt.toString(), style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                                            Tooltip(message: item.createdAt!.dateTimeTHFormApi, child: Text(timeago.format(DateTime.parse(item.createdAt!)))),
+                                            // Text(item.createdAt.toString(), style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                                             Container(
                                               margin: const EdgeInsets.only(top: 4),
                                               decoration: BoxDecoration(
@@ -301,10 +412,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
       data: (message) async {
         _controller.clear();
         await Future.delayed(const Duration(milliseconds: 500));
-        // ref.read(taskDetailProvider.notifier).getTaskDetail(ref.read(taskDetailProvider).value!.id!);
         ref.read(commentTaskProvider.notifier).getCommentTask(ref.read(taskDetailProvider).value!.id!);
-        // ignore: use_build_context_synchronously
-        // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message ?? "เพิ่มความคิดเห็นสำเร็จ")));
       },
       loading: () {},
       error: (e, _) {
@@ -350,23 +458,6 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class TitleForTask extends StatelessWidget {
-  final String title;
-  final String value;
-  const TitleForTask({super.key, required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        SizedBox(width: 80, child: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16))),
-        Text(' : $value', style: const TextStyle(fontSize: 14, color: Colors.black87)),
-      ],
     );
   }
 }

@@ -54,7 +54,6 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       _sprintGoalController = TextEditingController();
       _taskNameController = TextEditingController();
       ref.read(inputTaskNameProvider.notifier).state = '';
-      print('BacklogGroupWidget initialized');
     });
   }
 
