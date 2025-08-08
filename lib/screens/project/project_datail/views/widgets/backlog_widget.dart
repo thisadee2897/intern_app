@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
+import 'package:project/controllers/assignee_controller.dart';
+import 'package:project/controllers/priority_controller.dart';
+import 'package:project/controllers/task_status_controller.dart';
+import 'package:project/controllers/type_of_work_controller.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/screens/project/project_datail/views/widgets/task_detail_widget.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
@@ -40,6 +44,10 @@ class _BacklogWidgetState extends BaseState<BacklogWidget> with TickerProviderSt
     ref.read(sprintProvider.notifier).get();
     ref.read(masterTaskStatusControllerProvider.notifier).fetchTaskStatuses();
     ref.read(dropDownSprintFormCompleteProvider.notifier).get();
+    ref.read(listAssignProvider.notifier).get();
+    ref.read(listPriorityProvider.notifier).get();
+    ref.read(listTaskStatusProvider.notifier).get();
+    ref.read(listTypeOfWorkProvider.notifier).get();
   }
 
   @override

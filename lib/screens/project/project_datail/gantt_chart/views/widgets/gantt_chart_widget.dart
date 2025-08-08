@@ -99,8 +99,8 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     final ganttData = widget.ganttData;
 
     List<DateTime> allDates = [
-      ...ganttData.expand((sprint) => sprint.tasks?.map((task) => DateTime.parse(task.taskStartDate ?? DateTime.now().toString())) ?? []),
-      ...ganttData.expand((sprint) => sprint.tasks?.map((task) => DateTime.parse(task.taskEndDate ?? DateTime.now().toString())) ?? []),
+      ...ganttData.expand((sprint) => sprint.tasks.map((task) => DateTime.parse(task.taskStartDate ?? DateTime.now().toString()))),
+      ...ganttData.expand((sprint) => sprint.tasks.map((task) => DateTime.parse(task.taskEndDate ?? DateTime.now().toString()))),
     ];
 
     final DateTime chartStartDate, chartEndDate;
@@ -148,11 +148,11 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                               final sprint = ganttData[index];
                               return Container(
                                 decoration: BoxDecoration(border: Border(bottom: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)))),
-                                height: (sprintRowHeaderHeight + (sprint.tasks!.length * taskRowHeight)) + 1,
+                                height: (sprintRowHeaderHeight + (sprint.tasks.length * taskRowHeight)) + 1,
                                 child: Stack(
                                   children: [
                                     // Task bars
-                                    ...sprint.tasks!.map((task) {
+                                    ...sprint.tasks.map((task) {
                                       if (task.taskStartDate == null || task.taskEndDate == null) {
                                         return const SizedBox.shrink();
                                       }
@@ -162,7 +162,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                                       final duration = DateHelpers.differenceInDays(end, start) + 1;
                                       final left = offset * dayWidth;
                                       final width = duration * dayWidth;
-                                      final rowIndex = sprint.tasks!.indexOf(task);
+                                      final rowIndex = sprint.tasks.indexOf(task);
                                       final top = sprintRowHeaderHeight + rowIndex * taskRowHeight;
                                       return Positioned(
                                         left: left,
@@ -191,7 +191,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                             left: todayPosition,
                             top: 0,
                             width: 1,
-                            height: ganttData.fold<double>(0, (sum, sprint) => sum + (sprintRowHeaderHeight + (sprint.tasks!.length * taskRowHeight))),
+                            height: ganttData.fold<double>(0, (sum, sprint) => sum + (sprintRowHeaderHeight + (sprint.tasks.length * taskRowHeight))),
                             child: Container(color: Colors.red),
                           ),
                         ],
@@ -338,9 +338,9 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                   ListView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    itemCount: processedSprint.tasks!.length,
+                    itemCount: processedSprint.tasks.length,
                     itemBuilder: (context, indexitem) {
-                      TaskModel taskWithLayout = processedSprint.tasks![indexitem];
+                      TaskModel taskWithLayout = processedSprint.tasks[indexitem];
                       return Container(
                         height: taskRowHeight,
                         padding: const EdgeInsets.only(left: 16, right: 8),
