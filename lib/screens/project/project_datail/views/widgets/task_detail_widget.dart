@@ -431,23 +431,26 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                                 ),
                                               ],
                                             ),
-
-                                            Container(
-                                              margin: const EdgeInsets.only(top: 4),
-                                              decoration: BoxDecoration(
-                                                border: Border.all(color: Colors.grey.shade300),
-                                                borderRadius: BorderRadius.circular(8),
-                                                color: Colors.white,
-                                              ),
-                                              child: QuillEditor(
-                                                controller: controller,
-                                                focusNode: FocusNode(),
-                                                scrollController: ScrollController(),
-                                                config: QuillEditorConfig(
-                                                  padding: const EdgeInsets.all(12),
-                                                  scrollable: false,
-                                                  expands: false,
-                                                  embedBuilders: [],
+                                            IgnorePointer(
+                                              ignoring: true,
+                                              child: Container(
+                                                margin: const EdgeInsets.only(top: 4),
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(color: Colors.grey.shade300),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  color: Colors.white,
+                                                ),
+                                                child: QuillEditor(
+                                                  
+                                                  controller: controller,
+                                                  focusNode: FocusNode(),
+                                                  scrollController: ScrollController(),
+                                                  config: QuillEditorConfig(
+                                                    padding: const EdgeInsets.all(12),
+                                                    scrollable: false,
+                                                    expands: false,
+                                                    embedBuilders: [],
+                                                  ),
                                                 ),
                                               ),
                                             ),
