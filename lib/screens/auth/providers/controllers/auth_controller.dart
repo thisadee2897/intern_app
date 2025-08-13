@@ -35,16 +35,22 @@ class LoginNotifier extends StateNotifier<AsyncValue<UserLoginModel?>> {
 
 final loginProvider = StateNotifierProvider<LoginNotifier, AsyncValue<UserLoginModel?>>((ref) => LoginNotifier(ref));
 
-
 final isLoggedInProvider = FutureProvider<bool>((ref) async {
-  await Future.delayed(const Duration(milliseconds: 1000));
   final token = await ref.watch(localStorageServiceProvider).getToken();
   return token != null;
 });
 
 // logout Function
-final logoutProvider = FutureProvider<void>((ref) async {
-  await ref.watch(localStorageServiceProvider).clear();
-  ref.invalidate(isLoggedInProvider);
-  ref.invalidate(loginProvider);
+FutureProvider<void> logoutProvider = FutureProvider<void>((ref) async {
+  try {
+    print('Starting logout process...');
+    await ref.watch(localStorageServiceProvider).clear();
+    print('Local storage cleared');
+    ref.invalidate(isLoggedInProvider);
+    ref.invalidate(loginProvider);
+    print('Providers invalidated');
+  } catch (e) {
+    print('logoutProvider error: $e');
+    rethrow;
+  }
 });

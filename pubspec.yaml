@@ -69,6 +69,7 @@ dependencies:
   timeago: ^3.7.1
   dropdown_search: ^6.0.2
   smart_date_field_picker: ^0.0.3+1
+  dotted_border: ^3.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

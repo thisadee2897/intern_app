@@ -1,7 +1,7 @@
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:project/config/routes/app_router.dart';
 import 'package:project/config/routes/route_config.dart';
-import 'package:project/config/routes/route_helper.dart';
 import 'package:project/screens/home/providers/controllers/home_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/components/export.dart';
@@ -85,34 +85,49 @@ class _HomeScreenState extends BaseState<HomeScreen> with TickerProviderStateMix
                           mainAxisSpacing: 24,
                           childAspectRatio: aspectRatio,
                         ),
-                        itemCount: workspaces.length,
+                        itemCount: workspaces.length + 1,
                         itemBuilder: (context, index) {
-                          final workspace = workspaces[index];
-                          // Calculate staggered animation delay with proper bounds
-                          final delay = (index * 0.1).clamp(0.0, 0.8);
-                          final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-                            CurvedAnimation(parent: _animationController, curve: Interval(delay, (delay + 0.3).clamp(0.0, 1.0), curve: Curves.easeOutCubic)),
-                          );
-                          return AnimatedBuilder(
-                            animation: animation,
-                            builder: (context, child) {
-                              final animValue = animation.value.clamp(0.0, 1.0);
-                              return Transform.translate(
-                                offset: Offset(0, 30 * (1 - animValue)),
-                                child: Opacity(
-                                  opacity: animValue,
-                                  child: Transform.scale(
-                                    scale: (0.8 + (0.2 * animValue)).clamp(0.0, 1.0),
-                                    child: WorkspaceCard(
-                                      workspace,
-                                      title: workspace.name ?? 'ไม่มีชื่อ',
-                                      color: Colors.primaries[index % Colors.primaries.length].shade400,
+                          if (index == 0) {
+                            // ปุ่มสร้าง Workspace อยู่ที่ index แรก
+                            return DottedBorder(
+                              options: RoundedRectDottedBorderOptions(color: Colors.grey, dashPattern: const [6, 3], radius: Radius.circular(20)),
+                              child: InkWell(
+                                onTap: () {},
+                                child: Container(
+                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.grey.shade100),
+                                  child: Center(child: Icon(Icons.add, size: 50, color: Colors.grey)),
+                                ),
+                              ),
+                            );
+                          } else {
+                            // รายการ Workspace อื่นๆ จะเริ่มจาก index 1
+                            final workspace = workspaces[index - 1]; // ดึงข้อมูลจาก workspaces โดยใช้ index - 1
+                            // คำนวณ animation delay
+                            final delay = ((index - 1) * 0.1).clamp(0.0, 0.8);
+                            final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+                              CurvedAnimation(parent: _animationController, curve: Interval(delay, (delay + 0.3).clamp(0.0, 1.0), curve: Curves.easeOutCubic)),
+                            );
+                            return AnimatedBuilder(
+                              animation: animation,
+                              builder: (context, child) {
+                                final animValue = animation.value.clamp(0.0, 1.0);
+                                return Transform.translate(
+                                  offset: Offset(0, 30 * (1 - animValue)),
+                                  child: Opacity(
+                                    opacity: animValue,
+                                    child: Transform.scale(
+                                      scale: (0.8 + (0.2 * animValue)).clamp(0.0, 1.0),
+                                      child: WorkspaceCard(
+                                        workspace,
+                                        title: workspace.name ?? 'ไม่มีชื่อ',
+                                        color: Colors.primaries[(index - 1) % Colors.primaries.length].shade400,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          );
+                                );
+                              },
+                            );
+                          }
                         },
                       );
                     },

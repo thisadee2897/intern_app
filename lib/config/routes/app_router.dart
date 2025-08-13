@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project/config/routes/boxmain.dart';
 import 'package:project/config/routes/route_config.dart';
+import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 import 'package:project/screens/home/providers/controllers/home_controller.dart';
 import 'package:project/screens/home/views/home_screen.dart';
 import 'package:project/screens/auth/view/login.dart';
@@ -14,17 +15,25 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>();
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>();
 final appRouterProvider = Provider<GoRouter>((ref) {
-  ref.read(localStorageServiceProvider).getUserLogin();
   return GoRouter(
     redirect: (context, state) async {
       //ถ้า Token ไม่มีให้ไปหน้า Login
       String? token = await ref.read(localStorageServiceProvider).getToken();
+      ref.invalidate(isLoggedInProvider);
       var currentPath = state.fullPath;
+      
+      print('Redirect check - Token: ${token != null ? 'exists' : 'null'}, Current path: $currentPath');
+      
       if (token == null || token.isEmpty) {
-        return Routes.login;
+        // ถ้าไม่มี token และไม่ได้อยู่ที่หน้า login ให้ไปหน้า login
+        if (currentPath != Routes.login) {
+          print('Redirecting to login - no token');
+          return Routes.login;
+        }
       } else {
         //ถ้า Token มีให้ไปหน้า Home
-        if (currentPath == Routes.login || currentPath == Routes.init) {
+        if (currentPath == Routes.login || currentPath == Routes.init || currentPath == '/') {
+          print('Redirecting to home - token exists');
           return Routes.home;
         }
       }
@@ -64,14 +73,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             navigatorKey: _shellNavigatorHomeKey,
-            
-            routes: [GoRoute(
-              redirect: (context, state) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ref.read(workspaceProvider.notifier).fetchWorkspace();
-                });
-              },
-              path: Routes.home, pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()))],
+
+            routes: [
+              GoRoute(
+                redirect: (context, state) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ref.read(workspaceProvider.notifier).fetchWorkspace();
+                  });
+                  return null;
+                },
+                path: Routes.home,
+                pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()),
+              ),
+            ],
           ),
           StatefulShellBranch(
             navigatorKey: _shellNavigatorSettingsKey,

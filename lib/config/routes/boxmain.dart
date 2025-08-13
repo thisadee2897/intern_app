@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project/config/routes/route_config.dart';
-import 'package:project/config/routes/route_helper.dart';
 import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 
 final isShowButtomNavigationBar = StateProvider<bool>((ref) => true);
@@ -60,10 +59,11 @@ class _ScaffoldWithAppbarState extends ConsumerState<ScaffoldWithAppbar> {
                   IconButton(
                     icon: const Icon(Icons.logout),
                     onPressed: () async {
-                      print('Logout button pressed');
                       try {
                         await ref.read(logoutProvider.future);
-                        ref.goFromPath(Routes.login);
+                        if (context.mounted) {
+                          context.go(Routes.login);
+                        }
                       } catch (e, stx) {
                         print(stx);
                         if (context.mounted) {
