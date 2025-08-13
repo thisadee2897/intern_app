@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:project/config/routes/app_router.dart';
+import 'package:project/config/routes/route_config.dart';
+import 'package:project/config/routes/route_helper.dart';
 import 'package:project/screens/home/providers/controllers/home_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/components/export.dart';
@@ -18,7 +21,6 @@ class _HomeScreenState extends BaseState<HomeScreen> with TickerProviderStateMix
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: const Duration(milliseconds: 1200), vsync: this);
-
     // Start animation when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
@@ -50,6 +52,11 @@ class _HomeScreenState extends BaseState<HomeScreen> with TickerProviderStateMix
     return Consumer(
       builder: (context, ref, child) {
         final workspaceState = ref.watch(workspaceProvider);
+        if (workspaceState.hasError) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            return ref.read(appRouterProvider).go(Routes.login);
+          });
+        }
         return Scaffold(
           backgroundColor: Colors.grey.shade50,
           body: Container(

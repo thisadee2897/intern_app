@@ -14,7 +14,6 @@ import 'package:project/screens/project/project_datail/providers/controllers/mas
 import 'package:project/screens/project/project_datail/providers/controllers/task_detail_controller.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
 import 'package:project/screens/project/project_datail/views/widgets/route_observer.dart';
-import 'package:project/screens/project/sprint/views/widgets/insert_update_sprint.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/date.dart';
 import 'package:project/utils/extension/hex_color.dart';
@@ -113,9 +112,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     },
                     decoration: InputDecoration(
                       // loading state
-                      prefix: ref.watch(insertOrUpdateTaskControllerProvider).isLoading
-                          ? const CircularProgressIndicator( color: Colors.blue)
-                          : null,
+                      prefix: ref.watch(insertOrUpdateTaskControllerProvider).isLoading ? const CircularProgressIndicator(color: Colors.blue) : null,
                     ),
                     controller: _taskNameController,
                     onChanged: (value) => ref.read(inputTaskNameProvider.notifier).state = value,
@@ -235,10 +232,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
           ref.read(taskDetailProvider.notifier).getTaskDetail(task.id!);
           ref.read(commentTaskProvider.notifier).getCommentTask(task.id!);
         },
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [_buildTaskStatusDropdown(task, projectHdId), Gap(8), _buildAssigneeInfo(task)],
-        ),
+        trailing: Row(mainAxisSize: MainAxisSize.min, children: [_buildTaskStatusDropdown(task, projectHdId), Gap(8), _buildAssigneeInfo(task)]),
       ),
     );
   }
@@ -372,7 +366,6 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   //   }
   // }
 
-
   /// ปุ่มสำหรับสร้างงานใหม่
   Widget _buildCreateButton(SprintModel sprint) {
     return MouseRegion(
@@ -391,9 +384,6 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   }
 
   /// จัดการการสร้าง Task ใหม่
-
-
-
 
   /// แสดง Success SnackBar
   void _showSuccessSnackBar(String message) {
@@ -449,7 +439,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   Widget _buildCreateSprintButton() {
     return ElevatedButton(
       style: _getButtonStyle(),
-      onPressed: _handleCreateSprint,
+      onPressed: () => _handleCreateOrUpdateSprint(SprintModel()),
       child: const Text('Create sprint', style: TextStyle(color: Color.fromARGB(255, 91, 91, 91))),
     );
   }
@@ -484,13 +474,143 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   }
 
   /// จัดการการสร้าง Sprint ใหม่
-  Future<void> _handleCreateSprint() async {
-    final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const InsertUpdateSprint()));
-
-    if (result == true) {
-      await ref.read(sprintProvider.notifier).get();
-      ref.invalidate(sprintProvider);
-    }
+  Future<void> _handleCreateOrUpdateSprint(SprintModel itemSprint) async {
+    _sprintNameController.text = itemSprint.name ?? '';
+    _sprintGoalController.text = itemSprint.goal ?? '';
+    ref.read(insertUpdateSprintProvider.notifier).setItem(itemSprint);
+    final formKey = GlobalKey<FormState>();
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final state = ref.watch(insertUpdateSprintProvider);
+            DateTime? startDate = DateTime.parse(state.value?.satartDate ?? DateTime.now().toString());
+            DateTime? endDate = DateTime.parse(state.value?.endDate ?? DateTime.now().toString());
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: Text('${state.value?.id == '0' ? 'Create' : 'Update'} Sprint'),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  spacing: 4,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Text('$taskCount work items will be included in this sprint.'),
+                    const Text('Required fields are marked with an asterisk *'),
+                    const Gap(10),
+                    const TitleWidget(text: 'Sprint name'),
+                    SizedBox(
+                      width: 400,
+                      child: TextFormField(
+                        controller: _sprintNameController,
+                        onChanged: (value) {
+                          ref.read(insertUpdateSprintProvider.notifier).updateName(value);
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter sprint name';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const Gap(10),
+                    const TitleWidget(text: 'Start date'),
+                    SizedBox(
+                      width: 400,
+                      child: FormStartDateWidget(
+                        startDate: startDate,
+                        endDate: endDate,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select start date';
+                          }
+                          return null;
+                        },
+                        onChanged: (DateTime date) {
+                          ref.read(insertUpdateSprintProvider.notifier).updateStartDate(date);
+                        },
+                      ),
+                    ),
+                    const Gap(10),
+                    const TitleWidget(text: 'End date'),
+                    SizedBox(
+                      width: 400,
+                      child: FormEndDateWidget(
+                        startDate: startDate,
+                        endDate: endDate,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select end date';
+                          }
+                          return null;
+                        },
+                        onChanged: (date) {
+                          ref.read(insertUpdateSprintProvider.notifier).updateEndDate(date);
+                        },
+                      ),
+                    ),
+                    const Text('Sprint goal'),
+                    SizedBox(
+                      width: 552,
+                      child: TextFormField(
+                        controller: _sprintGoalController,
+                        minLines: 4,
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        onChanged: (value) {
+                          ref.read(insertUpdateSprintProvider.notifier).updateGoal(value);
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Enter sprint goal',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        ),
+                      ),
+                    ),
+                    // Active Sprint
+                    Row(
+                      spacing: 10,
+                      children: [
+                        Switch(
+                          value: state.value?.active == true,
+                          onChanged: (value) {
+                            ref.read(insertUpdateSprintProvider.notifier).updateActiveStatus(value);
+                          },
+                        ),
+                        Text(state.value?.active == true ? 'Active' : 'Inactive'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                FilledButton(
+                  onPressed: () async {
+                    try {
+                      await ref.read(insertUpdateSprintProvider.notifier).insertOrUpdateSprint().then((value) {
+                        if (value != null) {
+                          Navigator.pop(context, value);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sprint ${value.name} created successfully')));
+                          ref.read(sprintProvider.notifier).get();
+                          ref.read(insertUpdateSprintProvider.notifier).clearState();
+                        }
+                      });
+                    } catch (e) {
+                      _showErrorSnackBar('Error creating sprint: ${e.toString()}');
+                    }
+                  },
+                  child: Text('${state.value?.id == '0' ? 'Create' : 'Update'} Sprint'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   /// จัดการการเริ่ม Sprint
@@ -763,37 +883,35 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       child: PopupMenuButton<String>(
         icon: const Icon(Icons.more_horiz, color: Colors.grey),
         tooltip: 'ตัวเลือกเพิ่มเติม',
-        onSelected: _handleSprintMenuAction,
+        // onSelected: _handleSprintMenuAction,
         itemBuilder:
-            (context) => const [
-              PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(Icons.edit, size: 20, color: Colors.grey), title: Text('edit sprint'))),
-              PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete_outline, size: 20, color: Colors.grey), title: Text('delete sprint'))),
+            (context) => [
+              PopupMenuItem(
+                onTap: () => _handleCreateOrUpdateSprint(widget.item),
+                value: 'edit',
+                child: ListTile(leading: Icon(Icons.edit, size: 20, color: Colors.grey), title: Text('edit sprint')),
+              ),
+              PopupMenuItem(
+                onTap: _handleDeleteSprint,
+                value: 'delete',
+                child: ListTile(leading: Icon(Icons.delete_outline, size: 20, color: Colors.grey), title: Text('delete sprint')),
+              ),
             ],
       ),
     );
   }
 
-  /// จัดการ action ของเมนู Sprint
-  Future<void> _handleSprintMenuAction(String value) async {
-    switch (value) {
-      case 'edit':
-        await _handleEditSprint();
-        break;
-      case 'delete':
-        await _handleDeleteSprint();
-        break;
-    }
-  }
-
-  /// จัดการการแก้ไข Sprint
-  Future<void> _handleEditSprint() async {
-    final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => InsertUpdateSprint(sprint: widget.item)));
-
-    if (result == true) {
-      await ref.read(sprintProvider.notifier).get();
-      ref.invalidate(sprintProvider);
-    }
-  }
+  // /// จัดการ action ของเมนู Sprint
+  // Future<void> _handleSprintMenuAction(String value) async {
+  //   switch (value) {
+  //     case 'edit':
+  //       await _handleEditSprint();
+  //       break;
+  //     case 'delete':
+  //       await _handleDeleteSprint();
+  //       break;
+  //   }
+  // }
 
   /// จัดการการลบ Sprint
   Future<void> _handleDeleteSprint() async {

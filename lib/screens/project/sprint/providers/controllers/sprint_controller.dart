@@ -9,6 +9,7 @@ import 'package:project/models/task_model.dart';
 import 'package:project/models/task_status_model.dart';
 import 'package:project/screens/project/sprint/providers/apis/delete_sprint_api.dart';
 
+import '../../../project_datail/providers/controllers/task_detail_controller.dart';
 import '../../../project_datail/views/widgets/backlog_widget.dart';
 
 // -------------------  SprintNotifier -------------------
@@ -28,6 +29,7 @@ class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
       });
     }
   }
+
   Future<void> getWithOutLoading() async {
     String? id = ref.read(selectProjectIdProvider);
     if (id == null) {
@@ -42,11 +44,32 @@ class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
 
   Future<void> updateStatusTask(TaskStatusModel model, TaskModel item) async {
     try {
-      String? id = ref.read(selectProjectIdProvider);
-      state = await AsyncValue.guard(() async {
-        List<SprintModel> response = await ref.read(apiBacklog).get(projectId: id!);
-        return response;
-      });
+      // String? id = ref.read(selectProjectIdProvider);
+      // state = await AsyncValue.guard(() async {
+      //   List<SprintModel> response = await ref.read(apiBacklog).get(projectId: id!);
+      //   return response;
+      // });
+      state = AsyncValue.data(
+        state.valueOrNull?.map((sprint) {
+              if (sprint.tasks.any((task) => task.id == item.id)) {
+                return sprint.copyWith(
+                  tasks:
+                      sprint.tasks.map((task) {
+                        if (task.id == item.id) {
+                          return task.copyWith(taskStatus: model);
+                        }
+                        return task;
+                      }).toList(),
+                );
+              }
+              return sprint;
+            }).toList() ??
+            [],
+      );
+      var detail = ref.read(taskDetailProvider);
+      if (detail.hasValue && detail.value?.id == item.id) {
+        ref.read(taskDetailProvider.notifier).updateTaskStatus(model);
+      }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -67,42 +90,65 @@ class SprintNotifier extends StateNotifier<AsyncValue<List<SprintModel>>> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  // updateTaskById
+  Future<void> updateTaskById(TaskModel updatedTask) async {
+    try {
+      state = AsyncValue.data(
+        state.valueOrNull?.map((sprint) {
+              if (sprint.tasks.any((task) => task.id == updatedTask.id)) {
+                return sprint.copyWith(
+                  tasks:
+                      sprint.tasks.map((task) {
+                        if (task.id == updatedTask.id) {
+                          return updatedTask;
+                        }
+                        return task;
+                      }).toList(),
+                );
+              }
+              return sprint;
+            }).toList() ??
+            [],
+      );
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
 }
 
 // -------------------  Insert/Update Notifier -------------------
-class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel?>> {
-  InsertUpdateSprintNotifier(this.ref) : super(const AsyncValue.data(null));
+class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel>> {
+  InsertUpdateSprintNotifier(this.ref) : super(AsyncValue.data(SprintModel(id: '0', active: true, completed: false, duration: 0)));
   final Ref ref;
 
-  Future<void> insertOrUpdateSprint({
-    required String id, // "0" for insert, actual id for update
-    required String name,
-    required int duration,
-    required String goal,
-    required String projectHdId,
-    required String hdId,
-  }) async {
-    state = const AsyncValue.loading();
+  Future<SprintModel?> insertOrUpdateSprint() async {
+    if (state.hasValue) {
+      SprintModel item = state.value!;
+      try {
+        final body = {
+          "id": item.id,
+          "name": item.name,
+          "duration": item.duration,
+          "start_date": item.satartDate,
+          "end_date": item.endDate,
+          "goal": item.goal,
+          "completed": item.completed ?? false,
+          "project_hd_id": ref.read(selectProjectIdProvider)!,
+          "active": item.active ?? true,
+          "startting": item.startting ?? false,
+          "hd_id": ref.read(selectProjectIdProvider)!,
+        };
 
-    try {
-      final body = {
-        "id": id,
-        "name": name,
-        "duration": duration,
-        "start_date": null,
-        "end_date": null,
-        "goal": goal,
-        "completed": false,
-        "project_hd_id": projectHdId,
-        "active": true,
-        "startting": false,
-        "hd_id": projectHdId,
-      };
-
-      final result = await ref.read(apiInsertOrUpdateSprint).post(body: body);
-      state = AsyncValue.data(result);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+        final result = await ref.read(apiInsertOrUpdateSprint).post(body: body);
+        state = AsyncValue.data(result);
+        return result;
+      } catch (e, st) {
+        state = AsyncValue.error(e, st);
+        return null;
+      }
+    } else {
+      return null;
     }
   }
 
@@ -132,15 +178,53 @@ class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel?>>
     }
   }
 
+  void updateActiveStatus(bool isActive) {
+    if (state.hasValue) {
+      state = AsyncData(state.value!.copyWith(active: isActive));
+    }
+  }
+
+  //updateName
+  void updateName(String name) {
+    if (state.hasValue) {
+      state = AsyncData(state.value!.copyWith(name: name));
+    }
+  }
+
+  //updateGoal
+  void updateGoal(String goal) {
+    if (state.hasValue) {
+      state = AsyncData(state.value!.copyWith(goal: goal));
+    }
+  }
+
+  //updateStartDate
+  void updateStartDate(DateTime startDate) {
+    if (state.hasValue) {
+      state = AsyncData(state.value!.copyWith(satartDate: startDate.toString()));
+    }
+  }
+
+  //updateEndDate
+  void updateEndDate(DateTime endDate) {
+    if (state.hasValue) {
+      state = AsyncData(state.value!.copyWith(endDate: endDate.toString()));
+    }
+  }
+  //setItem
+  void setItem(SprintModel item) {
+    state = AsyncValue.data(item);
+  }
+
   void clearState() {
-    state = const AsyncValue.data(null);
+    state = const AsyncValue.data(SprintModel(id: '0', active: true, completed: false, duration: 0));
   }
 }
 
 // -------------------  Providers -------------------
 final sprintProvider = StateNotifierProvider<SprintNotifier, AsyncValue<List<SprintModel>>>((ref) => SprintNotifier(ref));
 
-final insertUpdateSprintProvider = StateNotifierProvider<InsertUpdateSprintNotifier, AsyncValue<SprintModel?>>((ref) => InsertUpdateSprintNotifier(ref));
+final insertUpdateSprintProvider = StateNotifierProvider<InsertUpdateSprintNotifier, AsyncValue<SprintModel>>((ref) => InsertUpdateSprintNotifier(ref));
 
 final selectProjectIdProvider = StateProvider<String?>((ref) => null); //  Provider สำหรับเลือก Project ID
 

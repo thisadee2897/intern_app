@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:project/components/export.dart';
+import 'package:project/config/routes/app_router.dart';
+import 'package:project/config/routes/route_config.dart';
 import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 
 import 'local_storage_service.dart';
@@ -46,18 +49,21 @@ class ApiInterceptor extends Interceptor {
       return;
     }
     if (err.response?.statusCode == 401) {
-      handler.reject(
-        DioException(
-          type: DioExceptionType.badResponse,
-          response: err.response,
-          requestOptions: err.requestOptions,
-          stackTrace: err.stackTrace,
-          message: err.response?.data['detail'] ?? 'Unauthorized',
-        ),
-      );
+      // handler.reject(
+      //   DioException(
+      //     type: DioExceptionType.badResponse,
+      //     response: err.response,
+      //     requestOptions: err.requestOptions,
+      //     stackTrace: err.stackTrace,
+      //     message: err.response?.data['detail'] ?? 'Unauthorized',
+      //   ),
+      // );
       ref.read(localStorageServiceProvider).deleteToken();
       ref.read(localStorageServiceProvider).clear();
       ref.read(logoutProvider.future);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(appRouterProvider).go(Routes.login);
+      });
       return;
     } else if (err.response?.statusCode == 404) {
       //404 หมายถึงไม่พบข้อมูล

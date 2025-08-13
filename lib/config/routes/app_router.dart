@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project/config/routes/boxmain.dart';
 import 'package:project/config/routes/route_config.dart';
+import 'package:project/screens/home/providers/controllers/home_controller.dart';
 import 'package:project/screens/home/views/home_screen.dart';
 import 'package:project/screens/auth/view/login.dart';
 import 'package:project/screens/settings/profile/view/profile_screen.dart';
@@ -63,7 +64,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             navigatorKey: _shellNavigatorHomeKey,
-            routes: [GoRoute(path: Routes.home, pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()))],
+            
+            routes: [GoRoute(
+              redirect: (context, state) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ref.read(workspaceProvider.notifier).fetchWorkspace();
+                });
+              },
+              path: Routes.home, pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()))],
           ),
           StatefulShellBranch(
             navigatorKey: _shellNavigatorSettingsKey,

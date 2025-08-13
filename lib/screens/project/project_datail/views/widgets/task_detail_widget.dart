@@ -107,6 +107,9 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                         padding: const EdgeInsets.all(8.0),
                         child: TextField(
                           controller: taskNameController,
+                          onChanged: (value) {
+                            ref.read(taskDetailProvider.notifier).updateTaskName(value);
+                          },
                           decoration: InputDecoration(border: InputBorder.none, hintText: 'Task Name', hintStyle: TextStyle(color: Colors.grey.shade600)),
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -150,11 +153,14 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                         TitleForTask(title: 'Project', value: data.projectHd?.name ?? 'No Project'),
                         TitleForTask(title: 'Sprint', value: data.sprint?.name ?? 'No Sprint'),
                         Gap(12),
-
                         Row(children: [const Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)), const Spacer()]),
                         const SizedBox(height: 8),
 
-                        TextField(maxLines: 10, controller: descriptionController),
+                        TextField(maxLines: 10, controller: descriptionController,
+                        onChanged: (value) {
+                          ref.read(taskDetailProvider.notifier).updateDescription(value);
+                        },
+                        ),
                         const SizedBox(height: 24),
 
                         Container(
@@ -206,7 +212,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                   UserModel assignee = ref.read(listAssignProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updateAssignee(assignee);
 
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
+                                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
                                 },
                               ),
                               DetailRowWidget<String>(
@@ -218,7 +224,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                   PriorityModel priority = ref.read(listPriorityProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updatePriority(priority);
 
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
+                                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
                                 },
                               ),
 
@@ -230,8 +236,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 onSaved: (item) {
                                   TaskStatusModel taskStatus = ref.read(listTaskStatusProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updateTaskStatus(taskStatus);
-
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
+                                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
                                 },
                               ),
                               DetailRowWidget<String>(
@@ -431,23 +436,26 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                                 ),
                                               ],
                                             ),
-
-                                            Container(
-                                              margin: const EdgeInsets.only(top: 4),
-                                              decoration: BoxDecoration(
-                                                border: Border.all(color: Colors.grey.shade300),
-                                                borderRadius: BorderRadius.circular(8),
-                                                color: Colors.white,
-                                              ),
-                                              child: QuillEditor(
-                                                controller: controller,
-                                                focusNode: FocusNode(),
-                                                scrollController: ScrollController(),
-                                                config: QuillEditorConfig(
-                                                  padding: const EdgeInsets.all(12),
-                                                  scrollable: false,
-                                                  expands: false,
-                                                  embedBuilders: [],
+                                            IgnorePointer(
+                                              ignoring: true,
+                                              child: Container(
+                                                margin: const EdgeInsets.only(top: 4),
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(color: Colors.grey.shade300),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  color: Colors.white,
+                                                ),
+                                                child: QuillEditor(
+                                                  
+                                                  controller: controller,
+                                                  focusNode: FocusNode(),
+                                                  scrollController: ScrollController(),
+                                                  config: QuillEditorConfig(
+                                                    padding: const EdgeInsets.all(12),
+                                                    scrollable: false,
+                                                    expands: false,
+                                                    embedBuilders: [],
+                                                  ),
                                                 ),
                                               ),
                                             ),
