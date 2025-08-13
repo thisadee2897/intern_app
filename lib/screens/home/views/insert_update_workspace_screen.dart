@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
 import 'package:project/models/workspace_model.dart';
+import 'package:project/screens/home/providers/controllers/delete_workspace_controllers.dart';
 import 'package:project/screens/home/providers/controllers/insert_update_workspace_controllers.dart';
 
-class InsertUpdateWorkspaceScreen extends BaseStatefulWidget {
+class InsertUpdateWorkspaceDialog extends BaseStatefulWidget {
   final WorkspaceModel? workspace; // null = insert, not null = update
-  const InsertUpdateWorkspaceScreen({super.key, this.workspace});
+  const InsertUpdateWorkspaceDialog({super.key, this.workspace});
 
   @override
-  BaseState<InsertUpdateWorkspaceScreen> createState() =>
-      _InsertUpdateWorkspaceScreenState();
+  BaseState<InsertUpdateWorkspaceDialog> createState() =>
+      _InsertUpdateWorkspaceDialogState();
 }
 
-class _InsertUpdateWorkspaceScreenState
-    extends BaseState<InsertUpdateWorkspaceScreen> {
+class _InsertUpdateWorkspaceDialogState
+    extends BaseState<InsertUpdateWorkspaceDialog> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _nameController;
@@ -24,8 +25,7 @@ class _InsertUpdateWorkspaceScreenState
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.workspace?.name ?? '');
-    // _isActive = widget.workspace?.active ?? true;  // กำหนดค่าเริ่มต้นจาก model ถ้ามี
-    _isActive = true; // ตั้งค่า default เป็น true เสมอ (แก้ไขหรือเพิ่มก็ได้)
+    _isActive = true;
   }
 
   @override
@@ -40,50 +40,101 @@ class _InsertUpdateWorkspaceScreenState
     SizingInformation sizingInformation,
   ) {
     final isEdit = widget.workspace != null;
+    final double baseFontSize =
+        MediaQuery.of(context).size.width < 600 ? 14 : 16;
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 600;
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            isEdit ? 'Edit Workspace' : 'Insert Workspace',
+            style: TextStyle(fontSize: baseFontSize + 4),
+          ),
+          if (isEdit) // แสดงปุ่มลบเฉพาะตอนแก้ไข
+            IconButton(
+              tooltip: 'Delete Workspace',
+              icon: const Icon(Icons.delete, color: Colors.grey),
+              iconSize: 16,
+              onPressed:
+                  _isLoading
+                      ? null
+                      : () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                backgroundColor: Colors.white,
+                                title: const Text('Confirm Delete'),
+                                content: const Text(
+                                  'คุณต้องการลบ Workspace นี้หรือไม่?',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed:
+                                        () => Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed:
+                                        () => Navigator.pop(context, true),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                    ),
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              ),
+                        );
 
-    final double baseFontSize = isSmallScreen ? 14 : 16;
+                        if (confirm == true) {
+                          try {
+                            setState(() => _isLoading = true);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          isEdit ? 'Edit Workspace' : 'Insert Workspace',
-          style: TextStyle(fontSize: baseFontSize + 10),
-        ),
-        backgroundColor: Colors.white,
+                            // เรียก API ลบ workspace
+                            await ref
+                                .read(
+                                  deleteWorkspaceControllerProvider.notifier,
+                                )
+                                .deleteWorkspace(id: widget.workspace!.id!);
+
+                            if (!mounted) return;
+                            Navigator.of(context).pop(
+                              true,
+                            ); // ส่ง true กลับไปบอกว่ามีการเปลี่ยนแปลง
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('ลบไม่สำเร็จ: $e')),
+                            );
+                          } finally {
+                            if (mounted) setState(() => _isLoading = false);
+                          }
+                        }
+                      },
+            ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Form(
-          key: _formKey,
+      content: Form(
+        key: _formKey,
+        child: SizedBox(
+          width: 400, // กำหนดความกว้าง dialog
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // ช่องกรอกชื่อ
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'Name Workspace *',
-                  prefixIcon: const Icon(Icons.dashboard_customize_rounded),
+                  prefixIcon: const Icon(
+                    Icons.dashboard_customize_rounded,
+                    color: Colors.blue,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Colors.indigo,
-                      width: 2.0,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Colors.grey,
-                      width: 1.2,
-                    ),
-                  ),
-                  hoverColor: Colors.indigo.withOpacity(0.05),
                 ),
                 style: TextStyle(fontSize: baseFontSize),
                 validator: (val) {
@@ -93,7 +144,7 @@ class _InsertUpdateWorkspaceScreenState
                   return null;
                 },
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // ปุ่มเปิดปิด Active
               SwitchListTile(
@@ -108,64 +159,30 @@ class _InsertUpdateWorkspaceScreenState
                   });
                 },
               ),
-              const SizedBox(height: 25),
-              // ปุ่มบันทึก
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 243, 242, 242), // สีพื้นหลังปุ่ม
-                        foregroundColor: const Color.fromARGB(199, 230, 33, 66), // สีตัวอักษร
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontSize:
-                              MediaQuery.of(context).size.width < 500 ? 12 : 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleSubmit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 243, 242, 242), // สีพื้นหลังปุ่ม
-                        foregroundColor: const Color.fromARGB(199, 78, 90, 222), // สีตัวอักษร
-                      ),
-                      child:
-                          _isLoading
-                              ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : Text(
-                                isEdit
-                                    ? 'Update Workspace'
-                                    : 'Insert Workspace',
-                                style: TextStyle(
-                                  fontSize:
-                                      MediaQuery.of(context).size.width < 500
-                                          ? 12
-                                          : 16,
-                                ),
-                              ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
       ),
-      backgroundColor: Colors.white,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _isLoading ? null : _handleSubmit,
+          child:
+              _isLoading
+                  ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                  : Text(isEdit ? 'Update' : 'Insert'),
+        ),
+      ],
     );
   }
 
@@ -184,20 +201,14 @@ class _InsertUpdateWorkspaceScreenState
             name: _nameController.text.trim(),
             active: _isActive,
           );
-          if (!mounted) return; // <--- เพิ่มบรรทัดนี้
+      if (!mounted) return;
 
-      _showSuccessSnackBar(
-        widget.workspace == null
-            ? 'Insert Workspace เรียบร้อย'
-            : 'Update Workspace เรียบร้อย',
-      );
-
-      Navigator.of(
-        context,
-      ).pop(true); // ส่งกลับ true เพื่อบอกให้รีเฟรชหน้าก่อนหน้า
+      Navigator.of(context).pop(true); // ส่ง true กลับไปบอกว่าบันทึกแล้ว
     } catch (e) {
-      if (!mounted) return; // <--- เพิ่มบรรทัดนี้
-      _showErrorSnackBar('เกิดข้อผิดพลาด: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -205,36 +216,6 @@ class _InsertUpdateWorkspaceScreenState
         });
       }
     }
-  }
-
-  void _showSuccessSnackBar(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(msg),
-          ],
-        ),
-        backgroundColor: const Color.fromARGB(255, 11, 41, 66),
-      ),
-    );
-  }
-
-  void _showErrorSnackBar(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(child: Text(msg)),
-          ],
-        ),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
 
   @override
