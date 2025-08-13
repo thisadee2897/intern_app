@@ -8,6 +8,7 @@ import 'package:project/models/task_model.dart';
 import 'package:project/models/task_status_model.dart';
 import 'package:project/models/type_of_work_model.dart';
 import 'package:project/models/user_model.dart';
+import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 
 import 'insert_controller.dart';
 
@@ -156,6 +157,7 @@ class TaskDetailNotifier extends StateNotifier<AsyncValue<TaskModel>> {
         } catch (e) {
           print("❌ อัปเดต status ผิดพลาด: $e");
         }
+        ref.read(sprintProvider.notifier).updateTaskById(currentData);
       }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
