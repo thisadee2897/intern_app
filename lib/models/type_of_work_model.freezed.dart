@@ -31,7 +31,9 @@ mixin _$TypeOfWorkModel {
   @JsonKey(name: 'color')
   String? get color => throw _privateConstructorUsedError;
   @JsonKey(name: 'active')
-  bool? get active => throw _privateConstructorUsedError;
+  bool get active => throw _privateConstructorUsedError;
+  @JsonKey(name: 'count')
+  num get count => throw _privateConstructorUsedError;
 
   /// Serializes this TypeOfWorkModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -55,7 +57,8 @@ abstract class $TypeOfWorkModelCopyWith<$Res> {
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'color') String? color,
-      @JsonKey(name: 'active') bool? active});
+      @JsonKey(name: 'active') bool active,
+      @JsonKey(name: 'count') num count});
 }
 
 /// @nodoc
@@ -78,7 +81,8 @@ class _$TypeOfWorkModelCopyWithImpl<$Res, $Val extends TypeOfWorkModel>
     Object? name = freezed,
     Object? description = freezed,
     Object? color = freezed,
-    Object? active = freezed,
+    Object? active = null,
+    Object? count = null,
   }) {
     return _then(_value.copyWith(
       tableName: freezed == tableName
@@ -101,10 +105,14 @@ class _$TypeOfWorkModelCopyWithImpl<$Res, $Val extends TypeOfWorkModel>
           ? _value.color
           : color // ignore: cast_nullable_to_non_nullable
               as String?,
-      active: freezed == active
+      active: null == active
           ? _value.active
           : active // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as num,
     ) as $Val);
   }
 }
@@ -123,7 +131,8 @@ abstract class _$$TypeOfWorkModelImplCopyWith<$Res>
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'color') String? color,
-      @JsonKey(name: 'active') bool? active});
+      @JsonKey(name: 'active') bool active,
+      @JsonKey(name: 'count') num count});
 }
 
 /// @nodoc
@@ -144,7 +153,8 @@ class __$$TypeOfWorkModelImplCopyWithImpl<$Res>
     Object? name = freezed,
     Object? description = freezed,
     Object? color = freezed,
-    Object? active = freezed,
+    Object? active = null,
+    Object? count = null,
   }) {
     return _then(_$TypeOfWorkModelImpl(
       tableName: freezed == tableName
@@ -167,10 +177,14 @@ class __$$TypeOfWorkModelImplCopyWithImpl<$Res>
           ? _value.color
           : color // ignore: cast_nullable_to_non_nullable
               as String?,
-      active: freezed == active
+      active: null == active
           ? _value.active
           : active // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as num,
     ));
   }
 }
@@ -184,7 +198,8 @@ class _$TypeOfWorkModelImpl implements _TypeOfWorkModel {
       @JsonKey(name: 'name') this.name,
       @JsonKey(name: 'description') this.description,
       @JsonKey(name: 'color') this.color,
-      @JsonKey(name: 'active') this.active});
+      @JsonKey(name: 'active') this.active = true,
+      @JsonKey(name: 'count') this.count = 0});
 
   factory _$TypeOfWorkModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$TypeOfWorkModelImplFromJson(json);
@@ -206,11 +221,14 @@ class _$TypeOfWorkModelImpl implements _TypeOfWorkModel {
   final String? color;
   @override
   @JsonKey(name: 'active')
-  final bool? active;
+  final bool active;
+  @override
+  @JsonKey(name: 'count')
+  final num count;
 
   @override
   String toString() {
-    return 'TypeOfWorkModel(tableName: $tableName, id: $id, name: $name, description: $description, color: $color, active: $active)';
+    return 'TypeOfWorkModel(tableName: $tableName, id: $id, name: $name, description: $description, color: $color, active: $active, count: $count)';
   }
 
   @override
@@ -225,13 +243,14 @@ class _$TypeOfWorkModelImpl implements _TypeOfWorkModel {
             (identical(other.description, description) ||
                 other.description == description) &&
             (identical(other.color, color) || other.color == color) &&
-            (identical(other.active, active) || other.active == active));
+            (identical(other.active, active) || other.active == active) &&
+            (identical(other.count, count) || other.count == count));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, tableName, id, name, description, color, active);
+  int get hashCode => Object.hash(
+      runtimeType, tableName, id, name, description, color, active, count);
 
   /// Create a copy of TypeOfWorkModel
   /// with the given fields replaced by the non-null parameter values.
@@ -257,7 +276,8 @@ abstract class _TypeOfWorkModel implements TypeOfWorkModel {
       @JsonKey(name: 'name') final String? name,
       @JsonKey(name: 'description') final String? description,
       @JsonKey(name: 'color') final String? color,
-      @JsonKey(name: 'active') final bool? active}) = _$TypeOfWorkModelImpl;
+      @JsonKey(name: 'active') final bool active,
+      @JsonKey(name: 'count') final num count}) = _$TypeOfWorkModelImpl;
 
   factory _TypeOfWorkModel.fromJson(Map<String, dynamic> json) =
       _$TypeOfWorkModelImpl.fromJson;
@@ -279,7 +299,10 @@ abstract class _TypeOfWorkModel implements TypeOfWorkModel {
   String? get color;
   @override
   @JsonKey(name: 'active')
-  bool? get active;
+  bool get active;
+  @override
+  @JsonKey(name: 'count')
+  num get count;
 
   /// Create a copy of TypeOfWorkModel
   /// with the given fields replaced by the non-null parameter values.

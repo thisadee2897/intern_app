@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'priority_model.dart';
+part of 'team_workload_model.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -14,12 +14,12 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-PriorityModel _$PriorityModelFromJson(Map<String, dynamic> json) {
-  return _PriorityModel.fromJson(json);
+TeamWorkloadModel _$TeamWorkloadModelFromJson(Map<String, dynamic> json) {
+  return _TeamWorkloadModel.fromJson(json);
 }
 
 /// @nodoc
-mixin _$PriorityModel {
+mixin _$TeamWorkloadModel {
   @JsonKey(name: 'table_name')
   String? get tableName => throw _privateConstructorUsedError;
   @JsonKey(name: 'id')
@@ -35,21 +35,21 @@ mixin _$PriorityModel {
   @JsonKey(name: 'count')
   num get count => throw _privateConstructorUsedError;
 
-  /// Serializes this PriorityModel to a JSON map.
+  /// Serializes this TeamWorkloadModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of PriorityModel
+  /// Create a copy of TeamWorkloadModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $PriorityModelCopyWith<PriorityModel> get copyWith =>
+  $TeamWorkloadModelCopyWith<TeamWorkloadModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $PriorityModelCopyWith<$Res> {
-  factory $PriorityModelCopyWith(
-          PriorityModel value, $Res Function(PriorityModel) then) =
-      _$PriorityModelCopyWithImpl<$Res, PriorityModel>;
+abstract class $TeamWorkloadModelCopyWith<$Res> {
+  factory $TeamWorkloadModelCopyWith(
+          TeamWorkloadModel value, $Res Function(TeamWorkloadModel) then) =
+      _$TeamWorkloadModelCopyWithImpl<$Res, TeamWorkloadModel>;
   @useResult
   $Res call(
       {@JsonKey(name: 'table_name') String? tableName,
@@ -62,16 +62,16 @@ abstract class $PriorityModelCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PriorityModelCopyWithImpl<$Res, $Val extends PriorityModel>
-    implements $PriorityModelCopyWith<$Res> {
-  _$PriorityModelCopyWithImpl(this._value, this._then);
+class _$TeamWorkloadModelCopyWithImpl<$Res, $Val extends TeamWorkloadModel>
+    implements $TeamWorkloadModelCopyWith<$Res> {
+  _$TeamWorkloadModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of PriorityModel
+  /// Create a copy of TeamWorkloadModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -118,11 +118,11 @@ class _$PriorityModelCopyWithImpl<$Res, $Val extends PriorityModel>
 }
 
 /// @nodoc
-abstract class _$$PriorityModelImplCopyWith<$Res>
-    implements $PriorityModelCopyWith<$Res> {
-  factory _$$PriorityModelImplCopyWith(
-          _$PriorityModelImpl value, $Res Function(_$PriorityModelImpl) then) =
-      __$$PriorityModelImplCopyWithImpl<$Res>;
+abstract class _$$TeamWorkloadModelImplCopyWith<$Res>
+    implements $TeamWorkloadModelCopyWith<$Res> {
+  factory _$$TeamWorkloadModelImplCopyWith(_$TeamWorkloadModelImpl value,
+          $Res Function(_$TeamWorkloadModelImpl) then) =
+      __$$TeamWorkloadModelImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
@@ -136,14 +136,14 @@ abstract class _$$PriorityModelImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$PriorityModelImplCopyWithImpl<$Res>
-    extends _$PriorityModelCopyWithImpl<$Res, _$PriorityModelImpl>
-    implements _$$PriorityModelImplCopyWith<$Res> {
-  __$$PriorityModelImplCopyWithImpl(
-      _$PriorityModelImpl _value, $Res Function(_$PriorityModelImpl) _then)
+class __$$TeamWorkloadModelImplCopyWithImpl<$Res>
+    extends _$TeamWorkloadModelCopyWithImpl<$Res, _$TeamWorkloadModelImpl>
+    implements _$$TeamWorkloadModelImplCopyWith<$Res> {
+  __$$TeamWorkloadModelImplCopyWithImpl(_$TeamWorkloadModelImpl _value,
+      $Res Function(_$TeamWorkloadModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of PriorityModel
+  /// Create a copy of TeamWorkloadModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -156,7 +156,7 @@ class __$$PriorityModelImplCopyWithImpl<$Res>
     Object? active = null,
     Object? count = null,
   }) {
-    return _then(_$PriorityModelImpl(
+    return _then(_$TeamWorkloadModelImpl(
       tableName: freezed == tableName
           ? _value.tableName
           : tableName // ignore: cast_nullable_to_non_nullable
@@ -191,8 +191,8 @@ class __$$PriorityModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$PriorityModelImpl implements _PriorityModel {
-  const _$PriorityModelImpl(
+class _$TeamWorkloadModelImpl implements _TeamWorkloadModel {
+  const _$TeamWorkloadModelImpl(
       {@JsonKey(name: 'table_name') this.tableName,
       @JsonKey(name: 'id') this.id,
       @JsonKey(name: 'name') this.name,
@@ -201,8 +201,8 @@ class _$PriorityModelImpl implements _PriorityModel {
       @JsonKey(name: 'active') this.active = true,
       @JsonKey(name: 'count') this.count = 0});
 
-  factory _$PriorityModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PriorityModelImplFromJson(json);
+  factory _$TeamWorkloadModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TeamWorkloadModelImplFromJson(json);
 
   @override
   @JsonKey(name: 'table_name')
@@ -228,14 +228,14 @@ class _$PriorityModelImpl implements _PriorityModel {
 
   @override
   String toString() {
-    return 'PriorityModel(tableName: $tableName, id: $id, name: $name, description: $description, color: $color, active: $active, count: $count)';
+    return 'TeamWorkloadModel(tableName: $tableName, id: $id, name: $name, description: $description, color: $color, active: $active, count: $count)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$PriorityModelImpl &&
+            other is _$TeamWorkloadModelImpl &&
             (identical(other.tableName, tableName) ||
                 other.tableName == tableName) &&
             (identical(other.id, id) || other.id == id) &&
@@ -252,34 +252,35 @@ class _$PriorityModelImpl implements _PriorityModel {
   int get hashCode => Object.hash(
       runtimeType, tableName, id, name, description, color, active, count);
 
-  /// Create a copy of PriorityModel
+  /// Create a copy of TeamWorkloadModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$PriorityModelImplCopyWith<_$PriorityModelImpl> get copyWith =>
-      __$$PriorityModelImplCopyWithImpl<_$PriorityModelImpl>(this, _$identity);
+  _$$TeamWorkloadModelImplCopyWith<_$TeamWorkloadModelImpl> get copyWith =>
+      __$$TeamWorkloadModelImplCopyWithImpl<_$TeamWorkloadModelImpl>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$PriorityModelImplToJson(
+    return _$$TeamWorkloadModelImplToJson(
       this,
     );
   }
 }
 
-abstract class _PriorityModel implements PriorityModel {
-  const factory _PriorityModel(
+abstract class _TeamWorkloadModel implements TeamWorkloadModel {
+  const factory _TeamWorkloadModel(
       {@JsonKey(name: 'table_name') final String? tableName,
       @JsonKey(name: 'id') final String? id,
       @JsonKey(name: 'name') final String? name,
       @JsonKey(name: 'description') final String? description,
       @JsonKey(name: 'color') final String? color,
       @JsonKey(name: 'active') final bool active,
-      @JsonKey(name: 'count') final num count}) = _$PriorityModelImpl;
+      @JsonKey(name: 'count') final num count}) = _$TeamWorkloadModelImpl;
 
-  factory _PriorityModel.fromJson(Map<String, dynamic> json) =
-      _$PriorityModelImpl.fromJson;
+  factory _TeamWorkloadModel.fromJson(Map<String, dynamic> json) =
+      _$TeamWorkloadModelImpl.fromJson;
 
   @override
   @JsonKey(name: 'table_name')
@@ -303,10 +304,10 @@ abstract class _PriorityModel implements PriorityModel {
   @JsonKey(name: 'count')
   num get count;
 
-  /// Create a copy of PriorityModel
+  /// Create a copy of TeamWorkloadModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$PriorityModelImplCopyWith<_$PriorityModelImpl> get copyWith =>
+  _$$TeamWorkloadModelImplCopyWith<_$TeamWorkloadModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

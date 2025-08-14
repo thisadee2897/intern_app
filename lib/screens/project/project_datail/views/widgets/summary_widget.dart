@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:project/components/export.dart';
-
 import 'context_summary_widget.dart';
+import 'priority_breakdown_widget.dart';
+import 'recent_activity_widget.dart';
+import 'status_overview_widget.dart';
+import 'team_workload_widget.dart';
+import 'type_of_work_widget.dart';
 
 class SummaryWidget extends BaseStatefulWidget {
   const SummaryWidget({super.key});
@@ -132,48 +136,23 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
     );
   }
 
-  Container _teamWorkload(BuildContext context) {
-    return Container(
-      height: 300, // Add some space between rows
-      margin: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.grey[200]),
-      child: Center(child: Text('Team workload', style: Theme.of(context).textTheme.titleLarge)),
-    );
+  TeamWorkloadWidget _teamWorkload(BuildContext context) {
+    return TeamWorkloadWidget();
   }
 
-  Container _typesOfWork(BuildContext context) {
-    return Container(
-      height: 300, // Add some space between rows
-      margin: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.grey[200]),
-      child: Center(child: Text('Types of work', style: Theme.of(context).textTheme.titleLarge)),
-    );
+  TypeOfWorkWidget _typesOfWork(BuildContext context) {
+    return TypeOfWorkWidget();
   }
 
-  Container _priorityBreakdown(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10),
-      height: 300, // Add some space between rows
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.grey[200]),
-      child: Center(child: Text('Priority breakdown', style: Theme.of(context).textTheme.titleLarge)),
-    );
+  PriorityBreakdownWidget _priorityBreakdown(BuildContext context) {
+    return PriorityBreakdownWidget();
   }
 
-  Container _recentActivity(BuildContext context) {
-    return Container(
-      height: 300, // Add some space between rows
-      margin: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.grey[200]),
-      child: Center(child: Text('Recent activity', style: Theme.of(context).textTheme.titleLarge)),
-    );
+  RecentActivityWidget _recentActivity(BuildContext context) {
+    return RecentActivityWidget();
   }
 
-  Container _statusOverview(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10),
-      height: 300, // Add some space between rows
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.grey[200]),
-      child: Center(child: Text('Status overview', style: Theme.of(context).textTheme.titleLarge)),
-    );
+  StatusOverviewWidget _statusOverview(BuildContext context) {
+    return StatusOverviewWidget();
   }
 }
