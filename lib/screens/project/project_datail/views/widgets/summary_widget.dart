@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:project/components/export.dart';
-import 'context_summary_widget.dart';
+import 'package:project/screens/project/project_datail/views/widgets/project_over_view_widget.dart';
 import 'priority_breakdown_widget.dart';
 import 'recent_activity_widget.dart';
 import 'status_overview_widget.dart';
@@ -15,17 +15,10 @@ class SummaryWidget extends BaseStatefulWidget {
 }
 
 class _SummaryWidgetState extends BaseState<SummaryWidget> {
-  List<Widget> contextSummaryWidgets = [
-    ContextSummaryWidget(title: 'Completed Tasks', count: '10'),
-    ContextSummaryWidget(title: 'In Progress Tasks', count: '5'),
-    ContextSummaryWidget(title: 'INPENDING', count: '2'),
-    ContextSummaryWidget(title: 'Due soon', count: '3'),
-  ];
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        double contextSummaryWidth = constraints.maxWidth / 4;
         return SizedBox(
           width: double.infinity,
           height: double.infinity,
@@ -35,7 +28,7 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 10,
               children: [
-                Row(children: contextSummaryWidgets.map((widget) => SizedBox(width: contextSummaryWidth, child: widget)).toList()),
+                ProjectOverViewWidget(),
                 Row(
                   children: [
                     SizedBox(width: constraints.maxWidth / 2, child: _statusOverview(context)),
@@ -63,7 +56,6 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
   Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        double contextSummaryWidth = constraints.maxWidth / 2;
         return SizedBox(
           width: double.infinity,
           height: double.infinity,
@@ -73,14 +65,7 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 10,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: contextSummaryWidgets.take(2).map((widget) => SizedBox(width: contextSummaryWidth, child: widget)).toList(),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: contextSummaryWidgets.skip(2).map((widget) => SizedBox(width: contextSummaryWidth, child: widget)).toList(),
-                ),
+                ProjectOverViewWidget(),
                 Row(
                   children: [
                     SizedBox(width: constraints.maxWidth / 2, child: _statusOverview(context)),
@@ -108,7 +93,6 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
   Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        double contextSummaryWidth = constraints.maxWidth;
         return SizedBox(
           width: double.infinity,
           height: double.infinity,
@@ -118,7 +102,7 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 10,
               children: [
-                Column(children: contextSummaryWidgets.map((widget) => SizedBox(width: contextSummaryWidth, child: widget)).toList()),
+                ProjectOverViewWidget(),
                 SizedBox(width: constraints.maxWidth, child: _statusOverview(context)),
                 Gap(5),
                 SizedBox(width: constraints.maxWidth, child: _recentActivity(context)),
