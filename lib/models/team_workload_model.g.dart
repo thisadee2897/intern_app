@@ -1,14 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'type_of_work_model.dart';
+part of 'team_workload_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$TypeOfWorkModelImpl _$$TypeOfWorkModelImplFromJson(
+_$TeamWorkloadModelImpl _$$TeamWorkloadModelImplFromJson(
         Map<String, dynamic> json) =>
-    _$TypeOfWorkModelImpl(
+    _$TeamWorkloadModelImpl(
       tableName: json['table_name'] as String?,
       id: json['id'] as String?,
       name: json['name'] as String?,
@@ -18,8 +18,8 @@ _$TypeOfWorkModelImpl _$$TypeOfWorkModelImplFromJson(
       count: json['count'] as num? ?? 0,
     );
 
-Map<String, dynamic> _$$TypeOfWorkModelImplToJson(
-        _$TypeOfWorkModelImpl instance) =>
+Map<String, dynamic> _$$TeamWorkloadModelImplToJson(
+        _$TeamWorkloadModelImpl instance) =>
     <String, dynamic>{
       'table_name': instance.tableName,
       'id': instance.id,

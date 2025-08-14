@@ -13,7 +13,8 @@ _$PriorityModelImpl _$$PriorityModelImplFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String?,
       description: json['description'] as String?,
       color: json['color'] as String?,
-      active: json['active'] as bool?,
+      active: json['active'] as bool? ?? true,
+      count: json['count'] as num? ?? 0,
     );
 
 Map<String, dynamic> _$$PriorityModelImplToJson(_$PriorityModelImpl instance) =>
@@ -24,4 +25,5 @@ Map<String, dynamic> _$$PriorityModelImplToJson(_$PriorityModelImpl instance) =>
       'description': instance.description,
       'color': instance.color,
       'active': instance.active,
+      'count': instance.count,
     };

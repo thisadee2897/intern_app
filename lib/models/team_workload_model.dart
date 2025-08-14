@@ -1,12 +1,12 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'type_of_work_model.freezed.dart';
-part 'type_of_work_model.g.dart';
+part 'team_workload_model.freezed.dart';
+part 'team_workload_model.g.dart';
 
 @freezed
-class TypeOfWorkModel with _$TypeOfWorkModel {
-  const factory TypeOfWorkModel({
+class TeamWorkloadModel with _$TeamWorkloadModel {
+  const factory TeamWorkloadModel({
   @JsonKey(name: 'table_name') String? tableName,
   @JsonKey(name: 'id') String? id,
   @JsonKey(name: 'name') String? name,
@@ -14,7 +14,7 @@ class TypeOfWorkModel with _$TypeOfWorkModel {
   @JsonKey(name: 'color') String? color,
   @JsonKey(name: 'active') @Default(true) bool active,
   @JsonKey(name: 'count') @Default(0) num count,
-  }) = _TypeOfWorkModel;
+  }) = _TeamWorkloadModel;
 
-  factory TypeOfWorkModel.fromJson(Map<String, dynamic> json) => _$TypeOfWorkModelFromJson(json);
+  factory TeamWorkloadModel.fromJson(Map<String, dynamic> json) => _$TeamWorkloadModelFromJson(json);
 }
