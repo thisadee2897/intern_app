@@ -21,8 +21,8 @@ class ProjectOverViewApi {
 final apiProjectOverView = Provider<ProjectOverViewApi>((ref) => ProjectOverViewApi(ref: ref));
 
 final dummyProjectOverView = [
-  {"table_name": "ProjectOverView", "title": "completed", "icon": "completed", "count": 5},
-  {"table_name": "ProjectOverView", "title": "updated", "icon": "updated", "count": 3},
-  {"table_name": "ProjectOverView", "title": "created", "icon": "created", "count": 2},
-  {"table_name": "ProjectOverView", "title": "due soon", "icon": "due_soon", "count": 0},
+  {"table_name": "ProjectOverView", "title": "completed", "icon": "completed", "count": 5,'description':'in the last 7 days'},
+  {"table_name": "ProjectOverView", "title": "updated", "icon": "updated", "count": 3,'description':'in the last 7 days'},
+  {"table_name": "ProjectOverView", "title": "created", "icon": "created", "count": 2,'description':'in the last 7 days'},
+  {"table_name": "ProjectOverView", "title": "due soon", "icon": "due_soon", "count": 0,'description':'in the next 7 days'},
 ];
