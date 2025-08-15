@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appflowy_board/appflowy_board.dart';
 import 'package:project/controllers/assignee_controller.dart';
 import 'package:project/controllers/priority_controller.dart';
+import 'package:project/controllers/task_status_controller.dart';
 import 'package:project/controllers/type_of_work_controller.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/models/task_status_model.dart';
@@ -44,6 +45,7 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
       ref.read(listAssignProvider.notifier).get();
       ref.read(listPriorityProvider.notifier).get();
       ref.read(listTypeOfWorkProvider.notifier).get();
+      ref.read(listTaskStatusProvider.notifier).get();
     });
 
     boardController = AppFlowyBoardController(
