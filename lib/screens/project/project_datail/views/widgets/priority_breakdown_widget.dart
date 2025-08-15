@@ -104,7 +104,7 @@ class _PriorityBreakdownWidgetState extends ConsumerState<PriorityBreakdownWidge
                           BarChartRodData(
                             toY: p.count.toDouble(),
                             color: _hexToColor(p.color ?? '#000000'),
-                            width: 35,
+                            width: 70,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ],
