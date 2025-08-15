@@ -14,7 +14,7 @@ class _StatusOverviewWidgetState extends ConsumerState<StatusOverviewWidget> {
   @override
   Widget build(BuildContext context) {
   // ดึงข้อมูล dummyStatusOverview มาใช้โดยตรง
-  final data = dummyStatusOverview;
+  final State = dummyStatusOverview;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10),
       padding: const EdgeInsets.all(10),
@@ -26,9 +26,9 @@ class _StatusOverviewWidgetState extends ConsumerState<StatusOverviewWidget> {
           Text('Status Overview', style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
           Row(
             children: [
-              Text('Get a snapshot of the status of your work items', style: Theme.of(context).textTheme.bodyMedium),
+              Text('Get a snapshot of the status of your work items.', style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(width: 8),
-              Text('View all statuses', style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.blue)),
+              Text('View all statuses', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.blue)),
             ],
           ),
         
