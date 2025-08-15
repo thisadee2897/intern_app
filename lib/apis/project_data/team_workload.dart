@@ -9,7 +9,7 @@ class TeamWorkloadApi {
   TeamWorkloadApi({required this.ref});
   Future<List<TeamWorkloadModel>> get({required String projectHDId}) async {
     try {
-      Response response = await ref.read(apiClientProvider).get(_path, queryParameters: {'project_hd_id': projectHDId});
+      Response response = await ref.read(apiClientProvider).get(_path, queryParameters: {'project_id': projectHDId});
       List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(response.data);
       return data.map((item) => TeamWorkloadModel.fromJson(item)).toList();
     } catch (e) {
