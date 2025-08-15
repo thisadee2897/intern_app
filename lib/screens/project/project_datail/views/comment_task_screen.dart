@@ -1,17 +1,23 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'package:flutter/material.dart';  
+// comment_task_screen.dart
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appflowy_board/appflowy_board.dart';
+import 'package:project/controllers/assignee_controller.dart';
+import 'package:project/controllers/priority_controller.dart';
+import 'package:project/controllers/type_of_work_controller.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/models/task_status_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
+
 import 'package:project/screens/project/project_datail/providers/controllers/task_status_controller.dart';
+import 'package:project/screens/project/project_datail/views/widgets/task_comment_detail.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/hex_color.dart';
 
-final sprintListProvider = sprintProvider; // ใช้ provider sprint เดิม
+final sprintListProvider = sprintProvider;
+final showTaskDetailProvider = StateProvider<bool>((ref) => false);
+final selectedTaskIdProvider = StateProvider<String?>((ref) => null);
 
 class CommentTaskScreen extends ConsumerStatefulWidget {
   final String projectId;
@@ -26,10 +32,19 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
   late AppFlowyBoardController boardController;
   final Map<String, List<MyGroupItem>> groupedItems = {};
   List<TaskStatusModel> statusList = [];
+  final double panelWidth = 450;
 
   @override
   void initState() {
     super.initState();
+    super.initState();
+
+    // Prefetch dropdown data providers
+    Future.microtask(() {
+      ref.read(listAssignProvider.notifier).get();
+      ref.read(listPriorityProvider.notifier).get();
+      ref.read(listTypeOfWorkProvider.notifier).get();
+    });
 
     boardController = AppFlowyBoardController(
       onMoveGroupItem: (groupId, fromIndex, toIndex) {
@@ -43,7 +58,6 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
         final fromList = groupedItems[fromGroupId];
         final toList = groupedItems[toGroupId];
         if (fromList == null || toList == null || fromIndex >= fromList.length) return;
-
         final item = fromList.removeAt(fromIndex);
         if (toIndex > toList.length) {
           toList.add(item);
@@ -79,7 +93,7 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(taskStatusControllerProvider.notifier).fetch();
-      await ref.read(sprintListProvider.notifier).get();   // เรียก get() ไม่ใช่ fetch()
+      await ref.read(sprintListProvider.notifier).get();
       await _loadTasks();
     });
   }
@@ -132,16 +146,48 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
     setState(() {});
   }
 
+  Future<void> _showTaskDetailPanel(String taskId) async {
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Task Detail',
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: Material(
+            color: Colors.transparent,
+            child: SizedBox(
+              width: panelWidth,
+              height: double.infinity,
+              child: TaskCommentDetail(
+                taskId: taskId,
+                onTaskUpdated: () async {
+                  ref.invalidate(taskBySprintControllerProvider(widget.projectId));
+                  await _loadTasks();
+                },
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(parent: anim1, curve: Curves.easeInOut)),
+          child: child,
+        );
+      },
+    );
+  }
+
   Future<void> _showAddTaskDialog(String statusId) async {
     final nameController = TextEditingController();
-
-    final sprintAsync = ref.watch(sprintListProvider);  // watch เพื่ออัพเดต UI อัตโนมัติ
+    final sprintAsync = ref.watch(sprintListProvider);
     List<SprintModel> sprintList = [];
-    sprintAsync.maybeWhen(
-      data: (data) => sprintList = data,
-      orElse: () {},
-    );
-
+    sprintAsync.maybeWhen(data: (data) => sprintList = data, orElse: () {});
     String? selectedSprintId;
 
     final result = await showDialog<bool>(
@@ -235,14 +281,6 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
     }
   }
 
-  // Color _colorForGroup(String groupId) {
-  //   final status = statusList.firstWhere(
-  //     (s) => s.id == groupId,
-  //     orElse: () => const TaskStatusModel(color: "#CCCCCC"),
-  //   );
-  //   return HexColor.fromHex(status.color ?? '#CCCCCC');
-  // }
-
   @override
   Widget build(BuildContext context) {
     final taskAsync = ref.watch(taskBySprintControllerProvider(widget.projectId));
@@ -263,13 +301,16 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
             return Padding(
               key: ValueKey(groupItem.id),
               padding: const EdgeInsets.all(0),
-              child: AppFlowyGroupCard(
-                key: ValueKey(groupItem.id),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                    child: Text(groupItem.title),
+              child: InkWell(
+                onTap: () => _showTaskDetailPanel(groupItem.taskId),
+                child: AppFlowyGroupCard(
+                  key: ValueKey(groupItem.id),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                      child: Text(groupItem.title),
+                    ),
                   ),
                 ),
               ),
@@ -409,7 +450,6 @@ class AppFlowyColumnItemCard extends StatelessWidget {
   }
 }
 
-/// Extension เพื่อปรับความเข้มสี (darken)
 extension ColorUtils on Color {
   Color darken([double amount = .1]) {
     assert(amount >= 0 && amount <= 1);
