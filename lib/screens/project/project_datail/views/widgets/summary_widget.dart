@@ -124,7 +124,8 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
     return TeamWorkloadWidget();
   }
 
-  TypeOfWorkWidget _typesOfWork(BuildContext context) {
+  Widget _typesOfWork(BuildContext context) {
+    // return DashboardTypeOfWorkWidget();
     return TypeOfWorkWidget();
   }
 
