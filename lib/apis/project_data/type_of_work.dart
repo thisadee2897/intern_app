@@ -1,16 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:project/components/export.dart';
 import 'package:project/models/type_of_work_model.dart';
+import 'package:project/utils/services/rest_api_service.dart';
 
 class TypeOfWorkApi {
   final Ref ref;
-  // final String _path = 'project_data/status_overview';
+  final String _path = 'project_data/dashboard_type_of_work';
   TypeOfWorkApi({required this.ref});
-  Future<List<TypeOfWorkModel>> get() async {
-    await Future.delayed(Duration(seconds: 1));
+  Future<List<TypeOfWorkModel>> get({required String projectHDId}) async {
     try {
-      // Response response = await ref.read(apiClientProvider).get(_path, queryParameters: {'project_hd_id': projectHDId});
-      // return response.data;
-      List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(dummyTypeOfWork);
+      Response response = await ref.read(apiClientProvider).get(_path, queryParameters: {'project_id': projectHDId});
+      List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(response.data);
       return data.map((item) => TypeOfWorkModel.fromJson(item)).toList();
     } catch (e) {
       rethrow;
