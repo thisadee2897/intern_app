@@ -120,7 +120,10 @@ class _PriorityBreakdownWidgetState extends ConsumerState<PriorityBreakdownWidge
     );
   }
 
-  Color _hexToColor(String code) {
-    return Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
-  }
+  Color _hexToColor(String hex) {
+  final buffer = StringBuffer();
+  if (hex.length == 6 || hex.length == 7) buffer.write('ff');
+  buffer.write(hex.replaceFirst('#', ''));
+  return Color(int.parse(buffer.toString(), radix: 16));
+}
 }
