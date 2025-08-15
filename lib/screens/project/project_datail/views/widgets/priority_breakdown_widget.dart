@@ -1,7 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/controllers/piority_breakdown_controller.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/piority_breakdown_controller.dart';
+
 
 class PriorityBreakdownWidget extends ConsumerStatefulWidget {
   const PriorityBreakdownWidget({super.key});
@@ -42,74 +43,75 @@ class _PriorityBreakdownWidgetState extends ConsumerState<PriorityBreakdownWidge
             child: state.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(child: Text('Error: $err')),
-              data: (priorities) => Column(
-                children: [
-                  SizedBox(
-                    height: 200,
-                    child: BarChart(
-                      BarChartData(
-                        alignment: BarChartAlignment.spaceAround,
-                        titlesData: FlTitlesData(
-                          leftTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 30,
-                              getTitlesWidget: (value, meta) => Text(
-                                value.toInt().toString(),
-                                style: const TextStyle(fontSize: 10),
-                              ),
-                            ),
-                          ),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        ),
-                        gridData: FlGridData(
-                          show: true,
-                          drawVerticalLine: false,
-                          horizontalInterval: 5,
-                          getDrawingHorizontalLine: (value) => FlLine(
-                            color: Colors.grey.shade300,
-                            strokeWidth: 1,
+              data: (priorities) => SizedBox(
+                height: 250,
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    titlesData: FlTitlesData(
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 40,
+                          getTitlesWidget: (value, meta) => Text(
+                            value.toInt().toString(),
+                            style: const TextStyle(fontSize: 10),
                           ),
                         ),
-                        borderData: FlBorderData(show: false),
-                        barGroups: priorities.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final p = entry.value;
-                          return BarChartGroupData(
-                            x: index,
-                            barRods: [
-                              BarChartRodData(
-                                toY: p.count.toDouble(),
-                                color: _hexToColor(p.color ?? '#000000'),
-                                width: 35,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ],
-                          );
-                        }).toList(),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 40,
+                          getTitlesWidget: (value, meta) {
+                            final index = value.toInt();
+                            if (index >= 0 && index < priorities.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Text(
+                                  priorities[index].name ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            }
+                            return const Text('');
+                          },
+                        ),
+                      ),
+                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    ),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval: 5,
+                      getDrawingHorizontalLine: (value) => FlLine(
+                        color: Colors.grey.shade300,
+                        strokeWidth: 1,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: priorities.map((p) {
-                      return Text(
-                        p.name ?? '',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                          letterSpacing: 0.2,
-                        ),
-                        textAlign: TextAlign.center,
+                    borderData: FlBorderData(show: false),
+                    barGroups: priorities.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final p = entry.value;
+                      return BarChartGroupData(
+                        x: index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: p.count.toDouble(),
+                            color: _hexToColor(p.color ?? '#000000'),
+                            width: 35,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ],
                       );
                     }).toList(),
                   ),
-                ],
+                ),
               ),
             ),
           ),
