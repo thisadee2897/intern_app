@@ -78,14 +78,14 @@ class _StatusOverviewWidgetState extends ConsumerState<StatusOverviewWidget> {
                               startDegreeOffset: 180,
                               borderData: FlBorderData(show: false),
                               sectionsSpace: 2,
-                              centerSpaceRadius: 100,
+                              centerSpaceRadius: 80,
                               sections: List.generate(list.length, (i) {
                                 final isTouched = i == touchedIndex;
                                 return PieChartSectionData(
                                   color: _hexToColor(list[i].color ?? '#000000'),
                                   value: (list[i].count).toDouble(),
                                   title: '',
-                                  radius: isTouched ? 40 : 30,
+                                  radius: isTouched ? 65 : 50,
                                   borderSide: isTouched
                                       ? const BorderSide(color: Colors.white, width: 2)
                                       : BorderSide(color: Colors.white),
