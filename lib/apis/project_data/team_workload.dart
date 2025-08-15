@@ -1,16 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:project/components/export.dart';
 import 'package:project/models/team_workload_model.dart';
+import 'package:project/utils/services/rest_api_service.dart';
 
 class TeamWorkloadApi {
   final Ref ref;
-  // final String _path = 'project_data/status_overview';
+  final String _path = 'project_data/dashboard_team_workload';
   TeamWorkloadApi({required this.ref});
-  Future<List<TeamWorkloadModel>> get() async {
-    await Future.delayed(Duration(seconds: 1));
+  Future<List<TeamWorkloadModel>> get({required String projectHDId}) async {
     try {
-      // Response response = await ref.read(apiClientProvider).get(_path, queryParameters: {'project_hd_id': projectHDId});
-      // return response.data;
-      List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(dummyTeamWorkload);
+      Response response = await ref.read(apiClientProvider).get(_path, queryParameters: {'project_hd_id': projectHDId});
+      List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(response.data);
       return data.map((item) => TeamWorkloadModel.fromJson(item)).toList();
     } catch (e) {
       rethrow;
