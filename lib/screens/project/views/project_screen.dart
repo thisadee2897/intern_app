@@ -551,6 +551,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                     const SizedBox(width: 6),
                     Text('Edit Project', style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
                   ],
+        
                 ),
               ),
             ),
