@@ -60,20 +60,20 @@ class _ScaffoldWithAppbarState extends ConsumerState<ScaffoldWithAppbar> {
                   //Logout Button
                   IconButton(
                     icon: const Icon(Icons.logout),
-                    onPressed: () => _handleLogout(),
-                    // onPressed: () async {
-                    //   try {
-                    //     await ref.read(logoutProvider.future);
-                    //     if (context.mounted) {
-                    //       context.go(Routes.login);
-                    //     }
-                    //   } catch (e, stx) {
-                    //     print(stx);
-                    //     if (context.mounted) {
-                    //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
-                    //     }
-                    //   }
-                    // },
+                    // onPressed: () => _handleLogout(),
+                    onPressed: () async {
+                      try {
+                        await ref.read(logoutProvider.future);
+                        if (context.mounted) {
+                          context.go(Routes.login);
+                        }
+                      } catch (e, stx) {
+                        print(stx);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
+                        }
+                      }
+                    },
                   ),
                 ],
               ),
