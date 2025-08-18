@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/category_model.dart';
 import 'package:project/models/project_h_d_model.dart';
+import 'package:project/screens/project/controllers/delete_project_hd_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_update/provider/controllers/project_update_controller.dart';
 
@@ -49,7 +50,57 @@ class _InsertOrUpdateProjectHDState extends ConsumerState<InsertOrUpdateProjectH
       builder: (context, ref, child) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: Text(widget.projectHDModel.id == '0' ? 'เพิ่มโปรเจค' : 'แก้ไขโปรเจค'),
+          title: Row(
+            children: [
+              Text(widget.projectHDModel.id == '0' ? 'เพิ่มโปรเจค' : 'แก้ไขโปรเจค'),
+
+            //แสดงเมื่อเปิดแก้ไขโปรเจค
+              if (widget.projectHDModel.id != '0') ...[
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.grey),
+                  onPressed: () {
+                    // แสดง dialog ยืนยันการลบ
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          backgroundColor: Colors.white,
+                          title: const Text('ยืนยันการลบ'),
+                          content: const Text('คุณต้องการลบโปรเจคนี้ใช่หรือไม่?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('ยกเลิก'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                await ref
+                                    .read(deleteProjectHDControllerProvider.notifier)
+                                    .deleteProjectHD(widget.projectHDModel.id!);
+
+                                // รีเฟรชข้อมูล category เพื่ออัปเดตรายการโปรเจค
+                                ref.read(categoryProvider.notifier).getCategory(widget.category.workspaceId!);
+
+                                // แสดง SnackBar
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('ลบโปรเจคเรียบร้อย')),
+                                );
+
+                                Navigator.pop(context); // ปิด dialog ยืนยันการลบ
+                                Navigator.pop(context); // ปิด dialog แก้ไขโปรเจค
+                                  },
+                                  child: const Text('ลบ'),
+                                  ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ]
+            ],
+          ),
           content: SizedBox(
             width: 400,
             child: Form(
@@ -91,6 +142,7 @@ class _InsertOrUpdateProjectHDState extends ConsumerState<InsertOrUpdateProjectH
             TextButton(onPressed: () => Navigator.pop(context), child: const Text('ยกเลิก')),
             FilledButton(onPressed: _submit, child: Text(widget.projectHDModel.id == '0' ? 'เพิ่มโปรเจค' : 'แก้ไขโปรเจค')),
           ],
+
         );
       },
     );
