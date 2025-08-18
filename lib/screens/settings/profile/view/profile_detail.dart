@@ -85,27 +85,24 @@ class _EditProfileScreenState extends BaseState<EditProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // Avatar + edit effect
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOut,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: [Colors.blue.shade200, Colors.blue.shade600],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [BoxShadow(color: Colors.blueAccent.withOpacity(0.3), blurRadius: 18, spreadRadius: 2)],
-                              border: Border.all(color: Colors.white, width: 3),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [Colors.blue.shade200, Colors.blue.shade600],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            child: CircleAvatar(
-                              radius: 50,
-                              backgroundColor: Colors.white,
-                              backgroundImage: imageController.text.isNotEmpty ? NetworkImage(imageController.text) : null,
-                              child: imageController.text.isEmpty ? const Icon(Icons.person, size: 50, color: Colors.grey) : null,
-                            ),
+                            boxShadow: [BoxShadow(color: Colors.blueAccent.withOpacity(0.3), blurRadius: 18, spreadRadius: 2)],
+                            border: Border.all(color: Colors.white, width: 3),
+                          ),
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.white,
+                            backgroundImage: imageController.text.isNotEmpty ? NetworkImage(imageController.text) : null,
+                            child: imageController.text.isEmpty ? const Icon(Icons.person, size: 50, color: Colors.grey) : null,
                           ),
                         ),
                         const SizedBox(height: 16),

@@ -181,50 +181,45 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
                               // ใช้ StatefulBuilder เพื่อจัดการการ hover แต่ละรายการ
                               builder: (context, setState) {
                                 // bool isHovering = false; // สถานะ hover
-                                return MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  // onEnter: (_) => setState(() => isHovering = true),
-                                  // onExit: (_) => setState(() => isHovering = false),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Row(
-                                      children: [
-                                        Image.asset(
-                                          // รูป thumbnail
-                                          post['image']!,
-                                          width: 60,
-                                          height: 60,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) => Container(
-                                                width: 60,
-                                                height: 60,
-                                                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(8)),
-                                                child: const Icon(Icons.broken_image),
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  child: Row(
+                                    children: [
+                                      Image.asset(
+                                        // รูป thumbnail
+                                        post['image']!,
+                                        width: 60,
+                                        height: 60,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) => Container(
+                                              width: 60,
+                                              height: 60,
+                                              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(8)),
+                                              child: const Icon(Icons.broken_image),
+                                            ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        // ข้อความประกอบ
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              post['title']!,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                decoration: TextDecoration.none,
+                                                color: Colors.black,
                                               ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(post['date']!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                          ],
                                         ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          // ข้อความประกอบ
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                post['title']!,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                  decoration: TextDecoration.none,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(post['date']!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 );
                               },
@@ -385,25 +380,19 @@ class _ProductUpdatScreenState extends State<ProductUpdatScreen> {
 
   Widget categoryChip(String label) {
     // ฟังก์ชันสร้างป้ายหมวดหมู่แบบ hover ได้
-    return MouseRegion(
-      // ตรวจจับเมาส์
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => hoveredCategory = label), // เมื่อเมาส์ชี้
-      onExit: (_) => setState(() => hoveredCategory = null), // เมื่อเมาส์ออก
-      child: Chip(
-        // ป้ายหมวดหมู่ (Chip widget)
-        label: Text(label),
-        backgroundColor: // เปลี่ยนพื้นหลังตามสถานะ hover
-            hoveredCategory == label ? Colors.green.shade50 : Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Colors.green), // เส้นขอบสีเขียว
-        ),
-        labelStyle: TextStyle(
-          color: hoveredCategory == label ? Colors.green.shade700 : Colors.green, // สีตัวอักษรเมื่อ hover
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    return Chip(
+      // ป้ายหมวดหมู่ (Chip widget)
+      label: Text(label),
+      backgroundColor: // เปลี่ยนพื้นหลังตามสถานะ hover
+          hoveredCategory == label ? Colors.green.shade50 : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Colors.green), // เส้นขอบสีเขียว
       ),
+      labelStyle: TextStyle(
+        color: hoveredCategory == label ? Colors.green.shade700 : Colors.green, // สีตัวอักษรเมื่อ hover
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     );
   }
 }

@@ -88,39 +88,44 @@ class _TypeOfWorkWidgetState extends ConsumerState<TypeOfWorkWidget> {
             ),
           ],
         ),
-
-        Column(
-          children:
-              items.map((type) {
-                final percentage = totalCount == 0 ? 0.0 : (type.count / totalCount).toDouble();
-                final typeColor = Color(_hexToColor(type.color ?? "#000000"));
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12), // ระยะห่างเท่า TeamWorkload
-                  child: Row(
-                    children: [
-                      _buildTypeIcon(type.name ?? "", type.color ?? "#000000", size: 38),
-                      const SizedBox(width: 8),
-                      SizedBox(width: 120, child: Text(type.name ?? "", style: const TextStyle(fontWeight: FontWeight.w500))),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: LinearProgressIndicator(
-                            value: percentage,
-                            minHeight: 30,
-                            backgroundColor: Colors.grey.shade300,
-                            valueColor: AlwaysStoppedAnimation(typeColor),
+        if (items.isEmpty)
+          Expanded(
+            child: const Center(
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text('No data available', style: TextStyle(color: Colors.grey))]),
+            ),
+          ),
+        if (items.isNotEmpty)
+          Column(
+            children:
+                items.map((type) {
+                  final percentage = totalCount == 0 ? 0.0 : (type.count / totalCount).toDouble();
+                  final typeColor = Color(_hexToColor(type.color ?? "#000000"));
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12), // ระยะห่างเท่า TeamWorkload
+                    child: Row(
+                      children: [
+                        _buildTypeIcon(type.name ?? "", type.color ?? "#000000", size: 38),
+                        const SizedBox(width: 8),
+                        SizedBox(width: 120, child: Text(type.name ?? "", style: const TextStyle(fontWeight: FontWeight.w500))),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: LinearProgressIndicator(
+                              value: percentage,
+                              minHeight: 30,
+                              backgroundColor: Colors.grey.shade300,
+                              valueColor: AlwaysStoppedAnimation(typeColor),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text("${(percentage * 100).toStringAsFixed(0)}%", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-                    ],
-                  ),
-                );
-              }).toList(),
-        ),
+                        const SizedBox(width: 8),
+                        Text("${(percentage * 100).toStringAsFixed(0)}%", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                      ],
+                    ),
+                  );
+                }).toList(),
+          ),
       ],
     );
   }

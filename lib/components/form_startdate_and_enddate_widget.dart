@@ -17,13 +17,19 @@ class FormStartDateWidget extends StatelessWidget {
       readOnly: true,
       validator: validator,
       decoration: InputDecoration(suffixIcon: const Icon(Icons.calendar_today, size: 20), hintText: 'Select start date'),
-      onTap: () {
-        showDatePicker(
+      onTap: () async {
+        await showDatePicker(
           context: context,
           initialDate: startDate ?? DateTime.now(),
           currentDate: startDate,
           firstDate: DateTime.now(),
-          lastDate: endDate?.add(const Duration(days: -1)) ?? DateTime(DateTime.now().year + 1),
+          // lastDate: endDate?.add(const Duration(days: -1)) ?? DateTime(DateTime.now().year + 1),
+          lastDate:
+              endDate != null
+                  ? endDate!.subtract(const Duration(days: 1)).isBefore(DateTime.now())
+                      ? DateTime.now().add(Duration(days: 365))
+                      : endDate!.subtract(const Duration(days: 1))
+                  : DateTime(DateTime.now().year + 1),
         ).then((value) {
           if (value != null) {
             onChanged(value);
@@ -43,20 +49,28 @@ class FormEndDateWidget extends StatelessWidget {
   final String? Function(String?)? validator;
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (startDate != null && endDate != null) {
+        if (startDate!.add(Duration(days: 7)).isAfter(endDate!)) {
+          onChanged(startDate!.add(const Duration(days: 7)));
+        }
+      }
+    });
     return TextFormField(
+      key: ValueKey(startDate),
       enabled: startDate != null,
       controller: TextEditingController(text: endDate != null ? DateFormat('dd/MM/yyyy').format(endDate!) : ''),
       mouseCursor: SystemMouseCursors.click,
       readOnly: true,
       validator: validator,
       decoration: InputDecoration(suffixIcon: const Icon(Icons.calendar_today, size: 20), hintText: 'Select End date'),
-      onTap: () {
-        showDatePicker(
+      onTap: () async {
+        await showDatePicker(
           context: context,
-          initialDate: endDate ?? startDate!.add(const Duration(days: 1)),
+          // initialDate: endDate ?? startDate!.add(const Duration(days: 1)),
           currentDate: endDate,
-          firstDate: startDate!.add(const Duration(days: 1)),
-          lastDate: DateTime(DateTime.now().year + 1),
+          firstDate: startDate!.add(const Duration(days: 7)),
+          lastDate: DateTime.now().add(const Duration(days: 365)),
         ).then((value) {
           if (value != null) {
             onChanged(value);

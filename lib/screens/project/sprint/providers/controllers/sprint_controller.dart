@@ -127,9 +127,9 @@ class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel>> 
       SprintModel item = state.value!;
       try {
         final body = {
-          "id": item.id,
+          "id": item.id ?? '0',
           "name": item.name,
-          "duration": item.duration,
+          "duration": item.duration ?? 0,
           "start_date": item.satartDate,
           "end_date": item.endDate,
           "goal": item.goal,
@@ -211,6 +211,7 @@ class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel>> 
       state = AsyncData(state.value!.copyWith(endDate: endDate.toString()));
     }
   }
+
   //setItem
   void setItem(SprintModel item) {
     state = AsyncValue.data(item);

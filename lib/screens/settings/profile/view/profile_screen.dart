@@ -90,44 +90,40 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // รูปโปรไฟล์ + เอฟเฟกต์
-                                MouseRegion(
-                                  onEnter: (_) => setState(() => _isAvatarHovered = true),
-                                  onExit: (_) => setState(() => _isAvatarHovered = false),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
-                                    transform: _isAvatarHovered
-                                        ? (Matrix4.identity()..scale(1.08))
-                                        : Matrix4.identity(),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        colors: [Colors.blue.shade200, Colors.blue.shade600],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color.fromARGB(255, 89, 149, 251).withOpacity(_isAvatarHovered ? 0.7 : 0.3),
-                                          blurRadius: _isAvatarHovered ? 32 : 16,
-                                          spreadRadius: _isAvatarHovered ? 8 : 2,
-                                        ),
-                                      ],
-                                      border: Border.all(
-                                        color: _isAvatarHovered ? Colors.white : Colors.transparent,
-                                        width: 3,
-                                      ),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
+                                  transform: _isAvatarHovered
+                                      ? (Matrix4.identity()..scale(1.08))
+                                      : Matrix4.identity(),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: [Colors.blue.shade200, Colors.blue.shade600],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
-                                    child: CircleAvatar(
-                                      radius: 70,
-                                      backgroundColor: Colors.white,
-                                      backgroundImage: user.image != null && user.image!.isNotEmpty
-                                          ? NetworkImage(user.image!)
-                                          : null,
-                                      child: (user.image == null || user.image!.isEmpty)
-                                          ? const Icon(Icons.person, size: 70, color: Colors.grey)
-                                          : null,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color.fromARGB(255, 89, 149, 251).withOpacity(_isAvatarHovered ? 0.7 : 0.3),
+                                        blurRadius: _isAvatarHovered ? 32 : 16,
+                                        spreadRadius: _isAvatarHovered ? 8 : 2,
+                                      ),
+                                    ],
+                                    border: Border.all(
+                                      color: _isAvatarHovered ? Colors.white : Colors.transparent,
+                                      width: 3,
                                     ),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 70,
+                                    backgroundColor: Colors.white,
+                                    backgroundImage: user.image != null && user.image!.isNotEmpty
+                                        ? NetworkImage(user.image!)
+                                        : null,
+                                    child: (user.image == null || user.image!.isEmpty)
+                                        ? const Icon(Icons.person, size: 70, color: Colors.grey)
+                                        : null,
                                   ),
                                 ),
                                 const SizedBox(width: 48),
@@ -147,34 +143,30 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                           ),
-                                          MouseRegion(
-                                            onEnter: (_) => setState(() => _isEditBtnHovered = true),
-                                            onExit: (_) => setState(() => _isEditBtnHovered = false),
-                                            child: AnimatedScale(
-                                              scale: _isEditBtnHovered ? 1.08 : 1.0,
-                                              duration: const Duration(milliseconds: 180),
-                                              child: ElevatedButton.icon(
-                                                onPressed: () {
-                                                  Navigator.of(context)
-                                                      .push(MaterialPageRoute(
-                                                        builder: (context) => EditProfileScreen(user: user),
-                                                      ))
-                                                      .then((updated) {
-                                                    if (updated == true) {
-                                                      ref.read(profileControllerProvider.notifier).fetchProfile();
-                                                    }
-                                                  });
-                                                },
-                                                icon: const Icon(Icons.edit, size: 16),
-                                                label: const Text('แก้ไขข้อมูล'),
-                                                style: ElevatedButton.styleFrom(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                  shape: const StadiumBorder(),
-                                                  backgroundColor: _isEditBtnHovered ? Colors.blue.shade700 : Colors.blueAccent,
-                                                  foregroundColor: Colors.white,
-                                                  elevation: _isEditBtnHovered ? 8 : 2,
-                                                  shadowColor: Colors.blueAccent,
-                                                ),
+                                          AnimatedScale(
+                                            scale: _isEditBtnHovered ? 1.08 : 1.0,
+                                            duration: const Duration(milliseconds: 180),
+                                            child: ElevatedButton.icon(
+                                              onPressed: () {
+                                                Navigator.of(context)
+                                                    .push(MaterialPageRoute(
+                                                      builder: (context) => EditProfileScreen(user: user),
+                                                    ))
+                                                    .then((updated) {
+                                                  if (updated == true) {
+                                                    ref.read(profileControllerProvider.notifier).fetchProfile();
+                                                  }
+                                                });
+                                              },
+                                              icon: const Icon(Icons.edit, size: 16),
+                                              label: const Text('แก้ไขข้อมูล'),
+                                              style: ElevatedButton.styleFrom(
+                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                shape: const StadiumBorder(),
+                                                backgroundColor: _isEditBtnHovered ? Colors.blue.shade700 : Colors.blueAccent,
+                                                foregroundColor: Colors.white,
+                                                elevation: _isEditBtnHovered ? 8 : 2,
+                                                shadowColor: Colors.blueAccent,
                                               ),
                                             ),
                                           ),

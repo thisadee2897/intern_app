@@ -36,8 +36,8 @@ class BacklogGroupWidget extends ConsumerStatefulWidget {
 
 class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with RouteAware {
   bool isExpanding = false;
-  late TextEditingController _sprintNameController;
-  late TextEditingController _sprintGoalController;
+  // late TextEditingController _sprintNameController;
+  // late TextEditingController _sprintGoalController;
   late TextEditingController _taskNameController;
 
   @override
@@ -45,8 +45,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
     super.initState();
     // โหลด Task หลังจาก UI ถูกสร้างเสร็จ
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _sprintNameController = TextEditingController();
-      _sprintGoalController = TextEditingController();
+      // _sprintNameController = TextEditingController();
+      // _sprintGoalController = TextEditingController();
       _taskNameController = TextEditingController();
       ref.read(inputTaskNameProvider.notifier).state = '';
     });
@@ -66,8 +66,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   void dispose() {
     // ยกเลิกการติดตาม route และ dispose controllers
     routeObserver.unsubscribe(this);
-    _sprintNameController.dispose();
-    _sprintGoalController.dispose();
+    // _sprintNameController.dispose();
+    // _sprintGoalController.dispose();
     _taskNameController.dispose();
     super.dispose();
   }
@@ -475,9 +475,31 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
 
   /// จัดการการสร้าง Sprint ใหม่
   Future<void> _handleCreateOrUpdateSprint(SprintModel itemSprint) async {
-    _sprintNameController.text = itemSprint.name ?? '';
-    _sprintGoalController.text = itemSprint.goal ?? '';
-    ref.read(insertUpdateSprintProvider.notifier).setItem(itemSprint);
+    // _sprintNameController.text = itemSprint.name ?? '';
+    // _sprintGoalController.text = itemSprint.goal ?? '';
+    
+    // Ensure we have valid data before setting the item
+    final validatedSprint = SprintModel(
+      tableName: itemSprint.tableName,
+      id: itemSprint.id,
+      name: itemSprint.name ?? '', // Ensure name is never null
+      duration: itemSprint.duration,
+      satartDate: itemSprint.satartDate,
+      endDate: itemSprint.endDate,
+      goal: itemSprint.goal,
+      completed: itemSprint.completed,
+      projectHd: itemSprint.projectHd,
+      createdAt: itemSprint.createdAt,
+      updatedAt: itemSprint.updatedAt,
+      createdBy: itemSprint.createdBy,
+      updatedBy: itemSprint.updatedBy,
+      active: itemSprint.active,
+      startting: itemSprint.startting,
+      tasks: itemSprint.tasks,
+      countStatus: itemSprint.countStatus,
+    );
+    
+    ref.read(insertUpdateSprintProvider.notifier).setItem(validatedSprint);
     final formKey = GlobalKey<FormState>();
     return showDialog(
       context: context,
@@ -485,8 +507,45 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
         return Consumer(
           builder: (context, ref, child) {
             final state = ref.watch(insertUpdateSprintProvider);
-            DateTime? startDate = DateTime.parse(state.value?.satartDate ?? DateTime.now().toString());
-            DateTime? endDate = DateTime.parse(state.value?.endDate ?? DateTime.now().toString());
+
+            // Use Future.microtask to delay provider state modification
+            if (state.hasValue) {
+              Future.microtask(() {
+                DateTime? startDate = state.value?.satartDate != null ? DateTime.parse(state.value!.satartDate!) : null;
+                DateTime? endDate = state.value?.endDate != null ? DateTime.parse(state.value!.endDate!) : null;
+                ref.read(formStartDateProvider.notifier).state = startDate;
+                ref.read(formEndDateProvider.notifier).state = endDate;
+              });
+            }
+
+            // Handle error state
+            if (state.hasError) {
+              return AlertDialog(
+                backgroundColor: Colors.white,
+                title: const Text('Error'),
+                content: Text('Failed to load sprint data: ${state.error}'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ],
+              );
+            }
+
+            // Handle loading state
+            if (state.isLoading) {
+              return AlertDialog(
+                backgroundColor: Colors.white,
+                title: const Text('Loading'),
+                content: const SizedBox(
+                  width: 400,
+                  height: 200,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              );
+            }
+
             return AlertDialog(
               backgroundColor: Colors.white,
               title: Text('${state.value?.id == '0' ? 'Create' : 'Update'} Sprint'),
@@ -504,9 +563,13 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     SizedBox(
                       width: 400,
                       child: TextFormField(
-                        controller: _sprintNameController,
+                        initialValue: itemSprint.name ?? '',
+                        // controller: _sprintNameController,
                         onChanged: (value) {
-                          ref.read(insertUpdateSprintProvider.notifier).updateName(value);
+                          // Only update if value is not empty to prevent validation errors
+                          if (value.trim().isNotEmpty) {
+                            ref.read(insertUpdateSprintProvider.notifier).updateName(value);
+                          }
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -521,8 +584,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     SizedBox(
                       width: 400,
                       child: FormStartDateWidget(
-                        startDate: startDate,
-                        endDate: endDate,
+                        startDate: ref.watch(formStartDateProvider),
+                        endDate: ref.watch(formEndDateProvider),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please select start date';
@@ -539,8 +602,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     SizedBox(
                       width: 400,
                       child: FormEndDateWidget(
-                        startDate: startDate,
-                        endDate: endDate,
+                        startDate: ref.watch(formStartDateProvider),
+                        endDate: ref.watch(formEndDateProvider),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please select end date';
@@ -556,7 +619,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     SizedBox(
                       width: 552,
                       child: TextFormField(
-                        controller: _sprintGoalController,
+                        initialValue: itemSprint.goal ?? '',
+                        // controller: _sprintGoalController,
                         minLines: 4,
                         maxLines: null,
                         keyboardType: TextInputType.multiline,
@@ -590,17 +654,19 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                 TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
                 FilledButton(
                   onPressed: () async {
-                    try {
-                      await ref.read(insertUpdateSprintProvider.notifier).insertOrUpdateSprint().then((value) {
-                        if (value != null) {
-                          Navigator.pop(context, value);
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sprint ${value.name} created successfully')));
-                          ref.read(sprintProvider.notifier).get();
-                          ref.read(insertUpdateSprintProvider.notifier).clearState();
-                        }
-                      });
-                    } catch (e) {
-                      _showErrorSnackBar('Error creating sprint: ${e.toString()}');
+                    if (formKey.currentState?.validate() == true) {
+                      try {
+                        await ref.read(insertUpdateSprintProvider.notifier).insertOrUpdateSprint().then((value) {
+                          if (value != null) {
+                            Navigator.pop(context, value);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sprint ${value.name} created successfully')));
+                            ref.read(sprintProvider.notifier).get();
+                            ref.read(insertUpdateSprintProvider.notifier).clearState();
+                          }
+                        });
+                      } catch (e) {
+                        _showErrorSnackBar('Error creating sprint: ${e.toString()}');
+                      }
                     }
                   },
                   child: Text('${state.value?.id == '0' ? 'Create' : 'Update'} Sprint'),
@@ -617,8 +683,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   Future<void> _handleStartSprint(int taskCount) async {
     final item = widget.item;
     // ตั้งค่าข้อมูลเริ่มต้น
-    _sprintNameController.text = item.name ?? '';
-    _sprintGoalController.text = item.goal ?? '';
+    // _sprintNameController.text = item.name ?? '';
+    // _sprintGoalController.text = item.goal ?? '';
     ref.read(formStartDateProvider.notifier).state = item.satartDate.formDateTimeJson;
     ref.read(formEndDateProvider.notifier).state = item.endDate.formDateTimeJson;
 
@@ -761,8 +827,6 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       builder: (context) {
         return Consumer(
           builder: (context, ref, child) {
-            DateTime? startDate = ref.watch(formStartDateProvider);
-            DateTime? endDate = ref.watch(formEndDateProvider);
             return AlertDialog(
               backgroundColor: Colors.white,
               title: const Text('Start Sprint'),
@@ -780,7 +844,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     SizedBox(
                       width: 400,
                       child: TextFormField(
-                        controller: _sprintNameController,
+                        initialValue: item.name ?? '',
+                        onChanged: (value) => ref.read(insertUpdateSprintProvider.notifier).updateName(value),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter sprint name';
@@ -794,8 +859,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     SizedBox(
                       width: 400,
                       child: FormStartDateWidget(
-                        startDate: startDate,
-                        endDate: endDate,
+                        startDate: ref.watch(formStartDateProvider),
+                        endDate: ref.watch(formEndDateProvider),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please select start date';
@@ -810,8 +875,8 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     SizedBox(
                       width: 400,
                       child: FormEndDateWidget(
-                        startDate: startDate,
-                        endDate: endDate,
+                        startDate: ref.watch(formStartDateProvider),
+                        endDate: ref.watch(formEndDateProvider),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please select end date';
@@ -825,8 +890,9 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                     SizedBox(
                       width: 552,
                       child: TextFormField(
-                        controller: _sprintGoalController,
+                        initialValue: item.goal ?? '',
                         minLines: 4,
+                        onChanged: (value) => ref.read(insertUpdateSprintProvider.notifier).updateGoal(value),
                         maxLines: null,
                         keyboardType: TextInputType.multiline,
                         decoration: InputDecoration(
@@ -856,13 +922,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       return;
     }
     try {
-      await ref
-          .read(insertUpdateSprintProvider.notifier)
-          .startSprint(
-            item.id!,
-            _sprintGoalController.text.isEmpty ? null : _sprintGoalController.text,
-            _sprintNameController.text.isEmpty ? item.name! : _sprintNameController.text,
-          );
+      await ref.read(insertUpdateSprintProvider.notifier).startSprint(item.id!, item.goal ?? '', item.name ?? '');
 
       if (!mounted) return;
 
