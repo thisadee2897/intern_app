@@ -7,11 +7,13 @@ class DeleteImageApi {
   final Ref ref;
   final String _path = 'image/delete_image';
   DeleteImageApi({required this.ref});
-  Future<String> post({required String imageUrl}) async {
+  Future<String> delete({required String imageUrl}) async {
+    print('imageUrl: $imageUrl');
     try {
-      Response response = await ref.read(apiClientProvider).get(_path, queryParameters: {'image_url': imageUrl});
+      Response response = await ref.read(apiClientProvider).delete(_path, queryParameters: {'image_url': imageUrl});
       return response.data['message'] as String;
     } catch (e) {
+      print('Error deleting image: $e');
       rethrow;
     }
   }
