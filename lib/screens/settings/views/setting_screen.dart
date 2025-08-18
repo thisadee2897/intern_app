@@ -1,10 +1,7 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:project/components/export.dart';
-import 'package:project/config/routes/route_config.dart';
-import 'package:project/config/routes/route_helper.dart';
-import '../../auth/providers/controllers/auth_controller.dart';
-
+import 'package:project/screens/settings/views/widgets/my_profile_dialog_widget.dart';
 
 class SettingScreen extends ConsumerStatefulWidget {
   const SettingScreen({super.key});
@@ -24,8 +21,12 @@ class _SettingScreenState extends ConsumerState<SettingScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await ref.read(logoutProvider.future);
-              ref.goFromPath(Routes.login);
+              final result = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: false);
+              if (result != null) {
+                print(result.paths);
+              }
+              // await ref.read(logoutProvider.future);
+              // ref.goFromPath(Routes.login);
             },
           ),
         ],
@@ -38,8 +39,14 @@ class _SettingScreenState extends ConsumerState<SettingScreen> {
             subtitle: const Text('View and edit your profile'),
             leading: const Icon(Icons.person),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              context.push('/setting/profile');
+            onTap: () async {
+              showDialog(
+                
+                context: context,
+                builder: (context) {
+                  return MyProfileDialogWidget();
+                },
+              );
             },
           ),
         ],
