@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TaskBysprintApi {
   final Ref ref;
-  final String _path = 'project_data/get_task_by_sprint';
+  final String _path = 'project_data/get_task_by_sprint_started';
   TaskBysprintApi({required this.ref});
 
   Future<List<TaskModel>> get({required String projectId}) async {
