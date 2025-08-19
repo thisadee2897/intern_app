@@ -26,7 +26,8 @@ class ProjectScreen extends BaseStatefulWidget {
   BaseState<ProjectScreen> createState() => _ProjectScreenState();
 }
 
-class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderStateMixin {
+class _ProjectScreenState extends BaseState<ProjectScreen>
+    with TickerProviderStateMixin {
   // String widget.workspaceId = '1';
   Map<String, bool> categoryExpansionState = {};
   final TextEditingController _searchController = TextEditingController();
@@ -47,18 +48,35 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     super.initState();
 
     // Initialize Animation Controllers
-    _fabAnimationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    _fabAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
 
-    _searchAnimationController = AnimationController(duration: const Duration(milliseconds: 400), vsync: this);
+    _searchAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
 
-    _categoryAnimationController = AnimationController(duration: const Duration(milliseconds: 600), vsync: this);
+    _categoryAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
 
     // Initialize Animations
-    _fabScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _fabAnimationController, curve: Curves.elasticOut));
+    _fabScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fabAnimationController,
+        curve: Curves.elasticOut,
+      ),
+    );
 
-
-
-    _categoryStaggerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _categoryAnimationController, curve: Curves.easeOutQuart));
+    _categoryStaggerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _categoryAnimationController,
+        curve: Curves.easeOutQuart,
+      ),
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // ref.read(categoryListProvider(widget.workspace.id!));
@@ -111,7 +129,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     }
   }
 
-
   void _hideOverlay() {
     _removeOverlay();
   }
@@ -120,7 +137,6 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
-
 
   // สร้าง Dialog สวยๆ สำหรับเพิ่ม Category
   Future<void> _showAddCategoryDialog(CategoryModel item) async {
@@ -131,7 +147,11 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         transitionDuration: Duration(milliseconds: 400),
         reverseTransitionDuration: Duration(milliseconds: 300),
       ),
-      builder: (context) => AddCategoryDialog(category: item, workspaceId: widget.workspace.id!),
+      builder:
+          (context) => AddCategoryDialog(
+            category: item,
+            workspaceId: widget.workspace.id!,
+          ),
     ).then((result) {
       if (result == true) {
         ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
@@ -142,6 +162,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
   onRefresh() async {
     await ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
   }
+
   Widget _buildBody(BuildContext context, SizingInformation sizingInformation) {
     // final categoryAsyncValue = ref.watch(categoryListProvider(widget.workspace.id!));
     final stateCategory = ref.watch(categoryProvider);
@@ -160,7 +181,14 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         elevation: 0,
         shadowColor: Colors.black26,
         surfaceTintColor: Colors.white,
-        title: Text(widget.workspace.name ?? '', style: const TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.w700)),
+        title: Text(
+          widget.workspace.name ?? '',
+          style: const TextStyle(
+            color: Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         centerTitle: false,
         actions: [
           // _buildSearchField(),
@@ -170,8 +198,18 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                gradient: const LinearGradient(colors: [Color(0xFF667eea), Color(0xFF764ba2)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                boxShadow: [BoxShadow(color: const Color(0xFF667eea).withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF667eea).withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Material(
                 color: Colors.transparent,
@@ -180,13 +218,27 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                   borderRadius: BorderRadius.circular(12),
                   onTap: () => _showAddCategoryDialog(CategoryModel(id: '0')),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.add_rounded, size: 20, color: Colors.white),
+                        const Icon(
+                          Icons.add_rounded,
+                          size: 20,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 8),
-                        const Text('New Category', style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w600)),
+                        const Text(
+                          'New Category',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -201,7 +253,11 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         dataBuilder: (data) {
           return Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.grey.shade50, Colors.white]),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.grey.shade50, Colors.white],
+              ),
             ),
             child: RefreshIndicator(
               onRefresh: () async {
@@ -212,26 +268,47 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
-                  SliverToBoxAdapter(child: SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top + 20)),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height:
+                          kToolbarHeight +
+                          MediaQuery.of(context).padding.top +
+                          20,
+                    ),
+                  ),
                   SliverPadding(
                     padding: padding,
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final category = data[index];
                         final categoryId = category.id ?? '0';
-                        final isExpanded = categoryExpansionState[categoryId] ?? false;
+                        final isExpanded =
+                            categoryExpansionState[categoryId] ?? false;
                         return FadeTransition(
                           opacity: _categoryStaggerAnimation,
                           child: SlideTransition(
                             position: Tween<Offset>(
                               begin: Offset(0.0, 0.5 + (index * 0.1)),
                               end: Offset.zero,
-                            ).animate(CurvedAnimation(parent: _categoryAnimationController, curve: Interval(index * 0.1, 1.0, curve: Curves.easeOutBack))),
+                            ).animate(
+                              CurvedAnimation(
+                                parent: _categoryAnimationController,
+                                curve: Interval(
+                                  index * 0.1,
+                                  1.0,
+                                  curve: Curves.easeOutBack,
+                                ),
+                              ),
+                            ),
                             child: _buildCategoryTile(
                               context,
                               isExpanded: isExpanded,
                               onExpansionChanged: (expanded) {
-                                setState(() => categoryExpansionState[categoryId] = expanded);
+                                setState(
+                                  () =>
+                                      categoryExpansionState[categoryId] =
+                                          expanded,
+                                );
                               },
                               category: category,
                               index: index,
@@ -266,10 +343,25 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 8), spreadRadius: -4),
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: -4,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
         ],
-        border: Border.all(color: isExpanded ? const Color(0xFF667eea).withOpacity(0.3) : Colors.grey.shade200, width: 1),
+        border: Border.all(
+          color:
+              isExpanded
+                  ? const Color(0xFF667eea).withOpacity(0.3)
+                  : Colors.grey.shade200,
+          width: 1,
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -288,19 +380,42 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [const Color(0xFF667eea).withOpacity(0.1), const Color(0xFF764ba2).withOpacity(0.1)]),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF667eea).withOpacity(0.1),
+                      const Color(0xFF764ba2).withOpacity(0.1),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.folder_rounded, color: const Color(0xFF667eea), size: 24),
+                child: Icon(
+                  Icons.folder_rounded,
+                  color: const Color(0xFF667eea),
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(category.name!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87)),
+                    Text(
+                      category.name!,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text('${category.projects.length} projects', style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
+                    Text(
+                      '${category.projects.length} projects',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -312,13 +427,28 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
                 child: Center(
                   child: Column(
                     children: [
-                      Icon(Icons.folder_open_rounded, size: 48, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.folder_open_rounded,
+                        size: 48,
+                        color: Colors.grey.shade400,
+                      ),
                       const SizedBox(height: 12),
-                      Text('ไม่มีโปรเจคในหมวดหมู่นี้', style: TextStyle(color: Colors.grey.shade600, fontSize: 14, fontWeight: FontWeight.w500)),
+                      Text(
+                        'ไม่มีโปรเจคในหมวดหมู่นี้',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -345,9 +475,17 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
       children: [
         Container(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFF667eea), Color(0xFF764ba2)]),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            ),
             borderRadius: BorderRadius.circular(10),
-            boxShadow: [BoxShadow(color: const Color(0xFF667eea).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF667eea).withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Material(
             color: Colors.transparent,
@@ -355,22 +493,44 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
             child: InkWell(
               borderRadius: BorderRadius.circular(10),
               onTap: () async {
-                UserLoginModel userLogin = await ref.read(localStorageServiceProvider).getUserLogin();
+                UserLoginModel userLogin =
+                    await ref.read(localStorageServiceProvider).getUserLogin();
                 await showModal(
                   context: context,
                   configuration: const FadeScaleTransitionConfiguration(),
                   builder:
-                      (context) => InsertOrUpdateProjectHD(category: category, projectHDModel: ProjectHDModel(id: '0', active: true, leader: userLogin.user)),
+                      (context) => InsertOrUpdateProjectHD(
+                        category: category,
+                        projectHDModel: ProjectHDModel(
+                          id: '0',
+                          active: true,
+                          leader: userLogin.user,
+                        ),
+                      ),
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.add_rounded, size: 16, color: Colors.white),
+                    const Icon(
+                      Icons.add_rounded,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                     const SizedBox(width: 6),
-                    const Text("Add project", style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+                    const Text(
+                      "Add project",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -379,10 +539,19 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         ),
         const SizedBox(width: 8),
         Container(
-          decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert_rounded, color: Colors.grey.shade600, size: 20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            icon: Icon(
+              Icons.more_vert_rounded,
+              color: Colors.grey.shade600,
+              size: 20,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             elevation: 8,
             itemBuilder:
                 (context) => [
@@ -391,9 +560,16 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(Icons.edit_rounded, color: Colors.blue.shade600, size: 20),
+                        Icon(
+                          Icons.edit_rounded,
+                          color: Colors.blue.shade600,
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
-                        const Text('แก้ไขหมวดหมู่', style: TextStyle(fontWeight: FontWeight.w500)),
+                        const Text(
+                          'แก้ไขหมวดหมู่',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
                       ],
                     ),
                   ),
@@ -402,9 +578,19 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete_rounded, color: Colors.red.shade600, size: 20),
+                        Icon(
+                          Icons.delete_rounded,
+                          color: Colors.red.shade600,
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
-                        Text('ลบหมวดหมู่', style: TextStyle(color: Colors.red.shade600, fontWeight: FontWeight.w500)),
+                        Text(
+                          'ลบหมวดหมู่',
+                          style: TextStyle(
+                            color: Colors.red.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -422,16 +608,42 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
       builder:
           (context) => AlertDialog(
             backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Row(children: [Icon(Icons.warning_rounded, color: Colors.orange.shade600), const SizedBox(width: 12), const Text('ยืนยันการลบ')]),
-            content: const Text('คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้? การกระทำนี้ไม่สามารถย้อนกลับได้', style: TextStyle(fontSize: 14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Row(
+              children: [
+                Icon(Icons.warning_rounded, color: Colors.orange.shade600),
+                const SizedBox(width: 12),
+                const Text('ยืนยันการลบ'),
+              ],
+            ),
+            content: const Text(
+              'คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้? การกระทำนี้ไม่สามารถย้อนกลับได้',
+              style: TextStyle(fontSize: 14),
+            ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context, false), child: Text('ยกเลิก', style: TextStyle(color: Colors.grey.shade600))),
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'ยกเลิก',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+              ),
               Container(
-                decoration: BoxDecoration(color: Colors.red.shade600, borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade600,
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: TextButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('ลบ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                  child: const Text(
+                    'ลบ',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -439,15 +651,25 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     ).then((confirmed) async {
       if (confirmed == true) {
         try {
-          await ref.read(deleteProjectCategoryControllerProvider.notifier).deleteCategory({'project_category_id': categoryId});
+          await ref
+              .read(deleteProjectCategoryControllerProvider.notifier)
+              .deleteCategory({'project_category_id': categoryId});
 
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Row(children: [Icon(Icons.check_circle, color: Colors.white), SizedBox(width: 8), Text('ลบหมวดหมู่สำเร็จ')]),
+                content: const Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.white),
+                    SizedBox(width: 8),
+                    Text('ลบหมวดหมู่สำเร็จ'),
+                  ],
+                ),
                 backgroundColor: Colors.green.shade600,
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             );
           }
@@ -461,11 +683,17 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(
-                  children: [const Icon(Icons.error, color: Colors.white), const SizedBox(width: 8), Expanded(child: Text('เกิดข้อผิดพลาด: $errorMessage'))],
+                  children: [
+                    const Icon(Icons.error, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text('เกิดข้อผิดพลาด: $errorMessage')),
+                  ],
                 ),
                 backgroundColor: Colors.red.shade600,
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             );
           }
@@ -474,7 +702,11 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     });
   }
 
-  Widget _buildProjectItem(ProjectHDModel project, int index, CategoryModel category) {
+  Widget _buildProjectItem(
+    ProjectHDModel project,
+    int index,
+    CategoryModel category,
+  ) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 200 + (index * 50)),
       curve: Curves.easeOutBack,
@@ -483,35 +715,85 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         color: index.isEven ? Colors.white : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           ref.read(selectProjectIdProvider.notifier).state = project.id;
-          ref.read(projectSelectingProvider.notifier).state = project; // เก็บค่าโปรเจค ก่อนเปิดหน้ารายละเอียด
-          Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
+          ref.read(projectSelectingProvider.notifier).state =
+              project; // เก็บค่าโปรเจค ก่อนเปิดหน้ารายละเอียด
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                    width: 40,
+                    height: 40,
+               // padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [const Color(0xFF667eea).withOpacity(0.1), const Color(0xFF764ba2).withOpacity(0.1)]),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF667eea).withOpacity(0.1),
+                      const Color(0xFF764ba2).withOpacity(0.1),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.folder_rounded, color: const Color(0xFF667eea), size: 20),
+                //child: Icon(Icons.folder_rounded, color: const Color(0xFF667eea), size: 20),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child:
+                      (project.image != null && project.image!.isNotEmpty)
+                          ? Image.network(
+                            project.image!,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (context, error, stackTrace) => Icon(
+                                  Icons.folder_rounded,
+                                  color: const Color(0xFF667eea),
+                                  size: 20,
+                                ),
+                          )
+                          : Icon(
+                            Icons.folder_rounded,
+                            color: const Color(0xFF667eea),
+                            size: 20,
+                          ),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(project.name ?? '-', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
+                    Text(
+                      project.name ?? '-',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text('ID: ${project.id}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.w400)),
+                    Text(
+                      'ID: ${project.id}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -529,7 +811,10 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Material(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(8),
@@ -539,19 +824,36 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                 await showModal(
                   context: context,
                   configuration: const FadeScaleTransitionConfiguration(),
-                  builder: (context) => InsertOrUpdateProjectHD(category: category, projectHDModel: project),
+                  builder:
+                      (context) => InsertOrUpdateProjectHD(
+                        category: category,
+                        projectHDModel: project,
+                      ),
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.edit_rounded, size: 16, color: Colors.grey.shade700),
+                    Icon(
+                      Icons.edit_rounded,
+                      size: 16,
+                      color: Colors.grey.shade700,
+                    ),
                     const SizedBox(width: 6),
-                    Text('Edit Project', style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+                    Text(
+                      'Edit Project',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
-        
                 ),
               ),
             ),
@@ -560,9 +862,17 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         const SizedBox(width: 8),
         Container(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFF667eea), Color(0xFF764ba2)]),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            ),
             borderRadius: BorderRadius.circular(8),
-            boxShadow: [BoxShadow(color: const Color(0xFF667eea).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))],
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF667eea).withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Material(
             color: Colors.transparent,
@@ -571,16 +881,32 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
               borderRadius: BorderRadius.circular(8),
               onTap: () {
                 ref.read(selectProjectIdProvider.notifier).state = project.id;
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => ProjectDetailScreen()),
+                );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.open_in_new_rounded, size: 16, color: Colors.white),
+                    Icon(
+                      Icons.open_in_new_rounded,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                     SizedBox(width: 6),
-                    Text('เปิด', style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+                    Text(
+                      'เปิด',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -592,17 +918,26 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
   }
 
   @override
-  Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
+  Widget buildDesktop(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     return _buildBody(context, sizingInformation);
   }
 
   @override
-  Widget buildTablet(BuildContext context, SizingInformation sizingInformation) {
+  Widget buildTablet(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     return _buildBody(context, sizingInformation);
   }
 
   @override
-  Widget buildMobile(BuildContext context, SizingInformation sizingInformation) {
+  Widget buildMobile(
+    BuildContext context,
+    SizingInformation sizingInformation,
+  ) {
     return _buildBody(context, sizingInformation);
   }
 }
