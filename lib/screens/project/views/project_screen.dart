@@ -490,7 +490,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         onTap: () {
           ref.read(selectProjectIdProvider.notifier).state = project.id;
           ref.read(projectSelectingProvider.notifier).state = project; // เก็บค่าโปรเจค ก่อนเปิดหน้ารายละเอียด
-          Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(projectId: project.id!)));
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -571,7 +571,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
               borderRadius: BorderRadius.circular(8),
               onTap: () {
                 ref.read(selectProjectIdProvider.notifier).state = project.id;
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen()));
+               Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(projectId: project.id!)));
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

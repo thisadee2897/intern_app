@@ -1,17 +1,35 @@
+// 📁 project_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:project/screens/project/project_datail/gantt_chart/views/widgets/gantt_app_widget.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
+import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'widgets/export.dart';
-// import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart'; // อย่าลืม import SprintProvider ด้วย
+import 'package:project/screens/project/project_datail/gantt_chart/views/widgets/gantt_app_widget.dart';
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
-  const ProjectDetailScreen({super.key});
+  final String projectId;
+
+  const ProjectDetailScreen({super.key, required this.projectId});
 
   @override
   ConsumerState<ProjectDetailScreen> createState() => _ProjectDetailScreenState();
 }
 
 class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // ตั้งค่า projectId ใน provider
+    ref.read(selectProjectIdProvider.notifier).state = widget.projectId;
+
+    // โหลด Sprint
+    ref.read(sprintProvider.notifier).get();
+
+    // โหลด Task ตาม projectId
+    ref.read(taskBySprintControllerProvider(widget.projectId).notifier).fetch();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
@@ -42,9 +60,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
           children: [
             SummaryWidget(),
             BacklogWidget(),
-            BoardWidget(),
+            // ส่ง projectId เข้า BoardWidget
+            BoardWidget(projectId: widget.projectId),
             GanttAppWidget(),
-            // TimelineWidget(),
           ],
         ),
       ),

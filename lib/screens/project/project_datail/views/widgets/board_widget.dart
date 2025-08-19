@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
-
-import '../comment_task_screen.dart';
+import 'package:project/screens/project/project_datail/views/comment_task_screen.dart';
 
 class BoardWidget extends BaseStatefulWidget {
-  const BoardWidget({super.key});
+  final String projectId; // <<< dynamic projectId
+  const BoardWidget({super.key, required this.projectId});
+
   @override
   BaseState<BoardWidget> createState() => _BoardWidgetState();
 }
@@ -12,8 +13,9 @@ class BoardWidget extends BaseStatefulWidget {
 class _BoardWidgetState extends BaseState<BoardWidget> {
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
-    return CommentTaskScreen(projectId: '95',);
-    // return Container(color: Colors.amber[50], child: Center(child: Text('Desktop View', style: Theme.of(context).textTheme.titleLarge)));
+    // Debug: print projectId
+    print('[BoardWidget] projectId: ${widget.projectId}');
+    return CommentTaskScreen(projectId: widget.projectId);
   }
 
   @override

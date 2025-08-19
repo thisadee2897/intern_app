@@ -6,8 +6,8 @@ import 'package:project/controllers/assignee_controller.dart';
 import 'package:project/controllers/priority_controller.dart';
 import 'package:project/controllers/task_status_controller.dart';
 import 'package:project/controllers/type_of_work_controller.dart';
-import 'package:project/models/sprint_model.dart';
 import 'package:project/models/task_status_model.dart';
+import 'package:project/screens/project/project_datail/providers/controllers/sprint_in_borad_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
 
@@ -57,40 +57,42 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
         _refreshBoard();
       },
       onMoveGroupItemToGroup: (fromGroupId, fromIndex, toGroupId, toIndex) async {
-        final fromList = groupedItems[fromGroupId];
-        final toList = groupedItems[toGroupId];
-        if (fromList == null || toList == null || fromIndex >= fromList.length) return;
-        final item = fromList.removeAt(fromIndex);
-        if (toIndex > toList.length) {
-          toList.add(item);
-        } else {
-          toList.insert(toIndex, item);
-        }
+  final fromList = groupedItems[fromGroupId];
+  final toList = groupedItems[toGroupId];
+  if (fromList == null || toList == null || fromIndex >= fromList.length) return;
+  final item = fromList.removeAt(fromIndex);
+  if (toIndex > toList.length) {
+    toList.add(item);
+  } else {
+    toList.insert(toIndex, item);
+  }
 
-        try {
-          await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(
-            body: {
-              "task_id": item.taskId,
-              "project_hd_id": widget.projectId,
-              "sprint_id": item.sprintId ?? "0",
-              "master_priority_id": item.priorityId ?? "1",
-              "master_task_status_id": toGroupId,
-              "master_type_of_work_id": item.typeOfWorkId ?? "1",
-              "task_name": item.title,
-              "task_description": item.subtitle ?? "",
-              "task_assigned_to": item.assignedToId ?? "0",
-              "task_start_date": item.startDate,
-              "task_end_date": item.endDate,
-              "task_is_active": true,
-            },
-          );
-          ref.invalidate(taskBySprintControllerProvider(widget.projectId));
-        } catch (e) {
-          print("❌ อัปเดต status ผิดพลาด: $e");
-        }
-
-        _refreshBoard();
+  try {
+    await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(
+      body: {
+        "task_id": item.taskId,
+        "project_hd_id": widget.projectId,
+        "sprint_id": item.sprintId ?? "0",
+        "master_priority_id": item.priorityId ?? "1",
+        "master_task_status_id": toGroupId,
+        "master_type_of_work_id": item.typeOfWorkId ?? "1",
+        "task_name": item.title,
+        "task_description": item.subtitle ?? "",
+        "task_assigned_to": item.assignedToId ?? "0",
+        "task_start_date": item.startDate,
+        "task_end_date": item.endDate,
+        "task_is_active": true,
       },
+    );
+
+    // ✅ รอโหลด Task ใหม่ก่อนรีเฟรช Board
+    await _loadTasks(); 
+
+  } catch (e) {
+    print("❌ อัปเดต status ผิดพลาด: $e");
+  }
+},
+
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -106,9 +108,15 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
       final tasksState = ref.read(taskBySprintControllerProvider(widget.projectId));
       final tasks = tasksState.maybeWhen(data: (data) => data, orElse: () => <dynamic>[]);
 
+      print('[CommentTaskScreen] Loaded ${tasks.length} tasks for project ${widget.projectId}');
+      for (var t in tasks) {
+        print('Task: ${t.name}, status: ${t.taskStatus?.id}, sprint: ${t.sprint?.id}');
+      }
+
       if (!mounted) return;
       final statusState = ref.read(taskStatusControllerProvider);
       statusList = statusState.maybeWhen(data: (data) => data, orElse: () => []);
+      print('[CommentTaskScreen] statusList: ${statusList.map((s) => '${s.id}:${s.name}').toList()}');
       groupedItems.clear();
 
       for (final status in statusList) {
@@ -126,7 +134,7 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
             endDate: task.taskEndDate,
           ),
         ).toList();
-
+        print('[CommentTaskScreen] status $id (${status.name}) mapped ${filtered.length} tasks');
         groupedItems[id] = filtered;
       }
 
@@ -185,103 +193,104 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
     );
   }
 
-  Future<void> _showAddTaskDialog(String statusId) async {
-    final nameController = TextEditingController();
-    final sprintAsync = ref.watch(sprintListProvider);
-    List<SprintModel> sprintList = [];
-    sprintAsync.maybeWhen(data: (data) => sprintList = data, orElse: () {});
-    String? selectedSprintId;
+Future<void> _showAddTaskDialog(String statusId) async {
+  final nameController = TextEditingController();
+  String? selectedSprintId;
 
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(builder: (context, setStateDialog) {
-          return AlertDialog(
-            title: const Text('เพิ่มงานใหม่'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'ชื่องาน'),
-                  autofocus: true,
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'เลือก Sprint'),
-                  value: selectedSprintId,
-                  items: sprintList.map((sprint) {
-                    return DropdownMenuItem(
-                      value: sprint.id,
-                      child: Text(sprint.name ?? 'ไม่มีชื่อ Sprint'),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    setStateDialog(() {
-                      selectedSprintId = val;
-                    });
-                  },
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('ยกเลิก'),
+  // โหลด Sprint ผ่าน controller
+  await ref.read(sprintStartedControllerProvider(widget.projectId).notifier).fetch();
+  final sprintAsync = ref.watch(sprintStartedControllerProvider(widget.projectId));
+
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(builder: (context, setStateDialog) {
+        return AlertDialog(
+          title: const Text('เพิ่มงานใหม่'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'ชื่องาน'),
+                autofocus: true,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (nameController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('กรุณากรอกชื่องาน')),
-                    );
-                    return;
-                  }
-                  if (selectedSprintId == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('กรุณาเลือก Sprint')),
-                    );
-                    return;
-                  }
-                  Navigator.of(context).pop(true);
+              const SizedBox(height: 16),
+              sprintAsync.when(
+                data: (sprintList) {
+                  return DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(labelText: 'เลือก Sprint'),
+                    value: selectedSprintId,
+                    items: sprintList.map((sprint) {
+                      return DropdownMenuItem(
+                        value: sprint.id,
+                        child: Text(sprint.name ?? 'ไม่มีชื่อ Sprint'),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setStateDialog(() {
+                        selectedSprintId = val;
+                      });
+                    },
+                  );
                 },
-                child: const Text('เพิ่ม'),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => Text('Error loading sprint: $err'),
               ),
             ],
-          );
-        });
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('ยกเลิก'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (nameController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('กรุณากรอกชื่องาน')),
+                  );
+                  return;
+                }
+                if (selectedSprintId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('กรุณาเลือก Sprint')),
+                  );
+                  return;
+                }
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('เพิ่ม'),
+            ),
+          ],
+        );
+      });
+    },
+  );
+
+  if (result == true) {
+    await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(
+      body: {
+        "task_id": "0",
+        "project_hd_id": widget.projectId,
+        "sprint_id": selectedSprintId ?? "0",
+        "master_priority_id": "1",
+        "master_task_status_id": statusId,
+        "master_type_of_work_id": "1",
+        "task_name": nameController.text.trim(),
+        "task_description": "",
+        "task_assigned_to": "0",
+        "task_start_date": null,
+        "task_end_date": null,
+        "task_is_active": true,
       },
     );
-
-    if (result == true) {
-      try {
-        await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(
-          body: {
-            "task_id": "0",
-            "project_hd_id": widget.projectId,
-            "sprint_id": selectedSprintId ?? "0",
-            "master_priority_id": "1",
-            "master_task_status_id": statusId,
-            "master_type_of_work_id": "1",
-            "task_name": nameController.text.trim(),
-            "task_description": "",
-            "task_assigned_to": "0",
-            "task_start_date": null,
-            "task_end_date": null,
-            "task_is_active": true,
-          },
-        );
-        await _loadTasks();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('เพิ่มงานสำเร็จ')),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
-        );
-      }
-    }
+    await _loadTasks();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('เพิ่มงานสำเร็จ')),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
