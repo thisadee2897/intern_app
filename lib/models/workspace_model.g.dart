@@ -17,6 +17,7 @@ _$WorkspaceModelImpl _$$WorkspaceModelImplFromJson(Map<String, dynamic> json) =>
       userRole: json['user_role'] == null
           ? null
           : UserRoleModel.fromJson(json['user_role'] as Map<String, dynamic>),
+      image: json['image'] as String?,
     );
 
 Map<String, dynamic> _$$WorkspaceModelImplToJson(
@@ -27,4 +28,5 @@ Map<String, dynamic> _$$WorkspaceModelImplToJson(
       'name': instance.name,
       'users': instance.users,
       'user_role': instance.userRole,
+      'image': instance.image,
     };

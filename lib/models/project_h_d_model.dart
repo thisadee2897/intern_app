@@ -22,6 +22,7 @@ class ProjectHDModel with _$ProjectHDModel {
   @JsonKey(name: 'created_by') UserModel? createdBy,
   @JsonKey(name: 'updated_by') UserModel? updatedBy,
   @JsonKey(name: 'active') bool? active,
+  @JsonKey(name: 'image') String? image,
   @JsonKey(ignore: true) @Default(0.0)double progress,
   }) = _ProjectHDModel;
 

@@ -30,6 +30,8 @@ mixin _$WorkspaceModel {
   List<UserModel>? get users => throw _privateConstructorUsedError;
   @JsonKey(name: 'user_role')
   UserRoleModel? get userRole => throw _privateConstructorUsedError;
+  @JsonKey(name: 'image')
+  String? get image => throw _privateConstructorUsedError;
 
   /// Serializes this WorkspaceModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -52,7 +54,8 @@ abstract class $WorkspaceModelCopyWith<$Res> {
       @JsonKey(name: 'id') String? id,
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'users') List<UserModel>? users,
-      @JsonKey(name: 'user_role') UserRoleModel? userRole});
+      @JsonKey(name: 'user_role') UserRoleModel? userRole,
+      @JsonKey(name: 'image') String? image});
 
   $UserRoleModelCopyWith<$Res>? get userRole;
 }
@@ -77,6 +80,7 @@ class _$WorkspaceModelCopyWithImpl<$Res, $Val extends WorkspaceModel>
     Object? name = freezed,
     Object? users = freezed,
     Object? userRole = freezed,
+    Object? image = freezed,
   }) {
     return _then(_value.copyWith(
       tableName: freezed == tableName
@@ -99,6 +103,10 @@ class _$WorkspaceModelCopyWithImpl<$Res, $Val extends WorkspaceModel>
           ? _value.userRole
           : userRole // ignore: cast_nullable_to_non_nullable
               as UserRoleModel?,
+      image: freezed == image
+          ? _value.image
+          : image // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 
@@ -130,7 +138,8 @@ abstract class _$$WorkspaceModelImplCopyWith<$Res>
       @JsonKey(name: 'id') String? id,
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'users') List<UserModel>? users,
-      @JsonKey(name: 'user_role') UserRoleModel? userRole});
+      @JsonKey(name: 'user_role') UserRoleModel? userRole,
+      @JsonKey(name: 'image') String? image});
 
   @override
   $UserRoleModelCopyWith<$Res>? get userRole;
@@ -154,6 +163,7 @@ class __$$WorkspaceModelImplCopyWithImpl<$Res>
     Object? name = freezed,
     Object? users = freezed,
     Object? userRole = freezed,
+    Object? image = freezed,
   }) {
     return _then(_$WorkspaceModelImpl(
       tableName: freezed == tableName
@@ -176,6 +186,10 @@ class __$$WorkspaceModelImplCopyWithImpl<$Res>
           ? _value.userRole
           : userRole // ignore: cast_nullable_to_non_nullable
               as UserRoleModel?,
+      image: freezed == image
+          ? _value.image
+          : image // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -188,7 +202,8 @@ class _$WorkspaceModelImpl implements _WorkspaceModel {
       @JsonKey(name: 'id') this.id,
       @JsonKey(name: 'name') this.name,
       @JsonKey(name: 'users') final List<UserModel>? users,
-      @JsonKey(name: 'user_role') this.userRole})
+      @JsonKey(name: 'user_role') this.userRole,
+      @JsonKey(name: 'image') this.image})
       : _users = users;
 
   factory _$WorkspaceModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -217,10 +232,13 @@ class _$WorkspaceModelImpl implements _WorkspaceModel {
   @override
   @JsonKey(name: 'user_role')
   final UserRoleModel? userRole;
+  @override
+  @JsonKey(name: 'image')
+  final String? image;
 
   @override
   String toString() {
-    return 'WorkspaceModel(tableName: $tableName, id: $id, name: $name, users: $users, userRole: $userRole)';
+    return 'WorkspaceModel(tableName: $tableName, id: $id, name: $name, users: $users, userRole: $userRole, image: $image)';
   }
 
   @override
@@ -234,13 +252,14 @@ class _$WorkspaceModelImpl implements _WorkspaceModel {
             (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other._users, _users) &&
             (identical(other.userRole, userRole) ||
-                other.userRole == userRole));
+                other.userRole == userRole) &&
+            (identical(other.image, image) || other.image == image));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, tableName, id, name,
-      const DeepCollectionEquality().hash(_users), userRole);
+      const DeepCollectionEquality().hash(_users), userRole, image);
 
   /// Create a copy of WorkspaceModel
   /// with the given fields replaced by the non-null parameter values.
@@ -261,12 +280,12 @@ class _$WorkspaceModelImpl implements _WorkspaceModel {
 
 abstract class _WorkspaceModel implements WorkspaceModel {
   const factory _WorkspaceModel(
-          {@JsonKey(name: 'table_name') final String? tableName,
-          @JsonKey(name: 'id') final String? id,
-          @JsonKey(name: 'name') final String? name,
-          @JsonKey(name: 'users') final List<UserModel>? users,
-          @JsonKey(name: 'user_role') final UserRoleModel? userRole}) =
-      _$WorkspaceModelImpl;
+      {@JsonKey(name: 'table_name') final String? tableName,
+      @JsonKey(name: 'id') final String? id,
+      @JsonKey(name: 'name') final String? name,
+      @JsonKey(name: 'users') final List<UserModel>? users,
+      @JsonKey(name: 'user_role') final UserRoleModel? userRole,
+      @JsonKey(name: 'image') final String? image}) = _$WorkspaceModelImpl;
 
   factory _WorkspaceModel.fromJson(Map<String, dynamic> json) =
       _$WorkspaceModelImpl.fromJson;
@@ -286,6 +305,9 @@ abstract class _WorkspaceModel implements WorkspaceModel {
   @override
   @JsonKey(name: 'user_role')
   UserRoleModel? get userRole;
+  @override
+  @JsonKey(name: 'image')
+  String? get image;
 
   /// Create a copy of WorkspaceModel
   /// with the given fields replaced by the non-null parameter values.
