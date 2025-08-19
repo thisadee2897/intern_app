@@ -15,6 +15,7 @@ class WorkspaceModel with _$WorkspaceModel {
   @JsonKey(name: 'name') String? name,
   @JsonKey(name: 'users') List<UserModel>? users,
   @JsonKey(name: 'user_role') UserRoleModel? userRole,
+  @JsonKey(name: 'image') String? image,
   }) = _WorkspaceModel;
 
   factory WorkspaceModel.fromJson(Map<String, dynamic> json) => _$WorkspaceModelFromJson(json);

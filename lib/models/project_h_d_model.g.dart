@@ -29,6 +29,7 @@ _$ProjectHDModelImpl _$$ProjectHDModelImplFromJson(Map<String, dynamic> json) =>
           ? null
           : UserModel.fromJson(json['updated_by'] as Map<String, dynamic>),
       active: json['active'] as bool?,
+      image: json['image'] as String?,
     );
 
 Map<String, dynamic> _$$ProjectHDModelImplToJson(
@@ -47,4 +48,5 @@ Map<String, dynamic> _$$ProjectHDModelImplToJson(
       'created_by': instance.createdBy,
       'updated_by': instance.updatedBy,
       'active': instance.active,
+      'image': instance.image,
     };
