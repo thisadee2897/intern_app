@@ -51,6 +51,17 @@ class _StatusOverviewWidgetState extends ConsumerState<StatusOverviewWidget> {
           Expanded(
             child: statusOverview.when(
               data: (list) {
+                // Handle empty list case
+                if (list.isEmpty) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('No data available', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  );
+                }
                 return Row(
                   children: [
                     Expanded(

@@ -93,40 +93,47 @@ class _TeamWorkloadWidgetState extends ConsumerState<TeamWorkloadWidget> {
           ],
         ),
         const SizedBox(height: 12),
-        ...items.map((member) {
-          final percentage = totalCount == 0 ? 0.0 : (member.count / totalCount).toDouble();
-          final memberColor = hexToColor(member.color ?? "#000000");
+        if (items.isEmpty)
+          Expanded(
+            child: const Center(
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text('No data available', style: TextStyle(color: Colors.grey))]),
+            ),
+          ),
+        if (items.isNotEmpty)
+          ...items.map((member) {
+            final percentage = totalCount == 0 ? 0.0 : (member.count / totalCount).toDouble();
+            final memberColor = hexToColor(member.color ?? "#000000");
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 14, // ขนาดวงกลม
-                  backgroundColor: memberColor.withOpacity(0.3),
-                  child: const Icon(Icons.person, color: Colors.black54, size: 20),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(width: 120, child: Text(member.name ?? "Unassigned", style: const TextStyle(fontWeight: FontWeight.w500))),
-                const SizedBox(width: 8),
-                // หลอดอยู่ต่อจากชื่อ
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: percentage,
-                      minHeight: 30,
-                      backgroundColor: Colors.grey.shade300,
-                      valueColor: AlwaysStoppedAnimation(memberColor),
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 14, // ขนาดวงกลม
+                    backgroundColor: memberColor.withOpacity(0.3),
+                    child: const Icon(Icons.person, color: Colors.black54, size: 20),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(width: 120, child: Text(member.name ?? "Unassigned", style: const TextStyle(fontWeight: FontWeight.w500))),
+                  const SizedBox(width: 8),
+                  // หลอดอยู่ต่อจากชื่อ
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: percentage,
+                        minHeight: 30,
+                        backgroundColor: Colors.grey.shade300,
+                        valueColor: AlwaysStoppedAnimation(memberColor),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text("${(percentage * 100).toStringAsFixed(0)}%", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-              ],
-            ),
-          );
-        }),
+                  const SizedBox(width: 8),
+                  Text("${(percentage * 100).toStringAsFixed(0)}%", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                ],
+              ),
+            );
+          }),
       ],
     );
   }
