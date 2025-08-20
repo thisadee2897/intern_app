@@ -40,24 +40,24 @@
 //   }
 // }
 
-
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/workspace_model.dart';
 import 'package:project/screens/home/providers/apis/insert_update_workspace_api.dart';
 
 /// State สำหรับเก็บผลลัพธ์หลัง insert หรือ update
-final insertUpdateWorkspaceControllerProvider =
-    StateNotifierProvider<InsertUpdateWorkspaceController, AsyncValue<WorkspaceModel?>>(
-  (ref) => InsertUpdateWorkspaceController(ref),
-);
+final insertUpdateWorkspaceControllerProvider = StateNotifierProvider<
+  InsertUpdateWorkspaceController,
+  AsyncValue<WorkspaceModel?>
+>((ref) => InsertUpdateWorkspaceController(ref));
 
-class InsertUpdateWorkspaceController extends StateNotifier<AsyncValue<WorkspaceModel?>> {
+class InsertUpdateWorkspaceController
+    extends StateNotifier<AsyncValue<WorkspaceModel?>> {
   final Ref ref;
 
-  InsertUpdateWorkspaceController(this.ref) : super(const AsyncValue.data(null));
+  InsertUpdateWorkspaceController(this.ref)
+    : super(const AsyncValue.data(null));
 
-  Future<void> insertOrUpdateWorkspace({
+  Future<WorkspaceModel> insertOrUpdateWorkspace({
     required String id,
     required String name,
     required bool active,
@@ -65,22 +65,16 @@ class InsertUpdateWorkspaceController extends StateNotifier<AsyncValue<Workspace
     state = const AsyncValue.loading();
 
     try {
-      final workspace = await ref.read(apiInsertOrUpdateWorkspace).post(
-        body: {
-          'id': id,
-          'name': name.trim(),
-          'active': active,
-        },
-      );
+      final workspace = await ref
+          .read(apiInsertOrUpdateWorkspace)
+          .post(body: {'id': id, 'name': name.trim(), 'active': active});
+
       state = AsyncValue.data(workspace);
+      return workspace; // ✅ ส่งกลับ workspace ให้ Dialog ใช้งานต่อ
     } catch (e, st) {
       state = AsyncValue.error(e, st);
-      print("insertOrUpdateWorkspace$st");
+      print("insertOrUpdateWorkspace $st");
+      rethrow; // ❌ ต้อง throw ต่อเพื่อให้ Dialog รู้ว่าเกิด error
     }
-  }
-
-  /// เรียกเมื่อต้องการล้างค่า state (เช่น ตอนออกจากหน้าจอ)
-  void reset() {
-    state = const AsyncValue.data(null);
   }
 }
