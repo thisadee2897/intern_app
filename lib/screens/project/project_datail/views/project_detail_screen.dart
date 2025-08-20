@@ -62,7 +62,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
             BacklogWidget(),
             // ส่ง projectId เข้า BoardWidget
             BoardWidget(projectId: widget.projectId),
-            GanttAppWidget(),
+            GanttAppWidget(projectId: widget.projectId),
           ],
         ),
       ),

@@ -6,7 +6,8 @@ import '../../providers/controllers/gantt_data_controller.dart';
 import 'gantt_chart_widget.dart';
 
 class GanttAppWidget extends ConsumerStatefulWidget {
-  const GanttAppWidget({super.key});
+  final String projectId;
+  const GanttAppWidget({required this.projectId, super.key});
 
   @override
   ConsumerState<GanttAppWidget> createState() => _GanttAppWidgetState();
@@ -29,7 +30,12 @@ class _GanttAppWidgetState extends ConsumerState<GanttAppWidget> with SingleTick
       dataBuilder:
           (data) => Row(
             children: [
-              Expanded(child: GanttChartWidget(data ?? [])),
+              Expanded(
+                child: GanttChartWidget(
+                  data ?? [],
+                  projectId: widget.projectId,
+                ),
+              ),
               AnimatedContainer(
                 decoration: BoxDecoration(border: Border(left: BorderSide(color: Colors.grey.shade300, width: 1))),
                 duration: const Duration(milliseconds: 200),

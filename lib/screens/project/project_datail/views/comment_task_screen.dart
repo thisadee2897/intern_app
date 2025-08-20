@@ -206,6 +206,8 @@ Future<void> _showAddTaskDialog(String statusId) async {
     builder: (context) {
       return StatefulBuilder(builder: (context, setStateDialog) {
         return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('เพิ่มงานใหม่'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
