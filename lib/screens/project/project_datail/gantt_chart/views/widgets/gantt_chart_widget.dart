@@ -99,41 +99,59 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                         children: [
                           Text('Start Date', style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
                           const SizedBox(height: 4),
-                          SmartDateFieldPicker(
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.only(left: 12, right: 12, top: 0, bottom: 0),
-                              border: OutlineInputBorder(),
+                            Stack(
+                              alignment: Alignment.centerRight,
+                              children: [
+                                SmartDateFieldPicker(
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.only(left: 12, right: 40, top: 0, bottom: 0),
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  initialDate: startDate,
+                                  controller: startDateController,
+                                  onDateSelected: (date) {
+                                    setStateDialog(() {
+                                      startDate = date;
+                                      // Reset endDate if it's before startDate
+                                      if (endDate != null && startDate != null && endDate!.isBefore(startDate!)) {
+                                        endDate = null;
+                                      }
+                                    });
+                                  },
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.only(right: 12),
+                                  child: Icon(Icons.calendar_today, color: Colors.grey, size: 20),
+                                ),
+                              ],
                             ),
-                            initialDate: startDate,
-                            controller: startDateController,
-                            onDateSelected: (date) {
-                              setStateDialog(() {
-                                startDate = date;
-                                // Reset endDate if it's before startDate
-                                if (endDate != null && startDate != null && endDate!.isBefore(startDate!)) {
-                                  endDate = null;
-                                }
-                              });
-                            },
-                          ),
                           const SizedBox(height: 16),
                           Text('End Date', style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
                           const SizedBox(height: 4),
-                          SmartDateFieldPicker(
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.only(left: 12, right: 12, top: 0, bottom: 0),
-                              border: OutlineInputBorder(),
+                            Stack(
+                              alignment: Alignment.centerRight,
+                              children: [
+                                SmartDateFieldPicker(
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.only(left: 12, right: 40, top: 0, bottom: 0),
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  initialDate: endDate,
+                                  controller: endDateController,
+                                  enabled: startDate != null,
+                                  firstDate: startDate != null ? startDate!.add(const Duration(days: 1)) : null,
+                                  onDateSelected: (date) {
+                                    setStateDialog(() {
+                                      endDate = date;
+                                    });
+                                  },
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.only(right: 12),
+                                  child: Icon(Icons.calendar_today, color: Colors.grey, size: 20),
+                                ),
+                              ],
                             ),
-                            initialDate: endDate,
-                            controller: endDateController,
-                            enabled: startDate != null,
-                            firstDate: startDate != null ? startDate!.add(const Duration(days: 1)) : null,
-                            onDateSelected: (date) {
-                              setStateDialog(() {
-                                endDate = date;
-                              });
-                            },
-                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
