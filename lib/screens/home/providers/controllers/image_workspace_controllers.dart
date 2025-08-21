@@ -61,10 +61,11 @@ final workspaceImageProvider = StateNotifierProvider.family<
 
 class WorkspaceImageNotifier extends StateNotifier<AsyncValue<String?>> {
   final Ref ref;
-  final String workspaceId;
-
   WorkspaceImageNotifier(this.ref, this.workspaceId)
       : super(const AsyncValue.data(null));
+  final String workspaceId;
+
+  
 
   /// upload
   Future<String> uploadWorkspaceImage(File imageFile) async {
@@ -83,11 +84,10 @@ class WorkspaceImageNotifier extends StateNotifier<AsyncValue<String?>> {
   }
 
   /// delete
-  Future<void> deleteWorkspaceImage() async {
-    final current = state.value;
-    if (current != null && current.isNotEmpty) {
+  Future<void> deleteWorkspaceImage(String imageUrl) async {
+    if (imageUrl.isNotEmpty) {
       try {
-        await ref.read(apiDeleteImage).delete(imageUrl: current);
+        await ref.read(apiDeleteImage).delete(imageUrl: imageUrl);
         state = const AsyncValue.data(null);
       } catch (e, st) {
         state = AsyncValue.error(e, st);

@@ -61,20 +61,21 @@ class InsertUpdateWorkspaceController
     required String id,
     required String name,
     required bool active,
+    String? image, // ✅ เพิ่ม image
   }) async {
     state = const AsyncValue.loading();
 
     try {
       final workspace = await ref
           .read(apiInsertOrUpdateWorkspace)
-          .post(body: {'id': id, 'name': name.trim(), 'active': active});
+          .post(body: {'id': id, 'name': name.trim(), 'active': active, 'image': image ?? ''});
 
       state = AsyncValue.data(workspace);
       return workspace; // ✅ ส่งกลับ workspace ให้ Dialog ใช้งานต่อ
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       print("insertOrUpdateWorkspace $st");
-      rethrow; // ❌ ต้อง throw ต่อเพื่อให้ Dialog รู้ว่าเกิด error
+      rethrow; // ต้อง throw ต่อเพื่อให้ Dialog รู้ว่าเกิด error
     }
   }
 }

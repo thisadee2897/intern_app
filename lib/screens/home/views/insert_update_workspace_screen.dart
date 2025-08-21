@@ -5,34 +5,39 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/components/export.dart';
+import 'package:project/models/user_model.dart';
 import 'package:project/models/workspace_model.dart';
 import 'package:project/screens/home/providers/controllers/delete_workspace_controllers.dart';
 import 'package:project/screens/home/providers/controllers/insert_update_workspace_controllers.dart';
 import 'package:project/screens/home/providers/controllers/image_workspace_controllers.dart';
 import 'package:project/screens/project/category/providers/controllers/workspace_controller.dart';
 
-class InsertUpdateWorkspaceDialog extends BaseStatefulWidget {
-  final WorkspaceModel? workspace; // null = insert, not null = update
+final dataUserProvider = StateProvider<UserModel>(
+  (ref) => UserModel(id: '0', name: '', active: true),
+);
+
+class InsertUpdateWorkspaceDialog extends ConsumerStatefulWidget {
+  final WorkspaceModel? workspace;
   const InsertUpdateWorkspaceDialog({super.key, this.workspace});
 
   @override
-  BaseState<InsertUpdateWorkspaceDialog> createState() =>
+  ConsumerState<InsertUpdateWorkspaceDialog> createState() =>
       _InsertUpdateWorkspaceDialogState();
 }
 
 class _InsertUpdateWorkspaceDialogState
-    extends BaseState<InsertUpdateWorkspaceDialog> {
+    extends ConsumerState<InsertUpdateWorkspaceDialog> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   bool _isActive = true;
   bool _isLoading = false;
-  File? _tempImage; // สำหรับ insert mode เก็บไฟล์ก่อนสร้าง workspace
+  File? _tempImage;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.workspace?.name ?? '');
-    _isActive = true; // ดึงค่า active ของ workspace จริง
+    _isActive = true;
   }
 
   @override
@@ -42,14 +47,9 @@ class _InsertUpdateWorkspaceDialogState
   }
 
   @override
-  Widget buildDesktop(
-    BuildContext context,
-    SizingInformation sizingInformation,
-  ) {
+  Widget build(BuildContext context) {
+    // ✅ ref ใช้งานได้ตรงนี้
     final isEdit = widget.workspace != null;
-    final double baseFontSize =
-        MediaQuery.of(context).size.width < 600 ? 14 : 16;
-
     final workspaceId = widget.workspace?.id ?? '0';
     final imageUrl = ref.watch(workspaceImageProvider(workspaceId));
 
@@ -64,7 +64,7 @@ class _InsertUpdateWorkspaceDialogState
             isEdit ? 'Edit Workspace' : 'Insert Workspace',
             style: TextStyle(
               backgroundColor: Colors.white,
-              fontSize: baseFontSize + 4,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -160,7 +160,7 @@ class _InsertUpdateWorkspaceDialogState
                             borderRadius: BorderRadius.circular(8),
                             child: () {
                               // Insert Mode → แสดงรูป temp ถ้ามี
-                              if (!isEdit && _tempImage != null) {
+                              if (_tempImage != null) {
                                 return Image.file(
                                   _tempImage!,
                                   fit: BoxFit.cover,
@@ -169,13 +169,25 @@ class _InsertUpdateWorkspaceDialogState
                                 );
                               }
 
-                              // Edit Mode → แสดงรูปจาก server ถ้ามี
+                              final wsImage = widget.workspace?.image ?? '';
+                              if (wsImage.isNotEmpty) {
+                                return CachedNetworkImage(
+                                  imageUrl: wsImage,
+                                  fit: BoxFit.cover,
+                                  height: 210,
+                                  width: 210,
+                                );
+                              }
+
+                              // 2) ถ้า edit และ server มี URL → แสดงรูปจาก server
                               if (isEdit &&
                                   imageUrl?.value != null &&
                                   imageUrl!.value!.isNotEmpty) {
                                 return CachedNetworkImage(
                                   imageUrl: imageUrl.value!,
                                   fit: BoxFit.cover,
+                                  height: 210,
+                                  width: 210,
                                   placeholder:
                                       (context, url) => const Center(
                                         child: CircularProgressIndicator(),
@@ -184,12 +196,10 @@ class _InsertUpdateWorkspaceDialogState
                                       (context, url, error) => const Center(
                                         child: Text('โหลดรูปไม่สำเร็จ'),
                                       ),
-                                  height: 210,
-                                  width: 210,
                                 );
                               }
 
-                              // Default → ปุ่มอัพโหลด
+                              // 3) Default → ปุ่ม upload
                               return Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -197,9 +207,7 @@ class _InsertUpdateWorkspaceDialogState
                                     onPressed: () async {
                                       await _pickAndUploadWorkspaceImage(
                                         ref,
-                                        workspaceId,
-                                        isEdit,
-                                      );
+                                      ); // ← เรียกใช้ฟังก์ชันใหม่
                                     },
                                     icon: const Icon(
                                       Icons.upload,
@@ -254,7 +262,7 @@ class _InsertUpdateWorkspaceDialogState
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                style: TextStyle(fontSize: baseFontSize),
+                style: TextStyle(fontSize: 20),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
                     return 'กรุณากรอกชื่อ Workspace';
@@ -267,7 +275,7 @@ class _InsertUpdateWorkspaceDialogState
               SwitchListTile(
                 title: Text(
                   'เปิดใช้งาน Workspace (Active)',
-                  style: TextStyle(fontSize: baseFontSize),
+                  style: TextStyle(fontSize: 20),
                 ),
                 value: _isActive,
                 onChanged: (val) {
@@ -304,11 +312,74 @@ class _InsertUpdateWorkspaceDialogState
   }
 
   // เลือกรูป: Insert → เก็บ temp, Edit → อัพโหลดเลย
-  Future<void> _pickAndUploadWorkspaceImage(
-    WidgetRef ref,
-    String workspaceId,
-    bool isEdit,
-  ) async {
+  // Future<void> _pickAndUploadWorkspaceImage(WidgetRef ref,
+  //     String workspaceId, bool isEdit
+  // ) async {
+  //   try {
+  //     final result = await FilePicker.platform.pickFiles(
+  //       type: FileType.custom,
+  //       allowMultiple: false,
+  //       allowedExtensions: const ['jpg', 'jpeg', 'png'],
+  //       withData: true,
+  //     );
+
+  //     if (result != null && result.files.single.bytes != null) {
+  //       final platformFile = result.files.single;
+  //       final bytes = platformFile.bytes!;
+  //       final tempDir = Directory.systemTemp;
+  //       final fileName = platformFile.name;
+  //       final tempFile = File('${tempDir.path}/$fileName');
+  //       await tempFile.writeAsBytes(bytes);
+
+  //       if (isEdit) {
+  //         // Edit → อัพโหลดทันที
+  //         final uploadedUrl = await ref
+  //             .read(workspaceImageProvider(workspaceId).notifier)
+  //             .uploadWorkspaceImage(tempFile); // ✅ ใช้ tempFile ที่เพิ่งสร้าง
+
+  //         // update workspace ใน DB
+  //         await ref
+  //             .read(insertUpdateWorkspaceControllerProvider.notifier)
+  //             .insertOrUpdateWorkspace(
+  //               id: workspaceId,
+  //               name: _nameController.text.trim(),
+  //               active: _isActive,
+  //               image: uploadedUrl, // ✅ ต้องส่ง image ด้วย
+  //             );
+
+  //         // update state
+  //         ref.read(dataUserProvider.notifier).state = ref
+  //             .read(dataUserProvider)
+  //             .copyWith(image: uploadedUrl);
+
+  //         if (mounted) {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(content: Text('อัพโหลดรูป Workspace สำเร็จ')),
+  //           );
+  //         }
+  //       } else {
+  //         // Insert → เก็บ temp ไว้ก่อน (ยังไม่อัพโหลด)
+  //         setState(() {
+  //           _tempImage = tempFile;
+  //         });
+
+  //         if (mounted) {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(content: Text('เลือกรูปภาพเรียบร้อย')),
+  //           );
+  //         }
+  //       }
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(
+  //         context,
+  //       ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+  //     }
+  //   }
+  // }
+
+  Future<void> _pickAndUploadWorkspaceImage(WidgetRef ref) async {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -325,27 +396,37 @@ class _InsertUpdateWorkspaceDialogState
         final tempFile = File('${tempDir.path}/$fileName');
         await tempFile.writeAsBytes(bytes);
 
-        if (isEdit) {
-          // Edit → อัพโหลดทันที
-          await ref
-              .read(workspaceImageProvider(workspaceId).notifier)
+        // ✅ อัพเดต state ให้ UI render ภาพทันที
+        setState(() {
+          _tempImage = tempFile;
+        });
+
+        // ✅ ถ้ามี workspaceId แล้ว (edit mode) → อัพโหลดทันที
+        if (widget.workspace?.id != null) {
+          final uploadedUrl = await ref
+              .read(workspaceImageProvider(widget.workspace!.id!).notifier)
               .uploadWorkspaceImage(tempFile);
 
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('อัพโหลดรูป Workspace สำเร็จ')),
-            );
-          }
-        } else {
-          // Insert → เก็บ temp ไว้ก่อน
-          setState(() {
-            _tempImage = tempFile;
-          });
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('เลือกรูปภาพเรียบร้อย')),
-            );
-          }
+          // ✅ update workspace ให้ image ถูกบันทึกจริงใน DB
+          await ref
+              .read(insertUpdateWorkspaceControllerProvider.notifier)
+              .insertOrUpdateWorkspace(
+                id: widget.workspace!.id!,
+                name: widget.workspace!.name ?? _nameController.text.trim(),
+                active: _isActive,
+                image: uploadedUrl, // << บันทึกลง DB
+              );
+
+          // update state สำหรับ UI ตอนนี้
+          ref.read(dataUserProvider.notifier).state = ref
+              .read(dataUserProvider)
+              .copyWith(image: uploadedUrl);
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('เลือกรูปภาพสำเร็จ')));
         }
       }
     } catch (e) {
@@ -381,7 +462,7 @@ class _InsertUpdateWorkspaceDialogState
     if (confirmDelete == true) {
       await ref
           .read(workspaceImageProvider(workspaceId).notifier)
-          .deleteWorkspaceImage();
+          .deleteWorkspaceImage(workspaceId);
 
       if (mounted) {
         ScaffoldMessenger.of(
@@ -393,45 +474,58 @@ class _InsertUpdateWorkspaceDialogState
 
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
 
     try {
+      // 1) Insert workspace ก่อน (ยังไม่ส่ง image)
       final newWorkspace = await ref
           .read(insertUpdateWorkspaceControllerProvider.notifier)
           .insertOrUpdateWorkspace(
             id: widget.workspace?.id ?? '0',
             name: _nameController.text.trim(),
             active: _isActive,
+            image: '',
           );
 
-      // Insert → upload temp image
-      if (widget.workspace == null && _tempImage != null) {
-        await ref
+      String? uploadedUrl;
+
+      // 2) ถ้ามี _tempImage → upload หลัง insert
+      if (_tempImage != null) {
+        uploadedUrl = await ref
             .read(workspaceImageProvider(newWorkspace.id!).notifier)
             .uploadWorkspaceImage(_tempImage!);
+
+        if (uploadedUrl == null || uploadedUrl.isEmpty) {
+          throw Exception('Upload รูปภาพล้มเหลว');
+        }
+
+        // 3) update workspace อีกครั้ง พร้อม image
+        await ref
+            .read(insertUpdateWorkspaceControllerProvider.notifier)
+            .insertOrUpdateWorkspace(
+              id: newWorkspace.id!,
+              name: newWorkspace.name ?? _nameController.text.trim(),
+              active: _isActive,
+              image: uploadedUrl,
+            );
       }
 
-      if (mounted) {
-        // แสดง SnackBar หลังอัปเดต/สร้าง workspace
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.workspace == null
-                  ? 'สร้าง Workspace สำเร็จ'
-                  : 'อัปเดต Workspace สำเร็จ',
-            ),
-          ),
-        );
-      }
+      // 4) update local state ให้หน้า UI แสดงภาพ
+      ref.read(dataUserProvider.notifier).state = ref
+          .read(dataUserProvider)
+          .copyWith(image: uploadedUrl ?? newWorkspace.image);
 
-      // Refresh list
+      // 5) refresh workspace list
       await ref
           .read(workspaceControllerProvider.notifier)
           .fetchWorkspaces(newWorkspace.id!);
 
-      if (!mounted) return;
-      Navigator.of(context).pop(true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('บันทึก Workspace สำเร็จ')),
+        );
+        Navigator.of(context).pop(true);
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -442,15 +536,27 @@ class _InsertUpdateWorkspaceDialogState
     }
   }
 
-  @override
-  Widget buildTablet(
-    BuildContext context,
-    SizingInformation sizingInformation,
-  ) => buildDesktop(context, sizingInformation);
+  // }
 
-  @override
-  Widget buildMobile(
-    BuildContext context,
-    SizingInformation sizingInformation,
-  ) => buildDesktop(context, sizingInformation);
+  //   /// ฟังก์ชันเลือกภาพ (ไม่ upload ทันที)
+  //   Future<void> _pickImage() async {
+  //     final result = await FilePicker.platform.pickFiles(type: FileType.image);
+  //     if (result != null && result.files.isNotEmpty) {
+  //       setState(() {
+  //         _tempImage = File(result.files.single.path!); // เก็บไฟล์ไว้เฉย ๆ
+  //       });
+  //     }
+  //   }
+
+  // @override
+  // Widget buildTablet(
+  //   BuildContext context,
+  //   SizingInformation sizingInformation,
+  // ) => buildDesktop(context, sizingInformation);
+
+  // @override
+  // Widget buildMobile(
+  //   BuildContext context,
+  //   SizingInformation sizingInformation,
+  // ) => buildDesktop(context, sizingInformation);
 }
