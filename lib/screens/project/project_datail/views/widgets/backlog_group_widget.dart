@@ -12,6 +12,7 @@ import 'package:project/screens/project/project_datail/providers/controllers/del
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/master_task_status_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_detail_controller.dart';
+import 'package:project/screens/project/project_datail/providers/user_profile_image_provider.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
 import 'package:project/screens/project/project_datail/views/widgets/route_observer.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
@@ -237,23 +238,52 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
     );
   }
 
-  /// แสดงข้อมูลผู้รับผิดชอบ
-  Widget _buildAssigneeInfo(TaskModel task) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Tooltip(
-          message: task.assignedTo?.name ?? 'ไม่มีผู้รับผิดชอบ',
-          child: CircleAvatar(
-            radius: 12,
-            backgroundColor: Colors.grey[300],
-            backgroundImage: (task.assignedTo?.image != null && task.assignedTo!.image!.isNotEmpty) ? NetworkImage(task.assignedTo!.image!) : null,
-            child: (task.assignedTo?.image == null || task.assignedTo!.image!.isEmpty) ? const Icon(Icons.person, size: 16, color: Colors.black) : null,
+  //แสดงข้อมูลผู้รับผิดชอบเดิมๆ
+  // Widget _buildAssigneeInfo(TaskModel task) {
+  //   return Row(
+  //     mainAxisSize: MainAxisSize.min,
+  //     children: [
+  //       Tooltip(
+  //         message: task.assignedTo?.id ?? 'ไม่มีผู้รับผิดชอบ',
+  //         child: CircleAvatar(
+  //           radius: 12,
+  //           backgroundColor: Colors.grey[300],
+  //           backgroundImage: (task.assignedTo?.image != null && task.assignedTo!.image!.isNotEmpty) ? NetworkImage(task.assignedTo!.image!) : null,
+  //           child: (task.assignedTo?.image == null || task.assignedTo!.image!.isEmpty) ? const Icon(Icons.person, size: 16, color: Colors.black) : null,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+//แสดงข้อมูลผู้รับผิดชอบอันใหม่
+//ใช้ได้แล้วเย้ๆ
+Widget _buildAssigneeInfo(TaskModel task) {
+  final userProfileImage = ref.watch(userProfileImageProvider(task.assignedTo?.id));
+  final hasLocalImage = task.assignedTo?.image != null && task.assignedTo!.image!.isNotEmpty;
+  
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Tooltip(
+        message: task.assignedTo?.name ?? 'ไม่มีผู้รับผิดชอบ',
+        child: CircleAvatar(
+          radius: 12,
+          backgroundColor: Colors.grey[300],
+          backgroundImage: userProfileImage.maybeWhen(
+            data: (url) => url?.isNotEmpty == true ? NetworkImage(url!) : null,
+            orElse: () => null,
+          ) ?? (hasLocalImage ? NetworkImage(task.assignedTo!.image!) : null),
+          child: userProfileImage.maybeWhen(
+            data: (url) => (url?.isNotEmpty == true || hasLocalImage) ? null : const Icon(Icons.person, size: 16, color: Colors.black),
+            orElse: () => hasLocalImage ? null : const Icon(Icons.person, size: 16, color: Colors.black),
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
+
 
   /// Navigate ไปยังหน้า Comment
   // void _navigateToCommentScreen(TaskModel task) {

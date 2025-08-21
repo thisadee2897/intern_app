@@ -25,6 +25,16 @@ class ProfileApi {
       rethrow;
     }
   }
+  Future<UserModel> getUserById(String id) async {
+    try {
+      Response response = await ref.read(apiClientProvider).get('master_data/get_master_user_by_id/$id');
+      Map<String, dynamic> datas = Map<String, dynamic>.from(response.data);
+      return UserModel.fromJson(datas);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 final apiProfile = Provider<ProfileApi>((ref) => ProfileApi(ref: ref));
+
