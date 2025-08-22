@@ -23,7 +23,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../../providers/controllers/delete_task_controller.dart';
 import '../../providers/controllers/insert_comment_task_controller.dart';
 import 'backlog_widget.dart';
-import 'date_detail_row_widget.dart';
+import 'detail_date_widget.dart';
 
 class TaskCommentDetail extends ConsumerStatefulWidget {
   final String taskId;
@@ -167,8 +167,8 @@ void initState() {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TitleForTask(title: 'Project', value: data.projectHd?.name ?? 'No Project'),
-                        TitleForTask(title: 'Sprint', value: data.sprint?.name ?? 'No Sprint'),
+                        TitleForTaskX(title: 'Project', value: data.projectHd?.name ?? 'No Project'),
+                        TitleForTaskX(title: 'Sprint', value: data.sprint?.name ?? 'No Sprint'),
                         Gap(12),
                         Row(children: [const Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)), const Spacer()]),
                         const SizedBox(height: 8),
@@ -274,20 +274,22 @@ void initState() {
                                   ref.read(taskDetailProvider.notifier).updateTypeOfWork(item);
                                 },
                               ),
-                              DateDetailRowWidget(
+                              DetailDateRowWidget(
                                 title: 'Start Date',
                                 initialDate: data.taskStartDate != null ? DateTime.tryParse(data.taskStartDate!) : null,
                                 controller: startDateController,
+                                enabled: !widget.readOnly, 
                                 onDateSelected: (value) {
                                   if (value != null) {
                                     ref.read(taskDetailProvider.notifier).updateStartDate(value);
                                   }
                                 },
                               ),
-                              DateDetailRowWidget(
+                             DetailDateRowWidget(
                                 title: 'End Date',
                                 initialDate: data.taskEndDate != null ? DateTime.tryParse(data.taskEndDate!) : null,
                                 controller: endDateController,
+                                enabled: !widget.readOnly, 
                                 onDateSelected: (value) {
                                   if (value != null) {
                                     ref.read(taskDetailProvider.notifier).updateEndDate(value);
