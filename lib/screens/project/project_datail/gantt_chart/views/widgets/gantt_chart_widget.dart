@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/sprint_model.dart';
 import 'package:project/utils/extension/context_extension.dart';
+import 'package:project/utils/extension/hex_color.dart';
 import '../../models/gantt_models.dart';
 import '../../providers/controllers/gantt_data_controller.dart';
 import '../../utils/date_helpers.dart';
@@ -432,7 +433,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                                             _showTaskDetailPanel(task.id?.toString() ?? '');
                                           },
                                           child: Container(
-                                            decoration: BoxDecoration(color: context.primaryColor.withValues(alpha: 0.8)),
+                                            decoration: BoxDecoration( color:HexColor.fromHex( task.taskStatus!.color!)),
                                             alignment: Alignment.centerLeft,
                                             padding: const EdgeInsets.symmetric(horizontal: 8),
                                             child: Text(
