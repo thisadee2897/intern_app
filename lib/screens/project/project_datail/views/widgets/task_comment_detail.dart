@@ -1,4 +1,4 @@
-//
+//task_comment_detail.dart
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -23,12 +23,19 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../../providers/controllers/delete_task_controller.dart';
 import '../../providers/controllers/insert_comment_task_controller.dart';
 import 'backlog_widget.dart';
-import 'date_detail_row_widget.dart';
+import 'detail_date_widget.dart';
 
 class TaskCommentDetail extends ConsumerStatefulWidget {
   final String taskId;
   final VoidCallback? onTaskUpdated;
-  const TaskCommentDetail({super.key, required this.taskId, this.onTaskUpdated});
+  final bool readOnly; // ✅ เพิ่มพารามิเตอร์ใหม่
+
+  const TaskCommentDetail({
+    super.key,
+    required this.taskId,
+    this.onTaskUpdated,
+    this.readOnly = false, // ✅ ค่า default
+  });
 
   @override
   ConsumerState<TaskCommentDetail> createState() => _TaskCommentDetailState();
@@ -117,6 +124,7 @@ void initState() {
                           onChanged: (value) {
                             ref.read(taskDetailProvider.notifier).updateTaskName(value);
                           },
+                          readOnly: widget.readOnly, // ✅ ใช้พารามิเตอร์ readOnly
                           decoration: InputDecoration(border: InputBorder.none, hintText: 'Task Name', hintStyle: TextStyle(color: Colors.grey.shade600)),
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -124,6 +132,7 @@ void initState() {
                     ),
                     Row(
                       children: [
+                         if (!widget.readOnly)
                         TextButton(
                           onPressed: () async {
                             try {
@@ -158,8 +167,8 @@ void initState() {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TitleForTask(title: 'Project', value: data.projectHd?.name ?? 'No Project'),
-                        TitleForTask(title: 'Sprint', value: data.sprint?.name ?? 'No Sprint'),
+                        TitleForTaskX(title: 'Project', value: data.projectHd?.name ?? 'No Project'),
+                        TitleForTaskX(title: 'Sprint', value: data.sprint?.name ?? 'No Sprint'),
                         Gap(12),
                         Row(children: [const Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)), const Spacer()]),
                         const SizedBox(height: 8),
@@ -168,6 +177,7 @@ void initState() {
                         onChanged: (value) {
                           ref.read(taskDetailProvider.notifier).updateDescription(value);
                         },
+                          readOnly: widget.readOnly,
                         ),
                         const SizedBox(height: 24),
 
@@ -182,6 +192,7 @@ void initState() {
                                 children: [
                                   const Text('Details', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                                   // Delete Task And Show Dialog confirmation
+                                    if (!widget.readOnly)
                                   IconButton(
                                     icon: const Icon(Icons.delete_outline, color: Colors.grey),
                                     onPressed: () {
@@ -218,6 +229,7 @@ void initState() {
                                 dropDownKey: assigneeKey,
                                 selectedItem: data.assignedTo?.name,
                                 items: ref.watch(dropdownListAssignProvider),
+                                enabled: !widget.readOnly, 
                                 onSaved: (item) {
                                   UserModel assignee = ref.read(listAssignProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updateAssignee(assignee);
@@ -230,6 +242,7 @@ void initState() {
                                 dropDownKey: priorityKey,
                                 selectedItem: data.priority?.name,
                                 items: ref.watch(dropdownListPriorityProvider),
+                                enabled: !widget.readOnly, 
                                 onSaved: (item) {
                                   PriorityModel priority = ref.read(listPriorityProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updatePriority(priority);
@@ -243,6 +256,7 @@ void initState() {
                                 dropDownKey: taskStatusDownKey,
                                 selectedItem: data.taskStatus?.name,
                                 items: ref.watch(dropdownListTaskStatusProvider),
+                                enabled: !widget.readOnly, 
                                 onSaved: (item) {
                                   TaskStatusModel taskStatus = ref.read(listTaskStatusProvider).value!.firstWhere((e) => e.name == item);
                                   ref.read(taskDetailProvider.notifier).updateTaskStatus(taskStatus);
@@ -254,25 +268,28 @@ void initState() {
                                 dropDownKey: typeOfWorkDownKey,
                                 selectedItem: data.typeOfWork!.name,
                                 items: ref.watch(dropdownListTypeOfWorkProvider),
+                                enabled: !widget.readOnly, 
                                 onSaved: (value) {
                                   TypeOfWorkModel item = ref.read(listTypeOfWorkProvider).value!.firstWhere((e) => e.name == value);
                                   ref.read(taskDetailProvider.notifier).updateTypeOfWork(item);
                                 },
                               ),
-                              DateDetailRowWidget(
+                              DetailDateRowWidget(
                                 title: 'Start Date',
                                 initialDate: data.taskStartDate != null ? DateTime.tryParse(data.taskStartDate!) : null,
                                 controller: startDateController,
+                                enabled: !widget.readOnly, 
                                 onDateSelected: (value) {
                                   if (value != null) {
                                     ref.read(taskDetailProvider.notifier).updateStartDate(value);
                                   }
                                 },
                               ),
-                              DateDetailRowWidget(
+                             DetailDateRowWidget(
                                 title: 'End Date',
                                 initialDate: data.taskEndDate != null ? DateTime.tryParse(data.taskEndDate!) : null,
                                 controller: endDateController,
+                                enabled: !widget.readOnly, 
                                 onDateSelected: (value) {
                                   if (value != null) {
                                     ref.read(taskDetailProvider.notifier).updateEndDate(value);
@@ -287,6 +304,7 @@ void initState() {
                             ],
                           ),
                         ),
+                          if (!widget.readOnly)
                         Container(
                           margin: const EdgeInsets.only(top: 16),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

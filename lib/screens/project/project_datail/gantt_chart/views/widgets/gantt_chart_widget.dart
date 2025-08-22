@@ -1,3 +1,4 @@
+//gantt_chart_widget.dart
 import 'package:project/controllers/assignee_controller.dart';
 import 'package:project/controllers/priority_controller.dart';
 import 'package:project/controllers/task_status_controller.dart';
@@ -16,9 +17,10 @@ import 'package:smart_date_field_picker/smart_date_field_picker.dart';
   // ...existing code...
 
 class GanttChartWidget extends ConsumerStatefulWidget {
-    final String projectId;
+  final String projectId;
   final List<SprintModel> ganttData;
-  const GanttChartWidget(this.ganttData, {required this.projectId, super.key});
+  final bool readOnly;
+  const GanttChartWidget(this.ganttData, {required this.projectId, this.readOnly = false, super.key});
 
   @override
   ConsumerState<GanttChartWidget> createState() => _GanttChartWidgetState();
@@ -26,7 +28,7 @@ class GanttChartWidget extends ConsumerStatefulWidget {
 
 class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
   // Slide panel แสดงรายละเอียด Task แบบเดียวกับ CommentTaskScreen
-  void _showTaskDetailPanel(String taskId) {
+  void _showTaskDetailPanel(String taskId, {bool readOnly = false}) {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -42,6 +44,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
               height: double.infinity,
               child: TaskCommentDetail(
                 taskId: taskId,
+                  readOnly: readOnly,
                 onTaskUpdated: () async {
                   await _loadTasks();
                 },
@@ -69,6 +72,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
   DateTime? endDate;
   final OverlayPortalController startDateController = OverlayPortalController();
   final OverlayPortalController endDateController = OverlayPortalController();
+  
 
     final result = await showDialog<bool>(
       context: context,
@@ -339,7 +343,13 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final ganttData = widget.ganttData;
+   final ganttData = [...widget.ganttData]
+  ..sort((a, b) {
+    final aHasTasks = a.tasks.isNotEmpty;
+    final bHasTasks = b.tasks.isNotEmpty;
+    if (aHasTasks == bHasTasks) return 0; // ถ้ามี/ไม่มี เท่ากัน ให้คงลำดับเดิม
+    return aHasTasks ? -1 : 1; // Sprint ที่มี Task ขึ้นก่อน
+  });
 
       // รวมทุก task ทุกสถานะ (รวม complete) ในแต่ละ sprint
       List<DateTime> allDates = [
@@ -535,86 +545,111 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     );
   }
 
-  Widget _buildSidebar(List<SprintModel> sprints) {
-    return Container(
-      width: sprintSidebarWidth,
-      decoration: BoxDecoration(border: Border(right: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)))),
-      child: Scrollbar(
+ Widget _buildSidebar(List<SprintModel> sprints) {
+  return Container(
+    width: sprintSidebarWidth,
+    decoration: BoxDecoration(
+      border: Border(
+        right: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)),
+      ),
+    ),
+    child: Scrollbar(
+      controller: _sidebarVerticalController,
+      child: ListView.builder(
         controller: _sidebarVerticalController,
-        child: ListView.builder(
-          controller: _sidebarVerticalController,
-          itemCount: sprints.length,
-          itemBuilder: (context, sprintIndex) {
-            final processedSprint = sprints[sprintIndex];
-            return Column(
+        itemCount: sprints.length,
+        itemBuilder: (context, sprintIndex) {
+          final processedSprint = sprints[sprintIndex];
+          return Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)),
+              ),
+            ),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        processedSprint.name ?? 'N/A',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: context.primaryColor),
-                        overflow: TextOverflow.ellipsis,
+                // 🔹 Sprint Header Row (ต้องมีให้สูงเท่าฝั่ง task area)
+                Container(
+                  height: sprintRowHeaderHeight,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          processedSprint.name ?? 'N/A',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: context.primaryColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final startedSprintListAsync = ref.watch(sprintStartedControllerProvider(widget.projectId));
-                        if (startedSprintListAsync.isLoading) {
-                          return IconButton(
-                            icon: const Icon(Icons.add, color: Colors.grey, size: 20),
-                            tooltip: 'กำลังโหลดข้อมูล...',
-                            onPressed: null,
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final startedSprintListAsync = ref.watch(
+                            sprintStartedControllerProvider(widget.projectId),
                           );
-                        }
-                        if (startedSprintListAsync.hasError) {
+                          final startedList = startedSprintListAsync.value ?? [];
+                          final isStarted = startedList.any((s) => s.id == processedSprint.id);
+
                           return IconButton(
-                            icon: const Icon(Icons.add, color: Colors.red, size: 20),
-                            tooltip: 'โหลดข้อมูล Sprint ไม่สำเร็จ',
-                            onPressed: null,
+                            icon: Icon(
+                              Icons.add,
+                              color: isStarted ? Colors.green : Colors.grey,
+                              size: 20,
+                            ),
+                            tooltip: isStarted ? 'เพิ่มงาน' : 'Sprint ยังไม่เริ่ม',
+                            onPressed: isStarted
+                                ? () => _showAddTaskDialog(processedSprint.id ?? '')
+                                : null,
                           );
-                        }
-                        final startedList = startedSprintListAsync.value ?? [];
-                        final isStarted = startedList.any((s) => s.id == processedSprint.id);
-                        return IconButton(
-                          icon: Icon(Icons.add, color: isStarted ? Colors.green : Colors.grey, size: 20),
-                          tooltip: isStarted ? 'เพิ่มงาน' : 'Sprint ยังไม่เริ่ม',
-                          onPressed: isStarted ? () => _showAddTaskDialog(processedSprint.id ?? '') : null,
-                        );
-                      },
-                    ),
-                    // ...existing code for PopupMenuButton (ถ้าต้องการคงไว้)
-                  ],
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                // Tasks list for this sprint
+
+                // 🔹 Task Rows (ต้องตรงกับ taskRowHeight ของฝั่ง task bar)
                 ...processedSprint.tasks.map((taskWithLayout) {
                   return GestureDetector(
-                    onTap: () => _showTaskDetailPanel(taskWithLayout.id?.toString() ?? ''),
+                    onTap: () {
+                      final startedList = ref
+                              .read(sprintStartedControllerProvider(widget.projectId))
+                              .value ??
+                          [];
+                      final sprintOfTask = startedList.any((s) => s.id == processedSprint.id);
+                      _showTaskDetailPanel(
+                        taskWithLayout.id?.toString() ?? '',
+                        readOnly: !sprintOfTask,
+                      );
+                    },
                     child: Container(
                       height: taskRowHeight,
                       padding: const EdgeInsets.only(left: 16, right: 8),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            return Tooltip(
-                              message: "${taskWithLayout.name} \n${taskWithLayout.taskStartDate} - ${taskWithLayout.taskEndDate}",
-                              child: Text(taskWithLayout.name ?? '', style: const TextStyle(color: Colors.black54), overflow: TextOverflow.ellipsis),
-                            );
-                          },
+                      alignment: Alignment.centerLeft,
+                      child: Tooltip(
+                        message:
+                            "${taskWithLayout.name}\n${taskWithLayout.taskStartDate} - ${taskWithLayout.taskEndDate}",
+                        child: Text(
+                          taskWithLayout.name ?? '',
+                          style: const TextStyle(color: Colors.black54),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
                   );
                 }).toList(),
               ],
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
