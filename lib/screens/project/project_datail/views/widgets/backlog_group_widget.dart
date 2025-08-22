@@ -13,7 +13,6 @@ import 'package:project/screens/project/project_datail/providers/controllers/del
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/master_task_status_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_detail_controller.dart';
-import 'package:project/screens/project/project_datail/providers/user_profile_image_provider.dart';
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
 import 'package:project/screens/project/project_datail/views/widgets/route_observer.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
@@ -265,11 +264,17 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       children: [
         Tooltip(
           message: task.assignedTo?.name ?? 'ไม่มีผู้รับผิดชอบ',
-          child: CircleAvatar(
-            backgroundColor: Colors.grey[300],
-            child: CachedNetworkImage(
-              imageUrl: task.assignedTo?.image ?? '',
-              errorWidget: (context, url, error) => const Icon(Icons.person, size: 16, color: Colors.black),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: Container(
+              color: Colors.grey[300],
+              width: 35,
+              height: 35,
+              child: CachedNetworkImage(
+                fit: BoxFit.cover,
+                imageUrl: task.assignedTo?.image ?? '',
+                errorWidget: (context, url, error) => const Icon(Icons.person, size: 16, color: Colors.black),
+              ),
             ),
           ),
         ),
