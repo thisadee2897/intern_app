@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -256,34 +257,39 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   //   );
   // }
 
-//แสดงข้อมูลผู้รับผิดชอบอันใหม่
-//ใช้ได้แล้วเย้ๆ
-Widget _buildAssigneeInfo(TaskModel task) {
-  final userProfileImage = ref.watch(userProfileImageProvider(task.assignedTo?.id));
-  final hasLocalImage = task.assignedTo?.image != null && task.assignedTo!.image!.isNotEmpty;
-  
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Tooltip(
-        message: task.assignedTo?.name ?? 'ไม่มีผู้รับผิดชอบ',
-        child: CircleAvatar(
-          radius: 12,
-          backgroundColor: Colors.grey[300],
-          backgroundImage: userProfileImage.maybeWhen(
-            data: (url) => url?.isNotEmpty == true ? NetworkImage(url!) : null,
-            orElse: () => null,
-          ) ?? (hasLocalImage ? NetworkImage(task.assignedTo!.image!) : null),
-          child: userProfileImage.maybeWhen(
-            data: (url) => (url?.isNotEmpty == true || hasLocalImage) ? null : const Icon(Icons.person, size: 16, color: Colors.black),
-            orElse: () => hasLocalImage ? null : const Icon(Icons.person, size: 16, color: Colors.black),
+  //แสดงข้อมูลผู้รับผิดชอบอันใหม่
+  //ใช้ได้แล้วเย้ๆ
+  Widget _buildAssigneeInfo(TaskModel task) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Tooltip(
+          message: task.assignedTo?.name ?? 'ไม่มีผู้รับผิดชอบ',
+          child: CircleAvatar(
+            backgroundColor: Colors.grey[300],
+            child: CachedNetworkImage(
+              imageUrl: task.assignedTo?.image ?? '',
+              errorWidget: (context, url, error) => const Icon(Icons.person, size: 16, color: Colors.black),
+            ),
           ),
         ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
+  // Tooltip(
+  //         message: task.assignedTo?.name ?? 'ไม่มีผู้รับผิดชอบ',
+  //         child: CircleAvatar(
+  //           radius: 12,
+  //           backgroundColor: Colors.grey[300],
+  //           backgroundImage:
+  //               userProfileImage.maybeWhen(data: (url) => url?.isNotEmpty == true ? NetworkImage(url!) : null, orElse: () => null) ??
+  //               (hasLocalImage ? NetworkImage(task.assignedTo!.image!) : null),
+  //           child: userProfileImage.maybeWhen(
+  //             data: (url) => (url?.isNotEmpty == true || hasLocalImage) ? null : const Icon(Icons.person, size: 16, color: Colors.black),
+  //             orElse: () => hasLocalImage ? null : const Icon(Icons.person, size: 16, color: Colors.black),
+  //           ),
+  //         ),
+  //       ),
 
   /// Navigate ไปยังหน้า Comment
   // void _navigateToCommentScreen(TaskModel task) {
@@ -507,7 +513,7 @@ Widget _buildAssigneeInfo(TaskModel task) {
   Future<void> _handleCreateOrUpdateSprint(SprintModel itemSprint) async {
     // _sprintNameController.text = itemSprint.name ?? '';
     // _sprintGoalController.text = itemSprint.goal ?? '';
-    
+
     // Ensure we have valid data before setting the item
     final validatedSprint = SprintModel(
       tableName: itemSprint.tableName,
@@ -528,7 +534,7 @@ Widget _buildAssigneeInfo(TaskModel task) {
       tasks: itemSprint.tasks,
       countStatus: itemSprint.countStatus,
     );
-    
+
     ref.read(insertUpdateSprintProvider.notifier).setItem(validatedSprint);
     final formKey = GlobalKey<FormState>();
     return showDialog(
@@ -554,12 +560,7 @@ Widget _buildAssigneeInfo(TaskModel task) {
                 backgroundColor: Colors.white,
                 title: const Text('Error'),
                 content: Text('Failed to load sprint data: ${state.error}'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
-                  ),
-                ],
+                actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Close'))],
               );
             }
 
@@ -568,11 +569,7 @@ Widget _buildAssigneeInfo(TaskModel task) {
               return AlertDialog(
                 backgroundColor: Colors.white,
                 title: const Text('Loading'),
-                content: const SizedBox(
-                  width: 400,
-                  height: 200,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
+                content: const SizedBox(width: 400, height: 200, child: Center(child: CircularProgressIndicator())),
               );
             }
 
