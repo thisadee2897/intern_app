@@ -1,3 +1,4 @@
+//detail_row_widget.dart
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +8,17 @@ class DetailRowWidget<T> extends StatelessWidget {
   final Key dropDownKey;
   final List<T> items;
   final Function(T?)? onSaved;
-  const DetailRowWidget({super.key, required this.title, required this.dropDownKey, required this.selectedItem, required this.items, this.onSaved});
+  final bool enabled; // ✅ เพิ่มพารามิเตอร์ใหม่
+
+  const DetailRowWidget({
+    super.key,
+    required this.title,
+    required this.dropDownKey,
+    required this.selectedItem,
+    required this.items,
+    this.onSaved,
+    this.enabled = true, // ✅ ค่า default
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,28 +32,27 @@ class DetailRowWidget<T> extends StatelessWidget {
             child: SizedBox(
               height: 40,
               child: DropdownSearch<T>(
-                
                 key: dropDownKey,
+                enabled: enabled, // ✅ เพิ่มตรงนี้
                 selectedItem: selectedItem,
                 items: (filter, infiniteScrollProps) => items,
-                onChanged: onSaved,
-                compareFn: (item, selectedItem) => item == selectedItem, // หรือใช้ id ถ้ามี
+                onChanged: enabled ? onSaved : null, // ✅ ปิด onSaved ถ้า disabled
+                compareFn: (item, selectedItem) => item == selectedItem,
                 decoratorProps: DropDownDecoratorProps(
-                
-                  
                   decoration: InputDecoration(
-                    
-                    contentPadding: const EdgeInsets.only(left: 12, right: 12,top: 0, bottom: 0),
-                    border: OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.only(left: 12, right: 12, top: 0, bottom: 0),
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 popupProps: PopupProps.menu(
                   cacheItems: true,
-                  searchFieldProps: TextFieldProps(decoration: InputDecoration(hintText: 'Search', hintStyle: TextStyle(color: Colors.grey.shade400))),
+                  searchFieldProps: TextFieldProps(
+                    decoration: InputDecoration(hintText: 'Search', hintStyle: TextStyle(color: Colors.grey.shade400)),
+                  ),
                   showSelectedItems: false,
                   showSearchBox: true,
                   fit: FlexFit.loose,
-                  constraints: BoxConstraints(maxHeight: 200),
+                  constraints: const BoxConstraints(maxHeight: 200),
                 ),
               ),
             ),
