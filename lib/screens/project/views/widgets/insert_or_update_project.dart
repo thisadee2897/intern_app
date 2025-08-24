@@ -1,4 +1,3 @@
-
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
@@ -80,107 +79,129 @@ class _InsertOrUpdateProjectHDState
         ],
       ),
       content: SizedBox(
-  width: 480,
-  child: Form(
-    key: _formKey,
-    child: SingleChildScrollView(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // รูปโปรเจค 
-          DottedBorder(
-            options: RoundedRectDottedBorderOptions(color: Colors.grey, dashPattern: const [6, 3], radius: Radius.circular(20)),
-            child: SizedBox(
-              width: 220,
-              height: 220,
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: ClipRRect(
-                      child: (projectData.image != null && projectData.image!.isNotEmpty)
-                          ? CachedNetworkImage(
-                              imageUrl: projectData.image!,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(),
+        width: 480,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // รูปโปรเจค
+                DottedBorder(
+                  options: RoundedRectDottedBorderOptions(
+                    color: Colors.grey,
+                    dashPattern: const [6, 3],
+                    radius: Radius.circular(20),
+                  ),
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: ClipRRect(
+                            child:
+                                (projectData.image != null &&
+                                        projectData.image!.isNotEmpty)
+                                    ? CachedNetworkImage(
+                                      imageUrl: projectData.image!,
+                                      fit: BoxFit.cover,
+                                      placeholder:
+                                          (context, url) => const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                      errorWidget:
+                                          (context, url, error) => const Center(
+                                            child: Text('โหลดรูปไม่สำเร็จ'),
+                                          ),
+                                      height: 210,
+                                      width: 210,
+                                    )
+                                    : Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () async {
+                                            await _pickAndUploadProjectImage(
+                                              ref,
+                                            );
+                                          },
+                                          icon: const Icon(
+                                            Icons.upload,
+                                            size: 30,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        const Text('อัพโหลดรูปภาพโปรเจค'),
+                                      ],
+                                    ),
+                          ),
+                        ),
+                        if (projectData.image != null &&
+                            projectData.image!.isNotEmpty)
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: IconButton.filled(
+                              onPressed: () async {
+                                await _deleteProjectImage(ref);
+                              },
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.black45,
                               ),
-                              errorWidget: (context, url, error) => const Center(
-                                child: Text('โหลดรูปไม่สำเร็จ'),
-                              ),
-                                height: 210,
-                                width: 210,
-                            )
-                          : Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () async {
-                                    await _pickAndUploadProjectImage(ref);
-                                  },
-                                  icon: const Icon(Icons.upload, size: 30),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  226,
+                                  226,
+                                  226,
                                 ),
-                                const SizedBox(height: 4),
-                                const Text('อัพโหลดรูปภาพโปรเจค'),
-                              ],
+                              ),
                             ),
+                          ),
+                      ],
                     ),
                   ),
-                  if (projectData.image != null && projectData.image!.isNotEmpty)
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: IconButton.filled(
-                        onPressed: () async {
-                          await _deleteProjectImage(ref);
-                        },
-                        icon: const Icon(Icons.delete, color: Colors.black45),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 226, 226, 226),
+                ),
+                const SizedBox(width: 16), // เระยะรูปกับฟอร์ม
+                //  ฟอร์มข้อมูล
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: _projectNameController,
+                        decoration: const InputDecoration(
+                          labelText: 'ชื่อโปรเจค',
+                          hintText: 'ชื่อโปรเจค',
                         ),
                       ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 16), // เระยะรูปกับฟอร์ม
-          //  ฟอร์มข้อมูล
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _projectNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'ชื่อโปรเจค',
-                    hintText: 'ชื่อโปรเจค',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _projectKeyController,
-                  decoration: const InputDecoration(
-                    labelText: 'Key โปรเจค',
-                    hintText: 'Key โปรเจค',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  maxLines: 3,
-                  controller: _projectDescriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'คำอธิบายโปรเจค',
-                    hintText: 'คำอธิบายโปรเจค',
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _projectKeyController,
+                        decoration: const InputDecoration(
+                          labelText: 'Key โปรเจค',
+                          hintText: 'Key โปรเจค',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        maxLines: 3,
+                        controller: _projectDescriptionController,
+                        decoration: const InputDecoration(
+                          labelText: 'คำอธิบายโปรเจค',
+                          hintText: 'คำอธิบายโปรเจค',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
-    ),
-  ),
-),
 
       actions: [
         TextButton(
