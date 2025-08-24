@@ -14,6 +14,7 @@ import 'package:project/screens/project/category/providers/controllers/workspace
 class InsertUpdateWorkspaceDialog extends ConsumerStatefulWidget {
   final WorkspaceModel? workspace;
   const InsertUpdateWorkspaceDialog({super.key, this.workspace});
+
   @override
   ConsumerState<InsertUpdateWorkspaceDialog> createState() =>
       _InsertUpdateWorkspaceDialogState();
@@ -26,12 +27,14 @@ class _InsertUpdateWorkspaceDialogState
   bool _isActive = true;
   bool _isLoading = false;
   File? _tempImage;
+
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.workspace?.name ?? '');
     _isActive = true;
     final workspaceId = widget.workspace?.id ?? '0';
+
     if (widget.workspace == null) {
       _tempImage = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -59,6 +62,7 @@ class _InsertUpdateWorkspaceDialogState
     final isEdit = widget.workspace != null;
     final workspaceId = widget.workspace?.id ?? '0';
     final imageState = ref.watch(workspaceImageProvider(workspaceId));
+
     return AlertDialog(
       backgroundColor: Colors.white,
       title: Row(
@@ -80,6 +84,7 @@ class _InsertUpdateWorkspaceDialogState
                           context: context,
                           builder:
                               (context) => AlertDialog(
+                                backgroundColor: Colors.white,
                                 title: const Text('ยืนยันการลบ Workspace'),
                                 content: const Text(
                                   'คุณแน่ใจว่าต้องการลบ workspace นี้?',
@@ -101,20 +106,35 @@ class _InsertUpdateWorkspaceDialogState
                                 ],
                               ),
                         );
-                        if (confirm != true) return;
-                        setState(() => _isLoading = true);
+                        if (confirm != true) {
+                          return; // ใช้ return ภายใน block {}
+                        }
+
+                        setState(() {
+                          _isLoading = true; // ใส่ {} ให้ชัดเจน
+                        });
+
                         try {
                           await ref
                               .read(deleteWorkspaceControllerProvider.notifier)
                               .deleteWorkspace(id: widget.workspace!.id!);
-                          if (mounted) Navigator.pop(context, true);
+
+                          if (mounted) {
+                            Navigator.pop(context, true); // block {}
+                          }
                         } catch (e) {
-                          if (mounted)
+                          if (mounted) {
+                            // block {} ครอบ ScaffoldMessenger
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
                             );
+                          }
                         } finally {
-                          if (mounted) setState(() => _isLoading = false);
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false; // block {}
+                            });
+                          }
                         }
                       },
             ),
@@ -171,10 +191,11 @@ class _InsertUpdateWorkspaceDialogState
                                                       workspaceId,
                                                     ),
                                           );
+                                        } else {
+                                          return _buildUploadPlaceholder(
+                                            workspaceId,
+                                          );
                                         }
-                                        return _buildUploadPlaceholder(
-                                          workspaceId,
-                                        );
                                       },
                                       loading:
                                           () => const Center(
@@ -198,8 +219,11 @@ class _InsertUpdateWorkspaceDialogState
                                 onPressed:
                                     _isLoading
                                         ? null
-                                        : () =>
-                                            _deleteWorkspaceImage(workspaceId),
+                                        : () async {
+                                          await _deleteWorkspaceImage(
+                                            workspaceId,
+                                          );
+                                        },
                               ),
                             ),
                         ],
@@ -218,17 +242,21 @@ class _InsertUpdateWorkspaceDialogState
                     ),
                     border: OutlineInputBorder(),
                   ),
-                  validator:
-                      (val) =>
-                          val == null || val.isEmpty
-                              ? 'กรุณากรอกชื่อ Workspace'
-                              : null,
+                  validator: (val) {
+                    return (val == null || val.isEmpty)
+                        ? 'กรุณากรอกชื่อ Workspace'
+                        : null;
+                  },
                 ),
                 const SizedBox(height: 20),
                 SwitchListTile(
                   title: const Text('เปิดใช้งาน Workspace (Active)'),
                   value: _isActive,
-                  onChanged: (val) => setState(() => _isActive = val),
+                  onChanged: (val) {
+                    setState(() {
+                      _isActive = val; // block {}
+                    });
+                  },
                 ),
               ],
             ),
@@ -237,18 +265,19 @@ class _InsertUpdateWorkspaceDialogState
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context, false),
+          onPressed: () {
+            Navigator.pop(context, false); // block {}
+          },
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: _isLoading ? null : () => _handleSubmit(workspaceId),
-          child:
+          onPressed:
               _isLoading
-                  ? const CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  )
-                  : Text(isEdit ? 'Update' : 'Insert'),
+                  ? null
+                  : () {
+                    _handleSubmit(workspaceId);
+                  },
+          child: Text(isEdit ? 'Update' : 'Insert'),
         ),
       ],
     );
@@ -265,7 +294,7 @@ class _InsertUpdateWorkspaceDialogState
           ),
           const SizedBox(height: 8),
           const Text(
-            'Upload image\n(support file types: jpg, png)',
+            'Upload Image\n(support file types: jpg, png)',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey, fontSize: 12),
           ),
@@ -280,7 +309,9 @@ class _InsertUpdateWorkspaceDialogState
         type: FileType.image,
         withData: true,
       );
-      if (result == null || result.files.single.bytes == null) return;
+      if (result == null || result.files.single.bytes == null) {
+        return;
+      }
       final file = File(
         '${Directory.systemTemp.path}/${result.files.single.name}',
       );
@@ -290,17 +321,73 @@ class _InsertUpdateWorkspaceDialogState
             .read(workspaceImageProvider(workspaceId).notifier)
             .uploadWorkspaceImage(file);
       } else {
-        setState(() => _tempImage = file);
+        setState(() {
+          _tempImage = file;
+        });
       }
-      if (mounted)
+
+      // ✅ ใส่ block {} ครอบ ScaffoldMessenger
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('เลือกรูปภาพเรียบร้อย')));
+      }
     } catch (e) {
-      if (mounted)
+      // ✅ ใส่ block {} ครอบ ScaffoldMessenger
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+      }
+    }
+  }
+
+  Future<void> _handleSubmit(String workspaceId) async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      String? imageUrl;
+      if (_tempImage != null) {
+        await ref
+            .read(workspaceImageProvider(workspaceId).notifier)
+            .uploadWorkspaceImage(_tempImage!);
+        imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
+        _tempImage = null;
+      } else {
+        imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
+      }
+
+      await ref
+          .read(insertUpdateWorkspaceControllerProvider.notifier)
+          .insertOrUpdateWorkspace(
+            id: widget.workspace?.id ?? workspaceId,
+            name: _nameController.text.trim(),
+            active: _isActive,
+            image: imageUrl,
+          );
+
+      // ✅ ใส่ block {} ครอบ ScaffoldMessenger
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('บันทึก Workspace สำเร็จ')),
+        );
+        Navigator.of(context).pop(true);
+      }
+    } catch (e) {
+      // ✅ ใส่ block {} ครอบ ScaffoldMessenger
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -309,6 +396,7 @@ class _InsertUpdateWorkspaceDialogState
       context: context,
       builder:
           (context) => AlertDialog(
+            backgroundColor: Colors.white,
             title: const Text('ยืนยันการลบ'),
             content: const Text('คุณต้องการลบรูป Workspace หรือไม่?'),
             actions: [
@@ -323,8 +411,12 @@ class _InsertUpdateWorkspaceDialogState
             ],
           ),
     );
-    if (confirm != true) return;
-    setState(() => _isLoading = true);
+    if (confirm != true) {
+      return;
+    }
+    setState(() {
+      _isLoading = true;
+    });
     try {
       final imageNotifier = ref.read(
         workspaceImageProvider(workspaceId).notifier,
@@ -345,58 +437,24 @@ class _InsertUpdateWorkspaceDialogState
       }
       imageNotifier.setInitialImage(null);
       ref.invalidate(workspaceControllerProvider);
+
+      // ✅ ใส่ block {} ครอบ ScaffoldMessenger
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('ลบรูป Workspace สำเร็จ')));
       }
     } catch (e) {
+      // ✅ ใส่ block {} ครอบ ScaffoldMessenger
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาดในการลบรูป: $e')));
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _handleSubmit(String workspaceId) async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    try {
-      String? imageUrl;
-      if (_tempImage != null) {
-        await ref
-            .read(workspaceImageProvider(workspaceId).notifier)
-            .uploadWorkspaceImage(_tempImage!);
-        imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
-        _tempImage = null;
-      } else {
-        imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
-      }
-      await ref
-          .read(insertUpdateWorkspaceControllerProvider.notifier)
-          .insertOrUpdateWorkspace(
-            id: widget.workspace?.id ?? workspaceId,
-            name: _nameController.text.trim(),
-            active: _isActive,
-            image: imageUrl,
-          );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('บันทึก Workspace สำเร็จ')),
-        );
-        Navigator.of(context).pop(true);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 }
