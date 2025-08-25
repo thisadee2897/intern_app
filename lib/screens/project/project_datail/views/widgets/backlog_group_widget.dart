@@ -958,7 +958,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
 
       if (!mounted) return;
 
-      Navigator.pop(context);
+      Navigator.of(context, rootNavigator: true).pop();
       _showSuccessSnackBar('Sprint started successfully');
     } catch (e) {
       if (!mounted) return;
