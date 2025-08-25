@@ -236,7 +236,10 @@ if (!downloadUrl.startsWith('https://')) {
 - ดู console logs สำหรับ error messages
 
 ### 2. GitHub Actions ไม่ทำงาน
-- ตรวจสอบ GITHUB_TOKEN permissions
+- ตรวจสอบ Repository Settings > Actions > General
+- เปิด "Allow all actions and reusable workflows"
+- ตรวจสอบ workflow permissions ใน Settings > Actions > General > Workflow permissions
+- เลือก "Read and write permissions"
 - ดู Actions logs ใน GitHub
 - ตรวจสอบ Flutter version ใน workflow
 

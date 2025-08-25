@@ -6,6 +6,12 @@ on:
       - 'v*' # เมื่อมี tag ที่ขึ้นต้นด้วย 'v' เช่น v1.0.0
   workflow_dispatch: # สามารถ run manual ได้
 
+# 🔑 Permissions ที่จำเป็น
+permissions:
+  contents: write
+  actions: read
+  security-events: write
+
 env:
   FLUTTER_VERSION: '3.29.3'
 
@@ -60,18 +66,29 @@ jobs:
       - name: Build macOS App
         run: flutter build macos --release
 
-      - name: Create DMG
+      - name: Create Package
         run: |
-          # สร้าง DMG file
+          # สร้าง DMG file หรือ ZIP ถ้า DMG ไม่สำเร็จ
           mkdir -p dist
           cp -R build/macos/Build/Products/Release/project.app dist/
-          hdiutil create -volname "InternApp" -srcfolder dist -ov -format UDZO "InternApp-macOS-${{ github.ref_name }}.dmg"
+          
+          # ลอง create DMG ก่อน
+          if hdiutil create -volname "InternApp" -srcfolder dist -ov -format UDZO "InternApp-macOS-${{ github.ref_name }}.dmg" 2>/dev/null; then
+            echo "DMG created successfully"
+          else
+            echo "DMG creation failed, creating ZIP instead"
+            cd dist
+            zip -r "../InternApp-macOS-${{ github.ref_name }}.zip" .
+            cd ..
+          fi
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
-          path: "InternApp-macOS-${{ github.ref_name }}.dmg"
+          path: |
+            InternApp-macOS-${{ github.ref_name }}.dmg
+            InternApp-macOS-${{ github.ref_name }}.zip
 
   #  Create Release
   release:
@@ -86,20 +103,26 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
+      - name: List downloaded files
+        run: |
+          echo "Downloaded files:"
+          find . -name "*.zip" -o -name "*.dmg" | head -10
+
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          files: |
+            windows-build/*.zip
+            macos-build/*.dmg
+            macos-build/*.zip
+          name: Release ${{ github.ref_name }}
           body: |
             ## 🎉 InternApp ${{ github.ref_name }}
             
             ### 📥 Downloads
             - **Windows**: InternApp-Windows-${{ github.ref_name }}.zip
-            - **macOS**: InternApp-macOS-${{ github.ref_name }}.dmg
+            - **macOS**: InternApp-macOS-${{ github.ref_name }}.dmg (หรือ .zip)
             
             ### 🔄 Auto Update
             แอปพลิเคชันจะตรวจสอบอัปเดตอัตโนมัติทุก 6 ชั่วโมง
@@ -114,23 +137,4 @@ jobs:
             **Installation**: ดาวน์โหลดไฟล์ที่เหมาะสมกับระบบปฏิบัติการของคุณ
           draft: false
           prerelease: false
-
-      - name: Upload Windows Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: windows-build/InternApp-Windows-${{ github.ref_name }}.zip
-          asset_name: InternApp-Windows-${{ github.ref_name }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload macOS Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: macos-build/InternApp-macOS-${{ github.ref_name }}.dmg
-          asset_name: InternApp-macOS-${{ github.ref_name }}.dmg
-          asset_content_type: application/octet-stream
+          token: ${{ secrets.GITHUB_TOKEN }}
