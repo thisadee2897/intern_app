@@ -430,7 +430,10 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                                         height: taskRowHeight,
                                         child: GestureDetector(
                                           onTap: () {
-                                            _showTaskDetailPanel(task.id?.toString() ?? '');
+                                             _showTaskDetailPanel(
+      task.id?.toString() ?? '',
+      readOnly: true,   // 👈 บังคับให้เปิดแบบ ReadOnly
+    );
                                           },
                                           child: Container(
                                             decoration: BoxDecoration( color:HexColor.fromHex( task.taskStatus!.color!)),
