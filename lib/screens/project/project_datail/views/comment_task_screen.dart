@@ -14,6 +14,7 @@ import 'package:project/screens/project/project_datail/providers/controllers/ins
 import 'package:project/screens/project/project_datail/providers/controllers/task_status_controller.dart';
 import 'package:project/screens/project/project_datail/views/widgets/task_comment_detail.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
+import 'package:project/utils/extension/custom_snackbar.dart';
 import 'package:project/utils/extension/hex_color.dart';
 
 final sprintListProvider = sprintProvider;
@@ -249,15 +250,23 @@ Future<void> _showAddTaskDialog(String statusId) async {
             ElevatedButton(
               onPressed: () {
                 if (nameController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('กรุณากรอกชื่องาน')),
-                  );
+                  CustomSnackbar.showSnackBar(
+  context: context,
+  title: 'ข้อมูลไม่ครบ',
+  message: 'กรุณากรอกชื่องาน',
+  contentType: ContentType.warning,
+  color: Colors.orange,
+);
                   return;
                 }
                 if (selectedSprintId == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('กรุณาเลือก Sprint')),
-                  );
+                  CustomSnackbar.showSnackBar(
+  context: context,
+  title: 'ข้อมูลไม่ครบ',
+  message: 'กรุณาเลือก Sprint',
+  contentType: ContentType.warning,
+  color: Colors.orange,
+);
                   return;
                 }
                 Navigator.of(context).pop(true);
@@ -288,9 +297,13 @@ Future<void> _showAddTaskDialog(String statusId) async {
       },
     );
     await _loadTasks();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('เพิ่มงานสำเร็จ')),
-    );
+   CustomSnackbar.showSnackBar(
+  context: context,
+  title: 'สำเร็จ',
+  message: 'เพิ่มงานเรียบร้อยแล้ว',
+  contentType: ContentType.success,
+  color: Colors.green,
+);
   }
 }
 

@@ -16,6 +16,7 @@ import 'package:project/screens/project/project_datail/providers/controllers/tas
 import 'package:project/screens/project/project_datail/views/widgets/count_work_type_widget.dart';
 import 'package:project/screens/project/project_datail/views/widgets/route_observer.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
+import 'package:project/utils/extension/custom_snackbar.dart';
 import 'package:project/utils/extension/date.dart';
 import 'package:project/utils/extension/hex_color.dart';
 import 'package:project/utils/services/local_storage_service.dart';
@@ -151,8 +152,14 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       _taskNameController.clear();
       ref.read(inputTaskNameProvider.notifier).state = '';
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: ${e.toString()}')));
+      if (mounted) {
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "ผิดพลาด",
+    message: "เกิดข้อผิดพลาด: ${e.toString()}",
+    contentType: ContentType.failure,color: Colors.red,
+  );
+}
     }
   }
 
@@ -349,9 +356,14 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
 
   /// แสดง error message
   void _showErrorMessage(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red));
-  }
+  if (!mounted) return;
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "ผิดพลาด",
+    message: message,
+    contentType: ContentType.failure,color: Colors.red,
+  );
+}
 
   /// แปลง TaskModel เป็น map สำหรับส่งไปยัง API
   Map<String, dynamic> _mapTaskToApi(TaskModel task) {
@@ -427,16 +439,25 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   /// จัดการการสร้าง Task ใหม่
 
   /// แสดง Success SnackBar
-  void _showSuccessSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.green, duration: const Duration(seconds: 2)));
-  }
+   void _showSuccessSnackBar(String message) {
+  if (!mounted) return;
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "สำเร็จ",
+    message: message,
+    contentType: ContentType.success,color: Colors.green,
+  );
+}
 
-  /// แสดง Error SnackBar
-  void _showErrorSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
-  }
+void _showErrorSnackBar(String message) {
+  if (!mounted) return;
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "ผิดพลาด",
+    message: message,
+    contentType: ContentType.failure,color: Colors.red,
+  );
+}
 
   /// ส่วนแสดง counter และปุ่มจัดการ sprint
   Widget _buildCountersAndButton(SprintModel data) {
@@ -691,7 +712,14 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
                         await ref.read(insertUpdateSprintProvider.notifier).insertOrUpdateSprint().then((value) {
                           if (value != null) {
                             Navigator.pop(context, value);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sprint ${value.name} created successfully')));
+                           
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "สำเร็จ",
+    message: "Sprint ${value.name} created successfully",
+    contentType: ContentType.success,color: Colors.green,
+  );
+
                             ref.read(sprintProvider.notifier).get();
                             ref.read(insertUpdateSprintProvider.notifier).clearState();
                           }

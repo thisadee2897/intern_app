@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
 import 'package:project/screens/settings/profile/provider/controller/my_profile_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
+import 'package:project/utils/extension/custom_snackbar.dart';
 
 class MyProfileDialogWidget extends ConsumerStatefulWidget {
   const MyProfileDialogWidget({super.key});
@@ -129,7 +130,13 @@ class _MyProfileDialogWidgetState extends ConsumerState<MyProfileDialogWidget> {
                                                           // Show success message
                                                           if (context.mounted) {
                                                             ScaffoldMessenger.of(context).clearSnackBars();
-                                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('อัพโหลดรูปภาพสำเร็จ')));
+                                                            CustomSnackbar.showSnackBar(
+  context: context,
+  title: 'สำเร็จ',
+  message: 'อัพโหลดรูปภาพสำเร็จ',
+  contentType: ContentType.success,
+  color: Colors.green,
+);
                                                           }
                                                         } else {
                                                           // if (context.mounted) {
@@ -142,7 +149,13 @@ class _MyProfileDialogWidgetState extends ConsumerState<MyProfileDialogWidget> {
                                                         print('Stack trace: $stx');
                                                         if (context.mounted) {
                                                           ScaffoldMessenger.of(context).clearSnackBars();
-                                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาดในการอัพโหลด: $e')));
+                                                        CustomSnackbar.showSnackBar(
+  context: context,
+  title: 'เกิดข้อผิดพลาด',
+  message: ' $e',
+  contentType: ContentType.failure,
+  color: Colors.red,
+);
                                                         }
                                                       }
                                                     },
@@ -327,13 +340,25 @@ class _MyProfileDialogWidgetState extends ConsumerState<MyProfileDialogWidget> {
                     await ref.read(profileProvider.notifier).updateProfile().then((e) {
                       if (context.mounted) {
                         Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('บันทึกโปรไฟล์สำเร็จ')));
+                        CustomSnackbar.showSnackBar(
+  context: context,
+  title: 'สำเร็จ',
+  message: 'บันทึกโปรไฟล์เรียบร้อยแล้ว',
+  contentType: ContentType.success,
+  color: Colors.green,
+);
                       }
                     });
                   } catch (e, st) {
                     print(e);
                     print(st);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึก: $e')));
+                    CustomSnackbar.showSnackBar(
+  context: context,
+  title: 'เกิดข้อผิดพลาด',
+  message: ' $e',
+  contentType: ContentType.failure,
+  color: Colors.red,
+);
                   }
                 }
               },

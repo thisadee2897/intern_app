@@ -13,6 +13,7 @@ import 'package:project/screens/project/project_datail/views/project_detail_scre
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/screens/project/category/providers/controllers/delete_project_category_controller.dart';
+import 'package:project/utils/extension/custom_snackbar.dart';
 import 'package:project/utils/services/local_storage_service.dart';
 
 import 'widgets/category_dialog.dart';
@@ -154,8 +155,16 @@ class _ProjectScreenState extends BaseState<ProjectScreen>
           ),
     ).then((result) {
       if (result == true) {
-        ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
-      }
+  ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "สำเร็จ",
+    message: "บันทึกหมวดหมู่สำเร็จ",
+    contentType: ContentType.success,
+    color: Colors.green, // ใส่ไปเพราะ method require
+  
+  );
+}
     });
   }
 
@@ -657,48 +666,31 @@ class _ProjectScreenState extends BaseState<ProjectScreen>
           await ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
 
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text('ลบหมวดหมู่สำเร็จ'),
-                  ],
-                ),
-                backgroundColor: Colors.green.shade600,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            );
-          }
-        } catch (e) {
-          if (context.mounted) {
-            String errorMessage = '';
-            if (e.runtimeType == DioException) {
-              DioException err = e as DioException;
-              errorMessage = err.message ?? 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
-            }
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.error, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text('เกิดข้อผิดพลาด: $errorMessage')),
-                  ],
-                ),
-                backgroundColor: Colors.red.shade600,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            );
-          }
-        }
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "สำเร็จ",
+    message: "ลบหมวดหมู่สำเร็จ",
+    contentType: ContentType.success,
+    color: Colors.green, // ใส่ไปเพราะ method require
+  );
+}
+       } catch (e) {
+  if (context.mounted) {
+    String errorMessage = '';
+    if (e.runtimeType == DioException) {
+      DioException err = e as DioException;
+      errorMessage = err.message ?? 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+    }
+
+    CustomSnackbar.showSnackBar(
+      context: context,
+      title: "ผิดพลาด",
+      message: " $errorMessage",
+      contentType: ContentType.failure,
+      color: Colors.red, // ใส่ไปเพราะ method require
+    );
+  }
+}
       }
     });
   }
