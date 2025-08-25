@@ -115,7 +115,8 @@ class InsertUpdateWorkspaceController
               'active': active,
               'image': image ?? '',
             },
-          );
+          )
+          .timeout(const Duration(seconds: 10));
       state = AsyncValue.data(workspace);
       return workspace;
     } catch (e, st) {
@@ -123,4 +124,5 @@ class InsertUpdateWorkspaceController
       rethrow;
     }
   }
+  
 }
