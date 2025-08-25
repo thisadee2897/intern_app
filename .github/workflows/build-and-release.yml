@@ -1,0 +1,208 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # เมื่อมี tag ที่ขึ้นต้นด้วย 'v' เช่น v1.0.0
+  workflow_dispatch: # สามารถ run manual ได้
+
+env:
+  FLUTTER_VERSION: '3.29.3'
+
+jobs:
+  # 🏗️ Build for Windows
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows EXE
+        run: flutter build windows --release
+
+      - name: Create Windows Installer
+        run: |
+          # ใช้ Inno Setup หรือ NSIS สร้าง installer
+          # สำหรับตัวอย่างนี้เราจะ zip ไฟล์
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "InternApp-Windows-${{ github.ref_name }}.zip"
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: "InternApp-Windows-${{ github.ref_name }}.zip"
+
+  # 🍎 Build for macOS
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build macOS App
+        run: flutter build macos --release
+
+      - name: Create DMG
+        run: |
+          # สร้าง DMG file
+          mkdir -p dist
+          cp -R build/macos/Build/Products/Release/project.app dist/
+          hdiutil create -volname "InternApp" -srcfolder dist -ov -format UDZO "InternApp-macOS-${{ github.ref_name }}.dmg"
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: "InternApp-macOS-${{ github.ref_name }}.dmg"
+
+  # 🐧 Build for Linux
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Linux App
+        run: flutter build linux --release
+
+      - name: Create AppImage
+        run: |
+          # สร้าง AppImage (ต้องติดตั้ง appimagetool ก่อน)
+          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool
+          
+          # สร้างโครงสร้าง AppDir
+          mkdir -p AppDir/usr/bin
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          
+          # สร้าง desktop file
+          cat > AppDir/InternApp.desktop << EOF
+          [Desktop Entry]
+          Type=Application
+          Name=InternApp
+          Exec=AppRun
+          Icon=icon
+          Categories=Utility;
+          EOF
+          
+          # สร้าง AppRun script
+          cat > AppDir/AppRun << 'EOF'
+          #!/bin/bash
+          HERE="$(dirname "$(readlink -f "${0}")")"
+          exec "${HERE}/usr/bin/project" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+          
+          # สร้าง AppImage
+          ./appimagetool AppDir "InternApp-Linux-${{ github.ref_name }}.AppImage"
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: "InternApp-Linux-${{ github.ref_name }}.AppImage"
+
+  # 🚀 Create Release
+  release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## 🎉 InternApp ${{ github.ref_name }}
+            
+            ### 📥 Downloads
+            - **Windows**: InternApp-Windows-${{ github.ref_name }}.zip
+            - **macOS**: InternApp-macOS-${{ github.ref_name }}.dmg  
+            - **Linux**: InternApp-Linux-${{ github.ref_name }}.AppImage
+            
+            ### 🔄 Auto Update
+            แอปพลิเคชันจะตรวจสอบอัปเดตอัตโนมัติทุก 6 ชั่วโมง
+            หรือสามารถตรวจสอบด้วยตนเองได้ในหน้าการตั้งค่า
+            
+            ### 📋 รายละเอียดการอัปเดต
+            - Bug fixes และ improvements
+            - เพิ่มฟีเจอร์ใหม่
+            - ปรับปรุงประสิทธิภาพ
+            
+            ---
+            **Installation**: ดาวน์โหลดไฟล์ที่เหมาะสมกับระบบปฏิบัติการของคุณ
+          draft: false
+          prerelease: false
+
+      - name: Upload Windows Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: windows-build/InternApp-Windows-${{ github.ref_name }}.zip
+          asset_name: InternApp-Windows-${{ github.ref_name }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload macOS Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: macos-build/InternApp-macOS-${{ github.ref_name }}.dmg
+          asset_name: InternApp-macOS-${{ github.ref_name }}.dmg
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: linux-build/InternApp-Linux-${{ github.ref_name }}.AppImage
+          asset_name: InternApp-Linux-${{ github.ref_name }}.AppImage
+          asset_content_type: application/octet-stream
