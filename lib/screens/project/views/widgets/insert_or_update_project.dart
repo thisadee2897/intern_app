@@ -12,7 +12,7 @@ import 'package:project/screens/project/controllers/delete_project_hd_controller
 import 'package:project/screens/project/controllers/project_image_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_update/provider/controllers/project_update_controller.dart';
-
+import 'package:project/utils/extension/custom_snackbar.dart';
 final dataProjectHDProvider = StateProvider<ProjectHDModel>(
   (ref) =>
       ProjectHDModel(id: '0', name: '', key: '', description: '', active: true),
@@ -247,16 +247,21 @@ class _InsertOrUpdateProjectHDState
             .copyWith(image: uploadedUrl);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('อัพโหลดรูปโปรเจคสำเร็จ')),
-          );
+            CustomSnackbar.showSnackBar(
+  context: context,
+  title: "สำเร็จ",
+  message: "อัพโหลดรูปโปรเจคเรียบร้อย",
+  contentType: ContentType.success,color: Colors.green,
+);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+        CustomSnackbar.showSnackBar(
+    context: context,
+    title: "เกิดข้อผิดพลาด",
+    message: "$e",
+    contentType: ContentType.failure,color: Colors.red,);
       }
     }
   }
@@ -296,15 +301,20 @@ class _InsertOrUpdateProjectHDState
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('ลบรูปโปรเจคสำเร็จ')));
+         CustomSnackbar.showSnackBar(
+  context: context,
+  title: "สำเร็จ",
+  message: "ลบรูปโปรเจคเรียบร้อย",
+  contentType: ContentType.success,color: Colors.green,
+);
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+          CustomSnackbar.showSnackBar(
+    context: context,
+    title: "เกิดข้อผิดพลาด",
+    message: "$e",
+    contentType: ContentType.failure,color: Colors.red,);
         }
       }
     }
@@ -343,17 +353,22 @@ class _InsertOrUpdateProjectHDState
             .getCategory(widget.category.workspaceId!);
 
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('ลบโปรเจคเรียบร้อย')));
+          CustomSnackbar.showSnackBar(
+  context: context,
+  title: "สำเร็จ",
+  message: "ลบโปรเจคเรียบร้อย",
+  contentType: ContentType.success,color: Colors.green,
+);
         }
 
         Navigator.pop(context);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+          CustomSnackbar.showSnackBar(
+    context: context,
+    title: "เกิดข้อผิดพลาด",
+    message: "$e",
+    contentType: ContentType.failure,color: Colors.red,);
         }
       }
     }
@@ -383,34 +398,26 @@ class _InsertOrUpdateProjectHDState
           .getCategory(widget.category.workspaceId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.projectHDModel.id == '0'
-                  ? 'เพิ่มโปรเจคสำเร็จ'
-                  : 'แก้ไขโปรเจคสำเร็จ',
-            ),
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        Navigator.of(context).pop(true);
-      }
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "สำเร็จ",
+    message: widget.projectHDModel.id == '0'
+        ? "เพิ่มโปรเจคสำเร็จ"
+        : "แก้ไขโปรเจคสำเร็จ",
+    contentType: ContentType.success,color: Colors.green,
+  );
+  Navigator.of(context).pop(true);
+}
     } catch (e, stx) {
       print('Error: $e, StackTrace: $stx');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('เกิดข้อผิดพลาด: $e'),
-            backgroundColor: Colors.red.shade600,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "ผิดพลาด",
+    message: " $e",
+    contentType: ContentType.failure,color: Colors.red,
+  );
+}
     }
   }
 }
