@@ -1,5 +1,6 @@
 
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/apis/image/delete_image.dart';
@@ -39,10 +40,15 @@ class WorkspaceImageNotifier extends StateNotifier<AsyncValue<String?>> {
 
       await ref.read(apiDeleteImage).delete(imageUrl: currentImageUrl);
       state = const AsyncValue.data(null);
-    } catch (e, st) {
-      debugPrint("Delete workspace image failed: $e");
-      state = AsyncValue.error(e, st);
-      rethrow;
-    }
+    } on DioException catch (e, st) {
+  String errorMessage =
+      e.response?.data['message']?.toString() ?? 'Upload/Delete failed';
+  state = AsyncValue.error(errorMessage, st);
+  rethrow;
+} catch (e, st) {
+  state = AsyncValue.error(e, st);
+  rethrow;
+}
+
   }
 }
