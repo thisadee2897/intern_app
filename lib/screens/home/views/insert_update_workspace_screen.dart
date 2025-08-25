@@ -25,7 +25,9 @@ class _InsertUpdateWorkspaceDialogState
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   bool _isActive = true;
-  bool _isLoading = false;
+  bool _isSubmitting = false; // สำหรับปุ่ม Insert/Update
+  bool _isDeletingWorkspace = false; // สำหรับปุ่ม Delete Workspace
+  bool _isDeletingImage = false;
   File? _tempImage;
 
   @override
@@ -77,7 +79,7 @@ class _InsertUpdateWorkspaceDialogState
               icon: const Icon(Icons.delete, color: Colors.grey),
               tooltip: 'Delete Workspace',
               onPressed:
-                  _isLoading
+                  _isDeletingWorkspace
                       ? null
                       : () async {
                         final confirm = await showDialog<bool>(
@@ -111,7 +113,7 @@ class _InsertUpdateWorkspaceDialogState
                         }
 
                         setState(() {
-                          _isLoading = true; // ใส่ {} ให้ชัดเจน
+                          _isDeletingWorkspace = true; // ใส่ {} ให้ชัดเจน
                         });
 
                         try {
@@ -132,7 +134,7 @@ class _InsertUpdateWorkspaceDialogState
                         } finally {
                           if (mounted) {
                             setState(() {
-                              _isLoading = false; // block {}
+                              _isDeletingWorkspace = false; // block {}
                             });
                           }
                         }
@@ -217,7 +219,7 @@ class _InsertUpdateWorkspaceDialogState
                                   color: Colors.grey,
                                 ),
                                 onPressed:
-                                    _isLoading
+                                    _isDeletingImage
                                         ? null
                                         : () async {
                                           await _deleteWorkspaceImage(
@@ -236,11 +238,15 @@ class _InsertUpdateWorkspaceDialogState
                   controller: _nameController,
                   decoration: const InputDecoration(
                     labelText: 'Name Workspace *',
+                    labelStyle: TextStyle(color: Colors.grey),
+
                     prefixIcon: Icon(
                       Icons.dashboard_customize_rounded,
                       color: Colors.blue,
                     ),
-                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
                   ),
                   validator: (val) {
                     return (val == null || val.isEmpty)
@@ -250,7 +256,10 @@ class _InsertUpdateWorkspaceDialogState
                 ),
                 const SizedBox(height: 20),
                 SwitchListTile(
-                  title: const Text('เปิดใช้งาน Workspace (Active)'),
+                  title: const Text(
+                    'เปิดใช้งาน Workspace (Active)',
+                    style: TextStyle(fontSize: 14),
+                  ),
                   value: _isActive,
                   onChanged: (val) {
                     setState(() {
@@ -271,13 +280,18 @@ class _InsertUpdateWorkspaceDialogState
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed:
-              _isLoading
-                  ? null
-                  : () {
-                    _handleSubmit(workspaceId);
-                  },
-          child: Text(isEdit ? 'Update' : 'Insert'),
+          onPressed: _isSubmitting ? null : () => _handleSubmit(workspaceId),
+          child:
+              _isSubmitting
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                  : Text(isEdit ? 'Update' : 'Insert'),
         ),
       ],
     );
@@ -343,24 +357,27 @@ class _InsertUpdateWorkspaceDialogState
   }
 
   Future<void> _handleSubmit(String workspaceId) async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-    setState(() {
-      _isLoading = true;
-    });
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
+
     try {
       String? imageUrl;
+
       if (_tempImage != null) {
+        // Upload รูป
         await ref
             .read(workspaceImageProvider(workspaceId).notifier)
             .uploadWorkspaceImage(_tempImage!);
+
+        // อ่านค่า URL หลัง upload เสร็จ
         imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
         _tempImage = null;
       } else {
         imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
       }
 
+      // Insert หรือ Update
       await ref
           .read(insertUpdateWorkspaceControllerProvider.notifier)
           .insertOrUpdateWorkspace(
@@ -370,24 +387,20 @@ class _InsertUpdateWorkspaceDialogState
             image: imageUrl,
           );
 
-      // ✅ ใส่ block {} ครอบ ScaffoldMessenger
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('บันทึก Workspace สำเร็จ')),
         );
-        Navigator.of(context).pop(true);
+        Navigator.of(context).pop(true); // ปิด Dialog
       }
     } catch (e) {
-      // ✅ ใส่ block {} ครอบ ScaffoldMessenger
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
       }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isSubmitting = false); // ปลดปุ่ม
     }
   }
 
@@ -415,7 +428,7 @@ class _InsertUpdateWorkspaceDialogState
       return;
     }
     setState(() {
-      _isLoading = true;
+      _isDeletingImage = true;
     });
     try {
       final imageNotifier = ref.read(
@@ -453,7 +466,7 @@ class _InsertUpdateWorkspaceDialogState
       }
     } finally {
       setState(() {
-        _isLoading = false;
+        _isDeletingImage = false;
       });
     }
   }
