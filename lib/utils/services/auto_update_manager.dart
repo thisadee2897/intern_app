@@ -78,6 +78,9 @@ class AutoUpdateManager {
           if (!silent) print('ℹ️ You are using the latest version');
           return null;
         }
+      } else if (response.statusCode == 404) {
+        if (!silent) print('ℹ️ No releases found yet');
+        return null;
       } else {
         if (!silent) print('❌ Failed to check for updates: ${response.statusCode}');
         return null;
