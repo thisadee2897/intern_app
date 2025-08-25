@@ -98,21 +98,6 @@ case "$(uname -s)" in
         fi
         ;;
         
-    Linux*)
-        print_status "🐧 Building for Linux"
-        flutter build linux --release
-        
-        print_status "📦 Creating AppImage"
-        mkdir -p releases/$VERSION/linux
-        cp -r build/linux/x64/release/bundle/* releases/$VERSION/linux/
-        
-        # Create tar.gz
-        cd releases/$VERSION
-        tar -czf "InternApp-Linux-$TAG_NAME.tar.gz" linux/
-        cd ../..
-        print_success "Linux build created: releases/$VERSION/InternApp-Linux-$TAG_NAME.tar.gz"
-        ;;
-        
     MINGW*|CYGWIN*|MSYS*)
         print_status "🪟 Building for Windows"
         flutter build windows --release
@@ -164,11 +149,6 @@ cat > releases/$VERSION/RELEASE_NOTES.md << EOF
 1. Download \`InternApp-macOS-$TAG_NAME.dmg\`
 2. Open the DMG file
 3. Drag the app to Applications folder
-
-### Linux
-1. Download \`InternApp-Linux-$TAG_NAME.tar.gz\`
-2. Extract: \`tar -xzf InternApp-Linux-$TAG_NAME.tar.gz\`
-3. Run: \`./linux/project\`
 
 ## 🔄 Auto Update
 
