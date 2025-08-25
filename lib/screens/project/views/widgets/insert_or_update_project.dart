@@ -316,6 +316,7 @@ class _InsertOrUpdateProjectHDState
       context: context,
       builder:
           (context) => AlertDialog(
+            backgroundColor: Colors.white,
             title: const Text('ยืนยันการลบ'),
             content: const Text('คุณต้องการลบโปรเจคนี้ใช่หรือไม่?'),
             actions: [
@@ -347,7 +348,6 @@ class _InsertOrUpdateProjectHDState
           ).showSnackBar(const SnackBar(content: Text('ลบโปรเจคเรียบร้อย')));
         }
 
-        Navigator.pop(context);
         Navigator.pop(context);
       } catch (e) {
         if (mounted) {

@@ -654,6 +654,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen>
           await ref
               .read(deleteProjectCategoryControllerProvider.notifier)
               .deleteCategory({'project_category_id': categoryId});
+          await ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
 
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
