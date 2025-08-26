@@ -10,6 +10,7 @@ import 'package:project/models/workspace_model.dart';
 import 'package:project/screens/home/providers/controllers/delete_workspace_controllers.dart';
 import 'package:project/screens/home/providers/controllers/insert_update_workspace_controllers.dart';
 import 'package:project/screens/home/providers/controllers/image_workspace_controllers.dart';
+import 'package:project/utils/extension/custom_snackbar.dart';
 
 class InsertUpdateWorkspaceDialog extends ConsumerStatefulWidget {
   final WorkspaceModel? workspace;
@@ -209,50 +210,82 @@ class _InsertUpdateWorkspaceDialogState
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('เลือกรูปภาพเรียบร้อย')));
-      }
-    } catch (e) {
-      if (mounted) await _showErrorDialog(_extractErrorMessage(e));
-    }
+  CustomSnackbar.showSnackBar(
+    context: context,
+    title: "สำเร็จ",
+    message: "เลือกรูปภาพเรียบร้อย",
+    contentType: ContentType.success,
+    color: Colors.green,
+  );
+}
+   } catch (e) {
+  if (mounted) {
+    CustomSnackbar.showSnackBar(
+      context: context,
+      title: "ผิดพลาด",
+      message: _extractErrorMessage(e),
+      contentType: ContentType.failure,
+      color: Colors.red,
+    );
+  }
+}
   }
 
-  Future<void> _handleSubmit(String workspaceId) async {
-    if (!_formKey.currentState!.validate()) return;
+ Future<void> _handleSubmit(String workspaceId) async {
+  if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSubmitting = true);
+  setState(() => _isSubmitting = true);
 
-    try {
-      String? imageUrl;
+  try {
+    String? imageUrl;
 
-      if (_tempImage != null) {
-        await ref
-            .read(workspaceImageProvider(workspaceId).notifier)
-            .uploadWorkspaceImage(_tempImage!);
-
-        imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
-        _tempImage = null;
-      } else {
-        imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
-      }
-
+    if (_tempImage != null) {
       await ref
-          .read(insertUpdateWorkspaceControllerProvider.notifier)
-          .insertOrUpdateWorkspace(
-            id: widget.workspace?.id ?? workspaceId,
-            name: _nameController.text.trim(),
-            active: _isActive,
-            image: imageUrl,
-          );
+          .read(workspaceImageProvider(workspaceId).notifier)
+          .uploadWorkspaceImage(_tempImage!);
 
-      if (mounted) Navigator.of(context).pop(true);
-    } catch (e) {
-      await _showErrorDialog(_extractErrorMessage(e));
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
+      _tempImage = null;
+    } else {
+      imageUrl = ref.read(workspaceImageProvider(workspaceId)).value;
     }
+
+    final isUpdate = widget.workspace != null;
+
+    await ref
+        .read(insertUpdateWorkspaceControllerProvider.notifier)
+        .insertOrUpdateWorkspace(
+          id: widget.workspace?.id ?? workspaceId,
+          name: _nameController.text.trim(),
+          active: _isActive,
+          image: imageUrl,
+        );
+
+    if (mounted) {
+      CustomSnackbar.showSnackBar(
+        context: context,
+        title: "สำเร็จ",
+        message: isUpdate ? "อัปเดต Workspace สำเร็จ" : "สร้าง Workspace สำเร็จ",
+        contentType: ContentType.success,
+        color: Colors.green,
+      );
+      Navigator.of(context).pop(true);
+    }
+  } catch (e) {
+    if (mounted) {
+      CustomSnackbar.showSnackBar(
+        context: context,
+        title: "ผิดพลาด",
+        message: _extractErrorMessage(e),
+        contentType: ContentType.failure,
+        color: Colors.red,
+      );
+    }
+  } finally {
+    if (mounted) setState(() => _isSubmitting = false);
   }
+}
+
 
   Widget _buildUploadPlaceholder(String workspaceId) {
     return Center(
