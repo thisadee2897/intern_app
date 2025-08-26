@@ -571,7 +571,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen>
                       children: [
                         Icon(
                           Icons.edit_rounded,
-                          color: Colors.blue.shade600,
+                          color: Colors.grey.shade600,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
@@ -589,14 +589,14 @@ class _ProjectScreenState extends BaseState<ProjectScreen>
                       children: [
                         Icon(
                           Icons.delete_rounded,
-                          color: Colors.red.shade600,
+                          color: Colors.grey.shade600,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
                         Text(
                           'ลบหมวดหมู่',
                           style: TextStyle(
-                            color: Colors.red.shade600,
+                            color: Colors.grey.shade600,
                             fontWeight: FontWeight.w500,
                           ),
                         ),

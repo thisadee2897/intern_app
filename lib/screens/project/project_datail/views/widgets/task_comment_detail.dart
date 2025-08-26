@@ -200,6 +200,7 @@ void initState() {
                                         context: context,
                                         builder: (context) {
                                           return AlertDialog(
+                                            backgroundColor: Colors.white,
                                             title: const Text('Confirm Delete'),
                                             content: const Text('Are you sure you want to delete this task?'),
                                             actions: [
@@ -213,7 +214,7 @@ void initState() {
                                                   if (widget.onTaskUpdated != null) widget.onTaskUpdated!();
                                                   Navigator.of(context).pop();
                                                 },
-                                                child: const Text('Delete'),
+                                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
                                               ),
                                             ],
                                           );
@@ -443,6 +444,7 @@ void initState() {
                                                       context: context,
                                                       builder: (BuildContext context) {
                                                         return AlertDialog(
+                                                          backgroundColor: Colors.white,
                                                           title: const Text('Confirm Delete'),
                                                           content: const Text('Are you sure you want to delete this comment?'),
                                                           actions: [
@@ -458,7 +460,7 @@ void initState() {
                                                                 await ref.read(deleteCommentTaskControllerProvider.notifier).deleteComment(item.id!);
                                                                 ref.read(commentTaskProvider.notifier).getCommentTask(state.value!.id!);
                                                               },
-                                                              child: const Text('Delete'),
+                                                              child: const Text('Delete', style: TextStyle(color: Colors.red)),
                                                             ),
                                                           ],
                                                         );

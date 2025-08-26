@@ -181,11 +181,12 @@ class _MyProfileDialogWidgetState extends ConsumerState<MyProfileDialogWidget> {
                                         context: context,
                                         builder:
                                             (context) => AlertDialog(
+                                              backgroundColor: Colors.white,
                                               title: const Text('ยืนยันการลบ'),
                                               content: const Text('คุณต้องการลบรูปโปรไฟล์หรือไม่?'),
                                               actions: [
                                                 TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('ยกเลิก')),
-                                                TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('ลบ')),
+                                                TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('ลบ', style: TextStyle(color: Colors.red))),
                                               ],
                                             ),
                                       );

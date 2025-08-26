@@ -72,38 +72,48 @@ class _InsertUpdateWorkspaceDialogState
     if (!mounted) return;
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text('เกิดข้อผิดพลาด'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('ตกลง'),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Icon(Icons.error, color: Colors.red.shade600, size: 40),
+                const SizedBox(width: 20),
+
+                const Text('เกิดข้อผิดพลาด'),
+              ],
+            ),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('ตกลง'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   Future<void> _deleteWorkspace() async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text('ยืนยันการลบ Workspace'),
-        content: const Text('คุณแน่ใจว่าต้องการลบ workspace นี้?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('ยกเลิก'),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            title: const Text('ยืนยันการลบ Workspace'),
+            content: const Text('คุณแน่ใจว่าต้องการลบ workspace นี้?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('ยกเลิก'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('ลบ', style: TextStyle(color: Colors.red)),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('ลบ', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
     );
 
     if (confirm != true) return;
@@ -128,21 +138,22 @@ class _InsertUpdateWorkspaceDialogState
   Future<void> _deleteWorkspaceImage(String workspaceId) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text('ยืนยันการลบรูป'),
-        content: const Text('คุณต้องการลบรูป Workspace หรือไม่?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('ยกเลิก'),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            title: const Text('ยืนยันการลบรูป'),
+            content: const Text('คุณต้องการลบรูป Workspace หรือไม่?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('ยกเลิก'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('ลบ', style: TextStyle(color: Colors.red)),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('ลบ', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
     );
 
     if (confirm != true) return;
@@ -150,8 +161,9 @@ class _InsertUpdateWorkspaceDialogState
     setState(() => _isDeletingImage = true);
 
     try {
-      final imageNotifier =
-          ref.read(workspaceImageProvider(workspaceId).notifier);
+      final imageNotifier = ref.read(
+        workspaceImageProvider(workspaceId).notifier,
+      );
 
       if (widget.workspace == null) {
         setState(() => _tempImage = null);
@@ -183,8 +195,9 @@ class _InsertUpdateWorkspaceDialogState
       );
       if (result == null || result.files.single.bytes == null) return;
 
-      final file =
-          File('${Directory.systemTemp.path}/${result.files.single.name}');
+      final file = File(
+        '${Directory.systemTemp.path}/${result.files.single.name}',
+      );
       await file.writeAsBytes(result.files.single.bytes!);
 
       if (widget.workspace != null) {
@@ -196,9 +209,9 @@ class _InsertUpdateWorkspaceDialogState
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('เลือกรูปภาพเรียบร้อย')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('เลือกรูปภาพเรียบร้อย')));
       }
     } catch (e) {
       if (mounted) await _showErrorDialog(_extractErrorMessage(e));
@@ -308,51 +321,63 @@ class _InsertUpdateWorkspaceDialogState
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: _tempImage != null
-                                ? Image.file(
-                                    _tempImage!,
-                                    width: 220,
-                                    height: 220,
-                                    fit: BoxFit.cover,
-                                  )
-                                : imageState.when(
-                                    data: (url) {
-                                      if (url != null && url.isNotEmpty) {
-                                        return CachedNetworkImage(
-                                          imageUrl: url,
-                                          fit: BoxFit.cover,
-                                          width: 220,
-                                          height: 220,
-                                          placeholder: (c, u) =>
-                                              const Center(
-                                            child:
-                                                CircularProgressIndicator(),
+                            child:
+                                _tempImage != null
+                                    ? Image.file(
+                                      _tempImage!,
+                                      width: 220,
+                                      height: 220,
+                                      fit: BoxFit.cover,
+                                    )
+                                    : imageState.when(
+                                      data: (url) {
+                                        if (url != null && url.isNotEmpty) {
+                                          return CachedNetworkImage(
+                                            imageUrl: url,
+                                            fit: BoxFit.cover,
+                                            width: 220,
+                                            height: 220,
+                                            placeholder:
+                                                (c, u) => const Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                ),
+                                            errorWidget:
+                                                (c, u, e) =>
+                                                    _buildUploadPlaceholder(
+                                                      workspaceId,
+                                                    ),
+                                          );
+                                        } else {
+                                          return _buildUploadPlaceholder(
+                                            workspaceId,
+                                          );
+                                        }
+                                      },
+                                      loading:
+                                          () => const Center(
+                                            child: CircularProgressIndicator(),
                                           ),
-                                          errorWidget: (c, u, e) =>
-                                              _buildUploadPlaceholder(
-                                                  workspaceId),
-                                        );
-                                      } else {
-                                        return _buildUploadPlaceholder(
-                                            workspaceId);
-                                      }
-                                    },
-                                    loading: () => const Center(
-                                        child: CircularProgressIndicator()),
-                                    error: (e, st) =>
-                                        _buildUploadPlaceholder(workspaceId),
-                                  ),
+                                      error:
+                                          (e, st) => _buildUploadPlaceholder(
+                                            workspaceId,
+                                          ),
+                                    ),
                           ),
                           if (_tempImage != null ||
                               (imageState.value?.isNotEmpty ?? false))
                             Align(
                               alignment: Alignment.bottomRight,
                               child: IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.grey),
-                                onPressed: _isDeletingImage
-                                    ? null
-                                    : () => _deleteWorkspaceImage(workspaceId),
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.grey,
+                                ),
+                                onPressed:
+                                    _isDeletingImage
+                                        ? null
+                                        : () =>
+                                            _deleteWorkspaceImage(workspaceId),
                               ),
                             ),
                         ],
@@ -374,8 +399,11 @@ class _InsertUpdateWorkspaceDialogState
                       borderRadius: BorderRadius.all(Radius.circular(8)),
                     ),
                   ),
-                  validator: (val) =>
-                      (val == null || val.isEmpty) ? 'กรุณากรอกชื่อ Workspace' : null,
+                  validator:
+                      (val) =>
+                          (val == null || val.isEmpty)
+                              ? 'กรุณากรอกชื่อ Workspace'
+                              : null,
                 ),
                 const SizedBox(height: 20),
                 SwitchListTile(
@@ -398,16 +426,17 @@ class _InsertUpdateWorkspaceDialogState
         ),
         ElevatedButton(
           onPressed: _isSubmitting ? null : () => _handleSubmit(workspaceId),
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-              : Text(isEdit ? 'Update' : 'Insert'),
+          child:
+              _isSubmitting
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                  : Text(isEdit ? 'Update' : 'Insert'),
         ),
       ],
     );
