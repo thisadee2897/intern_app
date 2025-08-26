@@ -181,6 +181,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                         context: context,
                                         builder: (context) {
                                           return AlertDialog(
+                                            backgroundColor: Colors.white,
                                             title: const Text('Confirm Delete'),
                                             content: const Text('Are you sure you want to delete this task?'),
                                             actions: [
@@ -192,7 +193,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                                   ref.read(showTaskDetailProvider.notifier).state = false;
                                                   ref.read(sprintProvider.notifier).get();
                                                 },
-                                                child: const Text('Delete'),
+                                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
                                               ),
                                             ],
                                           );
@@ -411,6 +412,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                                       context: context,
                                                       builder: (BuildContext context) {
                                                         return AlertDialog(
+                                                          backgroundColor: Colors.white,
                                                           title: const Text('Confirm Delete'),
                                                           content: const Text('Are you sure you want to delete this comment?'),
                                                           actions: [
@@ -426,7 +428,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                                                 await ref.read(deleteCommentTaskControllerProvider.notifier).deleteComment(item.id!);
                                                                 ref.read(commentTaskProvider.notifier).getCommentTask(state.value!.id!);
                                                               },
-                                                              child: const Text('Delete'),
+                                                              child: const Text('Delete', style: TextStyle(color: Colors.red)),
                                                             ),
                                                           ],
                                                         );

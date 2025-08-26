@@ -1060,12 +1060,14 @@ void _showErrorSnackBar(String message) {
       context: context,
       builder:
           (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            
             title: const Text('ยืนยันการลบ'),
             content: Text('คุณต้องการลบ Sprint "${widget.item.name}" ใช่หรือไม่?'),
             actions: [
               TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ยกเลิก')),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.white,foregroundColor: Colors.red),
                 onPressed: () => Navigator.pop(context, true),
                 child: const Text('ลบ'),
               ),

@@ -336,7 +336,7 @@ class _InsertOrUpdateProjectHDState
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('ลบ'),
+                child: const Text('ลบ', style: TextStyle(color: Colors.red)),
               ),
             ],
           ),
