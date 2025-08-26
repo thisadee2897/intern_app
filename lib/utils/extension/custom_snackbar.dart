@@ -13,7 +13,7 @@ class CustomSnackbar {
     required MaterialColor color,
   }) {
     final overlay = Overlay.of(context);
-    if (overlay == null) return;
+    
 
     late OverlayEntry entry;
     final controller = AnimationController(

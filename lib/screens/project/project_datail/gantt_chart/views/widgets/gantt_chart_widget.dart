@@ -3,6 +3,7 @@ import 'package:project/controllers/assignee_controller.dart';
 import 'package:project/controllers/priority_controller.dart';
 import 'package:project/controllers/task_status_controller.dart';
 import 'package:project/controllers/type_of_work_controller.dart';
+import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/sprint_in_borad_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
 import 'package:flutter/material.dart';
@@ -15,13 +16,18 @@ import '../../providers/controllers/gantt_data_controller.dart';
 import '../../utils/date_helpers.dart';
 import 'package:project/screens/project/project_datail/views/widgets/task_comment_detail.dart';
 import 'package:smart_date_field_picker/smart_date_field_picker.dart';
-  // ...existing code...
+// ...existing code...
 
 class GanttChartWidget extends ConsumerStatefulWidget {
   final String projectId;
   final List<SprintModel> ganttData;
   final bool readOnly;
-  const GanttChartWidget(this.ganttData, {required this.projectId, this.readOnly = false, super.key});
+  const GanttChartWidget(
+    this.ganttData, {
+    required this.projectId,
+    this.readOnly = false,
+    super.key,
+  });
 
   @override
   ConsumerState<GanttChartWidget> createState() => _GanttChartWidgetState();
@@ -45,7 +51,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
               height: double.infinity,
               child: TaskCommentDetail(
                 taskId: taskId,
-                  readOnly: readOnly,
+                readOnly: readOnly,
                 onTaskUpdated: () async {
                   await _loadTasks();
                 },
@@ -65,188 +71,277 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
       },
     );
   }
-  
+
   Future<void> _showAddTaskDialog(String sprintId) async {
-    final nameController = TextEditingController();
-    final descController = TextEditingController();
+  final nameController = TextEditingController();
+  final descController = TextEditingController();
   DateTime? startDate;
   DateTime? endDate;
-  final OverlayPortalController startDateController = OverlayPortalController();
-  final OverlayPortalController endDateController = OverlayPortalController();
-  
+  final startDateController = OverlayPortalController();
+  final endDateController = OverlayPortalController();
 
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return Dialog(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 500),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('เพิ่มงานใหม่', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: nameController,
-                        decoration: const InputDecoration(labelText: 'ชื่อ Task *', border: OutlineInputBorder()),
-                        autofocus: true,
+  // 👤 ดึง user id ที่ login อยู่
+  final currentUserId = ref.read(loginProvider).value?.user?.id.toString();
+
+  // state เก็บ assignee ที่เลือก
+  String? selectedAssigneeId = currentUserId;
+
+  // โหลด list assignee
+  final assigneeList = ref.read(listAssignProvider).value ?? [];
+
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'เพิ่มงานใหม่',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // 🔤 Task Name
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'ชื่อ Task *',
+                        border: OutlineInputBorder(),
                       ),
-                      const SizedBox(height: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Start Date', style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
-                          const SizedBox(height: 4),
-                            Stack(
-                              alignment: Alignment.centerRight,
-                              children: [
-                                SmartDateFieldPicker(
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.only(left: 12, right: 40, top: 0, bottom: 0),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  initialDate: startDate,
-                                  controller: startDateController,
-                                  onDateSelected: (date) {
-                                    setStateDialog(() {
-                                      startDate = date;
-                                      // Reset endDate if it's before startDate
-                                      if (endDate != null && startDate != null && endDate!.isBefore(startDate!)) {
-                                        endDate = null;
-                                      }
-                                    });
-                                  },
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 12),
-                                  child: Icon(Icons.calendar_today, color: Colors.grey, size: 20),
-                                ),
-                              ],
-                            ),
-                          const SizedBox(height: 16),
-                          Text('End Date', style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
-                          const SizedBox(height: 4),
-                            Stack(
-                              alignment: Alignment.centerRight,
-                              children: [
-                                SmartDateFieldPicker(
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.only(left: 12, right: 40, top: 0, bottom: 0),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  initialDate: endDate,
-                                  controller: endDateController,
-                                  enabled: startDate != null,
-                                  firstDate: startDate != null ? startDate!.add(const Duration(days: 1)) : null,
-                                  onDateSelected: (date) {
-                                    setStateDialog(() {
-                                      endDate = date;
-                                    });
-                                  },
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 12),
-                                  child: Icon(Icons.calendar_today, color: Colors.grey, size: 20),
-                                ),
-                              ],
-                            ),
-                        ],
+                      autofocus: true,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 👤 Dropdown เลือก Assignee
+                    DropdownButtonFormField<String>(
+                      value: selectedAssigneeId,
+                      decoration: const InputDecoration(
+                        labelText: 'Assignee',
+                        border: OutlineInputBorder(),
                       ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: descController,
-                        decoration: const InputDecoration(labelText: 'รายละเอียดงาน', border: OutlineInputBorder()),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
+                      items: assigneeList.map<DropdownMenuItem<String>>((user) {
+                        return DropdownMenuItem<String>(
+                          value: user.id.toString(),
+                          child: Text(user.name ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setStateDialog(() {
+                          selectedAssigneeId = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 📅 Start & End Date
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Start Date',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 14,
                           ),
-                          const SizedBox(width: 12),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0071BC),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        ),
+                        const SizedBox(height: 4),
+                        Stack(
+                          alignment: Alignment.centerRight,
+                          children: [
+                            SmartDateFieldPicker(
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.only(
+                                  left: 12,
+                                  right: 40,
+                                ),
+                                border: OutlineInputBorder(),
+                              ),
+                              initialDate: startDate,
+                              controller: startDateController,
+                              onDateSelected: (date) {
+                                setStateDialog(() {
+                                  startDate = date;
+                                  if (endDate != null &&
+                                      startDate != null &&
+                                      endDate!.isBefore(startDate!)) {
+                                    endDate = null;
+                                  }
+                                });
+                              },
                             ),
-                            onPressed: () {
-                              if (nameController.text.trim().isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('กรุณากรอกชื่องาน')),
-                                );
-                                return;
-                              }
-                              if (startDate == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('กรุณาเลือกวันที่เริ่ม')),
-                                );
-                                return;
-                              }
-                              if (endDate == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('กรุณาเลือกวันที่สิ้นสุด')),
-                                );
-                                return;
-                              }
-                              Navigator.of(context).pop(true);
-                            },
-                            child: const Text('Start', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                            const Padding(
+                              padding: EdgeInsets.only(right: 12),
+                              child: Icon(Icons.calendar_today,
+                                  color: Colors.grey, size: 20),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        Text(
+                          'End Date',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 14,
                           ),
-                        ],
+                        ),
+                        const SizedBox(height: 4),
+                        Stack(
+                          alignment: Alignment.centerRight,
+                          children: [
+                            SmartDateFieldPicker(
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.only(
+                                  left: 12,
+                                  right: 40,
+                                ),
+                                border: OutlineInputBorder(),
+                              ),
+                              initialDate: endDate,
+                              controller: endDateController,
+                              enabled: startDate != null,
+                              firstDate: startDate?.add(const Duration(days: 1)),
+                              onDateSelected: (date) {
+                                setStateDialog(() {
+                                  endDate = date;
+                                });
+                              },
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(right: 12),
+                              child: Icon(Icons.calendar_today,
+                                  color: Colors.grey, size: 20),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 📝 Description
+                    TextField(
+                      controller: descController,
+                      decoration: const InputDecoration(
+                        labelText: 'รายละเอียดงาน',
+                        border: OutlineInputBorder(),
                       ),
-                    ],
-                  ),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // ✅ Action buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0071BC),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 12,
+                            ),
+                          ),
+                          onPressed: () {
+                            if (nameController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('กรุณากรอกชื่องาน')),
+                              );
+                              return;
+                            }
+                            if (startDate == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('กรุณาเลือกวันที่เริ่ม')),
+                              );
+                              return;
+                            }
+                            if (endDate == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('กรุณาเลือกวันที่สิ้นสุด')),
+                              );
+                              return;
+                            }
+                            Navigator.of(context).pop(true);
+                          },
+                          child: const Text(
+                            'Start',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
-        );
-      },
-    );
+            ),
+          );
+        },
+      );
+    },
+  );
 
-    if (result == true) {
-      final body = {
-        "task_id": "0",
-        "project_hd_id": widget.projectId,
-        "sprint_id": sprintId,
-        "master_priority_id": "1",
-        "master_task_status_id": "1", // default status id (เช่น To Do)
-        "master_type_of_work_id": "1",
-        "task_name": nameController.text.trim(),
-        "task_description": descController.text.trim(),
-        "task_assigned_to": "0",
-        "task_start_date": startDate != null ? DateHelpers.format(startDate!, 'yyyy-MM-dd') : null,
-        "task_end_date": endDate != null ? DateHelpers.format(endDate!, 'yyyy-MM-dd') : null,
-        "task_is_active": true,
-      };
-      print('[GanttChartWidget] Submit body: $body');
-      await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(body: body);
-      final state = ref.read(insertOrUpdateTaskControllerProvider);
-      if (state.hasError) {
-        print('[GanttChartWidget] ❌ Error: ${state.error}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('เพิ่มงานไม่สำเร็จ: ${state.error}')),
-        );
-      } else {
-        print('[GanttChartWidget] ✅ Success: ${state.value}');
-        await _loadTasks();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('เพิ่มงานสำเร็จ')),
-        );
-      }
+  // 📤 ส่งข้อมูลถ้ากด Save
+  if (result == true) {
+    final body = {
+      "task_id": "0",
+      "project_hd_id": widget.projectId,
+      "sprint_id": sprintId,
+      "master_priority_id": "1",
+      "master_task_status_id": "1",
+      "master_type_of_work_id": "1",
+      "task_name": nameController.text.trim(),
+      "task_description": descController.text.trim(),
+      "task_assigned_to": selectedAssigneeId ?? currentUserId, // ✅ default เป็น login id
+      "task_start_date": DateHelpers.format(startDate!, 'yyyy-MM-dd'),
+      "task_end_date": DateHelpers.format(endDate!, 'yyyy-MM-dd'),
+      "task_is_active": true,
+    };
+
+    print('[GanttChartWidget] Submit body: $body');
+    await ref
+        .read(insertOrUpdateTaskControllerProvider.notifier)
+        .submit(body: body);
+
+    final state = ref.read(insertOrUpdateTaskControllerProvider);
+    if (state.hasError) {
+      print('[GanttChartWidget] ❌ Error: ${state.error}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('เพิ่มงานไม่สำเร็จ: ${state.error}')),
+      );
+    } else {
+      print('[GanttChartWidget] ✅ Success: ${state.value}');
+      await _loadTasks();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('เพิ่มงานสำเร็จ')),
+      );
     }
   }
+}
+
 
   Future<void> _loadTasks() async {
     ref.invalidate(ganttDataProvider);
@@ -274,7 +369,9 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
       ref.read(listTypeOfWorkProvider.notifier).get();
       ref.read(listTaskStatusProvider.notifier).get();
       final container = ProviderScope.containerOf(context, listen: false);
-      container.read(sprintStartedControllerProvider(widget.projectId).notifier).fetch();
+      container
+          .read(sprintStartedControllerProvider(widget.projectId).notifier)
+          .fetch();
     });
 
     _sidebarVerticalController = ScrollController();
@@ -286,13 +383,17 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     _sidebarVerticalController.addListener(() {
       if (_isSyncingVertical) return;
       _isSyncingVertical = true;
-      _taskVerticalController.jumpTo(_sidebarVerticalController.position.pixels);
+      _taskVerticalController.jumpTo(
+        _sidebarVerticalController.position.pixels,
+      );
       _isSyncingVertical = false;
     });
     _taskVerticalController.addListener(() {
       if (_isSyncingVertical) return;
       _isSyncingVertical = true;
-      _sidebarVerticalController.jumpTo(_taskVerticalController.position.pixels);
+      _sidebarVerticalController.jumpTo(
+        _taskVerticalController.position.pixels,
+      );
       _isSyncingVertical = false;
     });
 
@@ -300,13 +401,17 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     _headerHorizontalController.addListener(() {
       if (_isSyncingHorizontal) return;
       _isSyncingHorizontal = true;
-      _taskHorizontalController.jumpTo(_headerHorizontalController.position.pixels);
+      _taskHorizontalController.jumpTo(
+        _headerHorizontalController.position.pixels,
+      );
       _isSyncingHorizontal = false;
     });
     _taskHorizontalController.addListener(() {
       if (_isSyncingHorizontal) return;
       _isSyncingHorizontal = true;
-      _headerHorizontalController.jumpTo(_taskHorizontalController.position.pixels);
+      _headerHorizontalController.jumpTo(
+        _taskHorizontalController.position.pixels,
+      );
       _isSyncingHorizontal = false;
     });
   }
@@ -323,7 +428,8 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
   List<DateTime> _getDateRange(DateTime startDate, DateTime endDate) {
     final range = <DateTime>[];
     var currentDate = startDate;
-    while (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
+    while (currentDate.isBefore(endDate) ||
+        currentDate.isAtSameMomentAs(endDate)) {
       range.add(currentDate);
       currentDate = DateHelpers.addDays(currentDate, 1);
     }
@@ -339,27 +445,38 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
       monthMap[monthKey] = (monthMap[monthKey] ?? 0) + 1;
     }
 
-    return monthMap.entries.map((entry) => MonthInfo(name: entry.key, dayCount: entry.value)).toList();
+    return monthMap.entries
+        .map((entry) => MonthInfo(name: entry.key, dayCount: entry.value))
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
-   final ganttData = [...widget.ganttData]
-  ..sort((a, b) {
-    final aHasTasks = a.tasks.isNotEmpty;
-    final bHasTasks = b.tasks.isNotEmpty;
-    if (aHasTasks == bHasTasks) return 0; // ถ้ามี/ไม่มี เท่ากัน ให้คงลำดับเดิม
-    return aHasTasks ? -1 : 1; // Sprint ที่มี Task ขึ้นก่อน
-  });
+    final ganttData = [...widget.ganttData]..sort((a, b) {
+      final aHasTasks = a.tasks.isNotEmpty;
+      final bHasTasks = b.tasks.isNotEmpty;
+      if (aHasTasks == bHasTasks)
+        return 0; // ถ้ามี/ไม่มี เท่ากัน ให้คงลำดับเดิม
+      return aHasTasks ? -1 : 1; // Sprint ที่มี Task ขึ้นก่อน
+    });
 
-      // รวมทุก task ทุกสถานะ (รวม complete) ในแต่ละ sprint
-      List<DateTime> allDates = [
-        ...ganttData.expand((sprint) => sprint.tasks
-          // ไม่ filter สถานะ
-          .map((task) => DateTime.parse(task.taskStartDate ?? DateTime.now().toString()))),
-        ...ganttData.expand((sprint) => sprint.tasks
-          .map((task) => DateTime.parse(task.taskEndDate ?? DateTime.now().toString()))),
-      ];
+    // รวมทุก task ทุกสถานะ (รวม complete) ในแต่ละ sprint
+    List<DateTime> allDates = [
+      ...ganttData.expand(
+        (sprint) => sprint.tasks
+        // ไม่ filter สถานะ
+        .map(
+          (task) =>
+              DateTime.parse(task.taskStartDate ?? DateTime.now().toString()),
+        ),
+      ),
+      ...ganttData.expand(
+        (sprint) => sprint.tasks.map(
+          (task) =>
+              DateTime.parse(task.taskEndDate ?? DateTime.now().toString()),
+        ),
+      ),
+    ];
 
     final DateTime chartStartDate, chartEndDate;
     if (allDates.isEmpty) {
@@ -376,7 +493,8 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     final dateRange = _getDateRange(chartStartDate, chartEndDate);
     final months = _getMonths(dateRange);
     final today = DateHelpers.startOfToday();
-    final todayPosition = DateHelpers.differenceInDays(today, chartStartDate) * dayWidth;
+    final todayPosition =
+        DateHelpers.differenceInDays(today, chartStartDate) * dayWidth;
     return Column(
       children: [
         _buildHeader(months, dateRange),
@@ -405,50 +523,92 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                             itemBuilder: (context, index) {
                               final sprint = ganttData[index];
                               return Container(
-                                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)))),
-                                height: (sprintRowHeaderHeight + (sprint.tasks.length * taskRowHeight)) + 1,
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: context.primaryColor.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                height:
+                                    (sprintRowHeaderHeight +
+                                        (sprint.tasks.length * taskRowHeight)) +
+                                    1,
                                 child: Stack(
                                   children: [
                                     // Task bars
                                     ...sprint.tasks.map((task) {
-                                      if (task.taskStartDate == null || task.taskEndDate == null) {
+                                      if (task.taskStartDate == null ||
+                                          task.taskEndDate == null) {
                                         return const SizedBox.shrink();
                                       }
                                       // ไม่ filter สถานะ task ใด ๆ
-                                      final start = DateTime.parse(task.taskStartDate!.toString());
-                                      final end = DateTime.parse(task.taskEndDate!.toString());
-                                      final offset = DateHelpers.differenceInDays(start, chartStartDate);
-                                      final duration = DateHelpers.differenceInDays(end, start) + 1;
+                                      final start = DateTime.parse(
+                                        task.taskStartDate!.toString(),
+                                      );
+                                      final end = DateTime.parse(
+                                        task.taskEndDate!.toString(),
+                                      );
+                                      final offset =
+                                          DateHelpers.differenceInDays(
+                                            start,
+                                            chartStartDate,
+                                          );
+                                      final duration =
+                                          DateHelpers.differenceInDays(
+                                            end,
+                                            start,
+                                          ) +
+                                          1;
                                       final left = offset * dayWidth;
                                       final width = duration * dayWidth;
-                                      final rowIndex = sprint.tasks.indexOf(task);
-                                      final top = sprintRowHeaderHeight + rowIndex * taskRowHeight;
+                                      final rowIndex = sprint.tasks.indexOf(
+                                        task,
+                                      );
+                                      final top =
+                                          sprintRowHeaderHeight +
+                                          rowIndex * taskRowHeight;
                                       return Positioned(
                                         left: left,
                                         top: top,
                                         width: width,
                                         height: taskRowHeight,
                                         child: GestureDetector(
-                                          onTap: () {
-                                             _showTaskDetailPanel(
-      task.id?.toString() ?? '',
-      readOnly: true,   // 👈 บังคับให้เปิดแบบ ReadOnly
-    );
-                                          },
+                                         onTap: () {
+
+  final isCompleted = sprint.completed == true;
+
+  _showTaskDetailPanel(
+    task.id?.toString() ?? '',
+    // ✅ ถ้า completed = true → readOnly = true
+    readOnly: isCompleted,
+  );
+},
                                           child: Container(
-                                            decoration: BoxDecoration( color:HexColor.fromHex( task.taskStatus!.color!)),
+                                            decoration: BoxDecoration(
+                                              color: HexColor.fromHex(
+                                                task.taskStatus!.color!,
+                                              ),
+                                            ),
                                             alignment: Alignment.centerLeft,
-                                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                            ),
                                             child: Text(
                                               "${task.taskStartDate} - ${task.taskEndDate}",
-                                              style: const TextStyle(fontSize: 12, color: Colors.white60),
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.white60,
+                                              ),
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ),
                                       );
                                     }),
-  // Slide panel แสดงรายละเอียด Task แบบเดียวกับ CommentTaskScreen
+                                    // Slide panel แสดงรายละเอียด Task แบบเดียวกับ CommentTaskScreen
                                   ],
                                 ),
                               );
@@ -459,7 +619,13 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                             left: todayPosition,
                             top: 0,
                             width: 1,
-                            height: ganttData.fold<double>(0, (sum, sprint) => sum + (sprintRowHeaderHeight + (sprint.tasks.length * taskRowHeight))),
+                            height: ganttData.fold<double>(
+                              0,
+                              (sum, sprint) =>
+                                  sum +
+                                  (sprintRowHeaderHeight +
+                                      (sprint.tasks.length * taskRowHeight)),
+                            ),
                             child: Container(color: Colors.red),
                           ),
                         ],
@@ -487,24 +653,38 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
             decoration: BoxDecoration(
               color: context.primaryColor.withValues(alpha: 0.05),
               border: Border(
-                right: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)),
-                bottom: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)),
+                right: BorderSide(
+                  color: context.primaryColor.withValues(alpha: 0.1),
+                ),
+                bottom: BorderSide(
+                  color: context.primaryColor.withValues(alpha: 0.1),
+                ),
               ),
             ),
-            child: const Center(child: Text('Sprints', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+            child: const Center(
+              child: Text(
+                'Sprints',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
           // Header for the gantt chart
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 color: context.primaryColor.withValues(alpha: 0.05),
-                border: Border(bottom: BorderSide(color: context.primaryColor.withValues(alpha: 0.1))),
+                border: Border(
+                  bottom: BorderSide(
+                    color: context.primaryColor.withValues(alpha: 0.1),
+                  ),
+                ),
               ),
               child: Scrollbar(
                 controller: _headerHorizontalController,
                 scrollbarOrientation: ScrollbarOrientation.bottom,
                 child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(), // ไม่เกิด overscroll/สกอเตลิด
+                  physics:
+                      const ClampingScrollPhysics(), // ไม่เกิด overscroll/สกอเตลิด
                   controller: _headerHorizontalController,
                   scrollDirection: Axis.horizontal,
                   child: SizedBox(
@@ -519,8 +699,22 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                                 months.map((month) {
                                   return Container(
                                     width: month.dayCount * dayWidth,
-                                    decoration: BoxDecoration(border: Border(right: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)))),
-                                    child: Center(child: Text(month.name, style: TextStyle(color: context.primaryColor))),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        right: BorderSide(
+                                          color: context.primaryColor
+                                              .withValues(alpha: 0.1),
+                                        ),
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        month.name,
+                                        style: TextStyle(
+                                          color: context.primaryColor,
+                                        ),
+                                      ),
+                                    ),
                                   );
                                 }).toList(),
                           ),
@@ -531,8 +725,22 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                                 dateRange.map((date) {
                                   return Container(
                                     width: dayWidth,
-                                    decoration: BoxDecoration(border: Border(right: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)))),
-                                    child: Center(child: Text(DateHelpers.format(date, 'd'), style: const TextStyle(color: Colors.black45))),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        right: BorderSide(
+                                          color: context.primaryColor
+                                              .withValues(alpha: 0.1),
+                                        ),
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        DateHelpers.format(date, 'd'),
+                                        style: const TextStyle(
+                                          color: Colors.black45,
+                                        ),
+                                      ),
+                                    ),
                                   );
                                 }).toList(),
                           ),
@@ -549,111 +757,133 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     );
   }
 
- Widget _buildSidebar(List<SprintModel> sprints) {
-  return Container(
-    width: sprintSidebarWidth,
-    decoration: BoxDecoration(
-      border: Border(
-        right: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)),
+  Widget _buildSidebar(List<SprintModel> sprints) {
+    return Container(
+      width: sprintSidebarWidth,
+      decoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)),
+        ),
       ),
-    ),
-    child: Scrollbar(
-      controller: _sidebarVerticalController,
-      child: ListView.builder(
+      child: Scrollbar(
         controller: _sidebarVerticalController,
-        itemCount: sprints.length,
-        itemBuilder: (context, sprintIndex) {
-          final processedSprint = sprints[sprintIndex];
-          return Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: context.primaryColor.withValues(alpha: 0.1)),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 🔹 Sprint Header Row (ต้องมีให้สูงเท่าฝั่ง task area)
-                Container(
-                  height: sprintRowHeaderHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  alignment: Alignment.centerLeft,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          processedSprint.name ?? 'N/A',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: context.primaryColor,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Consumer(
-                        builder: (context, ref, _) {
-                          final startedSprintListAsync = ref.watch(
-                            sprintStartedControllerProvider(widget.projectId),
-                          );
-                          final startedList = startedSprintListAsync.value ?? [];
-                          final isStarted = startedList.any((s) => s.id == processedSprint.id);
-
-                          return IconButton(
-                            icon: Icon(
-                              Icons.add,
-                              color: isStarted ? Colors.green : Colors.grey,
-                              size: 20,
-                            ),
-                            tooltip: isStarted ? 'เพิ่มงาน' : 'Sprint ยังไม่เริ่ม',
-                            onPressed: isStarted
-                                ? () => _showAddTaskDialog(processedSprint.id ?? '')
-                                : null,
-                          );
-                        },
-                      ),
-                    ],
+        child: ListView.builder(
+          controller: _sidebarVerticalController,
+          itemCount: sprints.length,
+          itemBuilder: (context, sprintIndex) {
+            final processedSprint = sprints[sprintIndex];
+      print("${processedSprint.name}สถานะเสร็จ ${processedSprint.completed}");
+            return Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: context.primaryColor.withValues(alpha: 0.1),
                   ),
                 ),
-
-                // 🔹 Task Rows (ต้องตรงกับ taskRowHeight ของฝั่ง task bar)
-                ...processedSprint.tasks.map((taskWithLayout) {
-                  return GestureDetector(
-                    onTap: () {
-                      final startedList = ref
-                              .read(sprintStartedControllerProvider(widget.projectId))
-                              .value ??
-                          [];
-                      final sprintOfTask = startedList.any((s) => s.id == processedSprint.id);
-                      _showTaskDetailPanel(
-                        taskWithLayout.id?.toString() ?? '',
-                        readOnly: !sprintOfTask,
-                      );
-                    },
-                    child: Container(
-                      height: taskRowHeight,
-                      padding: const EdgeInsets.only(left: 16, right: 8),
-                      alignment: Alignment.centerLeft,
-                      child: Tooltip(
-                        message:
-                            "${taskWithLayout.name}\n${taskWithLayout.taskStartDate} - ${taskWithLayout.taskEndDate}",
-                        child: Text(
-                          taskWithLayout.name ?? '',
-                          style: const TextStyle(color: Colors.black54),
-                          overflow: TextOverflow.ellipsis,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 🔹 Sprint Header Row
+                  Container(
+                    height: sprintRowHeaderHeight,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            processedSprint.name ?? 'N/A',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: context.primaryColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ],
-            ),
-          );
-        },
-      ),
-    ),
-  );
-}
 
+                        // 🔹 เงื่อนไขปุ่ม Add Task
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final isCompleted =
+                                processedSprint.completed == true;
+
+                            // ❌ Sprint จบแล้ว → ไม่โชว์ปุ่ม
+                            if (isCompleted) {
+                              return const SizedBox.shrink();
+                            }
+
+                            // ✅ Sprint เริ่มแล้ว หรือ ยังไม่ start → โชว์ปุ่ม
+                            return IconButton(
+                              icon: const Icon(
+                                Icons.add,
+                                color: Colors.green,
+                                size: 20,
+                              ),
+                              tooltip: 'เพิ่มงาน',
+                              onPressed:
+                                  () => _showAddTaskDialog(
+                                    processedSprint.id ?? '',
+                                  ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 🔹 Task Rows
+                  ...processedSprint.tasks.map((taskWithLayout) {
+                    return Consumer(
+                      builder: (context, ref, _) {
+                        final startedList =
+                            ref
+                                .watch(
+                                  sprintStartedControllerProvider(
+                                    widget.projectId,
+                                  ),
+                                )
+                                .value ??
+                            [];
+
+                    
+
+                        final isCompleted = processedSprint.completed == true;
+
+                        return GestureDetector(
+                          onTap: () {
+                            _showTaskDetailPanel(
+                              taskWithLayout.id?.toString() ?? '',
+                              // ✅ ถ้า Sprint complete → readOnly เสมอ
+                              readOnly: isCompleted , 
+                            );
+                          },
+                          child: Container(
+                            height: taskRowHeight,
+                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            alignment: Alignment.centerLeft,
+                            child: Tooltip(
+                              message:
+                                  "${taskWithLayout.name}\n${taskWithLayout.taskStartDate} - ${taskWithLayout.taskEndDate}",
+                              child: Text(
+                                taskWithLayout.name ?? '',
+                                style: const TextStyle(color: Colors.black54),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
