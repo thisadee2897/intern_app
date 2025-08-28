@@ -100,9 +100,13 @@ class _TeamWorkloadWidgetState extends ConsumerState<TeamWorkloadWidget> {
             ),
           ),
         if (items.isNotEmpty)
-          ...items.map((member) {
-            final percentage = totalCount == 0 ? 0.0 : (member.count / totalCount).toDouble();
-            final memberColor = hexToColor(member.color ?? "#000000");
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ...items.map((member) {
+                  final percentage = totalCount == 0 ? 0.0 : (member.count / totalCount).toDouble();
+                  final memberColor = hexToColor(member.color ?? "#000000");
 
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -133,8 +137,11 @@ class _TeamWorkloadWidgetState extends ConsumerState<TeamWorkloadWidget> {
                 ],
               ),
             );
-          }),
-      ],
-    );
+        }).toList(), 
+        ],
+      ),
+    ),
+  ), ],
+  );
   }
 }
