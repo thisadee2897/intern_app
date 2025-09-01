@@ -40,7 +40,6 @@ class _MyProfileDialogWidgetState extends ConsumerState<MyProfileDialogWidget> {
       builder: (context, ref, child) {
         final state = ref.watch(profileProvider);
         final imageState = ref.watch(profileImageProvider);
-
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           backgroundColor: Colors.white,
