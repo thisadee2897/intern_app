@@ -54,3 +54,4 @@ FutureProvider<void> logoutProvider = FutureProvider<void>((ref) async {
     rethrow;
   }
 });
+

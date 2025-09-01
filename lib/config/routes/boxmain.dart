@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 import 'package:project/screens/project/project_datail/views/widgets/backlog_widget.dart';
+import 'package:project/utils/services/local_storage_service.dart';
 
 final isShowButtomNavigationBar = StateProvider<bool>((ref) => true);
 
@@ -57,6 +58,9 @@ class _ScaffoldWithAppbarState extends ConsumerState<ScaffoldWithAppbar> {
                               .toList(),
                     ),
                   ),
+                  //Version
+                  Text('Version', style: TextStyle(color: Colors.grey)),
+                  Text(LocalStorageService.versionProject, style: TextStyle(color: Colors.grey)),
                   //Logout Button
                   IconButton(
                     icon: const Icon(Icons.logout),
