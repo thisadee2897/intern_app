@@ -22,6 +22,7 @@ class LocalStorageService {
   final String _auth_token = "auth_token";
   final String _profileImageKey = "profileImage";
   static const String _keyFcmToken = "fcm_token";
+  static  String versionProject = "";
   String? fcmToken;
   String? _userToken;
   String? get mobileToken => fcmToken;
@@ -90,7 +91,7 @@ class LocalStorageService {
     await getToken();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     _applicationVersion = packageInfo.version;
-
+    LocalStorageService.versionProject = _applicationVersion;
     if (kIsWeb) {
       _applicationPlatform = "web";
     } else if (Platform.isAndroid) {

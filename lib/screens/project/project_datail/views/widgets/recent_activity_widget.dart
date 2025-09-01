@@ -39,6 +39,9 @@ class _RecentActivityWidgetState extends ConsumerState<RecentActivityWidget> {
           Expanded(
             child: state.when(
               data: (data) {
+                if (data.isEmpty) {
+                  return const Center(child: Text('No recent activity',style: TextStyle(color: Colors.grey),));
+                }
                 return listData(data);
               },
               error: (error, stack) {
