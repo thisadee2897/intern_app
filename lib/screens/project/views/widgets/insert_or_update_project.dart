@@ -164,35 +164,58 @@ class _InsertOrUpdateProjectHDState
                     ),
                   ),
                 ),
-                const SizedBox(width: 16), // เระยะรูปกับฟอร์ม
+                const SizedBox(width: 16), 
                 //  ฟอร์มข้อมูล
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextField(
+                      // ชื่อโปรเจค
+                      TextFormField(
                         controller: _projectNameController,
                         decoration: const InputDecoration(
                           labelText: 'ชื่อโปรเจค',
                           hintText: 'ชื่อโปรเจค',
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'กรุณากรอกชื่อโปรเจค';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 8),
-                      TextField(
+
+                      // Key โปรเจค
+                      TextFormField(
                         controller: _projectKeyController,
                         decoration: const InputDecoration(
                           labelText: 'Key โปรเจค',
                           hintText: 'Key โปรเจค',
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'กรุณากรอก Key โปรเจค';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 8),
-                      TextField(
-                        maxLines: 3,
+
+                      // คำอธิบายโปรเจค
+                      TextFormField(
                         controller: _projectDescriptionController,
+                        maxLines: 3,
                         decoration: const InputDecoration(
                           labelText: 'คำอธิบายโปรเจค',
                           hintText: 'คำอธิบายโปรเจค',
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'กรุณากรอกคำอธิบายโปรเจค';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),

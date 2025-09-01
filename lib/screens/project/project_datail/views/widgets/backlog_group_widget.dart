@@ -501,7 +501,7 @@ void _showErrorSnackBar(String message) {
   Widget _buildCreateSprintButton() {
     return ElevatedButton(
       style: _getButtonStyle(),
-      onPressed: () => _handleCreateOrUpdateSprint(SprintModel()),
+      onPressed: () => _handleCreateOrUpdateSprint(SprintModel(id: '0')),
       child: const Text('Create sprint', style: TextStyle(color: Color.fromARGB(255, 91, 91, 91))),
     );
   }
@@ -712,7 +712,7 @@ void _showErrorSnackBar(String message) {
                         await ref.read(insertUpdateSprintProvider.notifier).insertOrUpdateSprint().then((value) {
                           if (value != null) {
                             Navigator.pop(context, value);
-                           
+
   CustomSnackbar.showSnackBar(
     context: context,
     title: "สำเร็จ",

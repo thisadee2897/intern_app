@@ -99,7 +99,16 @@ class AddCategoryDialogState extends ConsumerState<AddCategoryDialog> with Ticke
                       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF667eea))),
                     ),
                     autofocus: true,
-                    // validator: (String? value) => ref.read(checkTextCategoryUniqueNameProvider(value)).value,
+                   // การตรวจสอบความถูกต้องของข้อมูล
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'กรุณากรอกชื่อหมวดหมู่';
+                      }
+                      if (ref.watch(checkTextCategoryUniqueNameProvider) == false) {
+                        return 'ชื่อหมวดหมู่นี้มีอยู่แล้ว';
+                      }
+                      return null;
+                    },
                   ),
                   //description
                   const SizedBox(height: 12),
