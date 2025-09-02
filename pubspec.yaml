@@ -74,6 +74,7 @@ dependencies:
   image: ^4.5.4
   file_picker: ^10.3.1
   awesome_snackbar_content: ^0.1.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -83,6 +84,7 @@ dev_dependencies:
   riverpod_generator: ^2.4.3
   custom_lint: ^0.6.5
   riverpod_lint: ^2.3.13
+  flutter_launcher_icons: ^0.13.1
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -109,7 +111,23 @@ flutter:
     - assets/
     - assets/images/
     - assets/images/66.png
-
+flutter_launcher_icons:
+  android:
+    generate: true
+    image_path: "assets/icons/app_icon.jpg"
+  ios:
+    generate: true
+    image_path: "assets/icons/app_icon.jpg"
+  macos:
+    generate: true
+    image_path: "assets/icons/app_icon.jpg"
+  windows:
+    generate: true
+    image_path: "assets/icons/app_icon.jpg"
+  web:
+    generate: true
+    image_path: "assets/icons/app_icon.jpg"
+  image_path: "assets/icons/app_icon.jpg"
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
