@@ -17,3 +17,9 @@ dart run build_runner build --delete-conflicting-outputs
 git push origin v1.0.6
 
 # 3. GitHub Actions จะ build และสร้าง release อัตโนมัติ
+
+
+
+## rename 
+
+``flutter pub run rename setAppName --value "OHO Task" --targets macos,windows,web,ios,android``
