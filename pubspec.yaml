@@ -74,6 +74,7 @@ dependencies:
   image: ^4.5.4
   file_picker: ^10.3.1
   awesome_snackbar_content: ^0.1.6
+  rename: ^3.1.0
 
 dev_dependencies:
   flutter_test:
@@ -111,6 +112,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/images/66.png
+    - assets/icons/
 flutter_launcher_icons:
   android:
     generate: true

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project/components/export.dart';
 import 'package:project/screens/auth/widgets/widgets.dart';
+import 'package:project/utils/extension/hex_color.dart';
 
 class LoginScreen extends BaseStatefulWidget {
   const LoginScreen({super.key});
@@ -13,26 +14,44 @@ class _LoginScreenState extends BaseState<LoginScreen> {
   @override
   Widget buildDesktop(BuildContext context, SizingInformation sizingInformation) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Row(
-        children: [
-          // Left side - Brand/Image with Abstract Background
-          Expanded(flex: 1, child: Center(child: LoginHeader(isLarge: true))),
-          // Right side - Login Form with subtle background
-          Expanded(
-            flex: 1,
-            child: Container(
-              padding: const EdgeInsets.all(48),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(width: 400, child: FloatingCard(padding: const EdgeInsets.all(32), child: LoginForm())),
-                ],
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration:  BoxDecoration(
+          gradient: LinearGradient(
+            transform: const GradientRotation(-45),
+            colors: [
+              HexColor.fromHex('#011031'), 
+              HexColor.fromHex('#001B4B'), 
+              HexColor.fromHex('#004AAF')], 
               ),
-            ),
+        ),
+        child: SafeArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Left side - Brand/Image with Abstract Background
+              ConstrainedBox(
+                constraints: BoxConstraints(minWidth: 400, maxWidth: 500),
+                child: LoginHeader(isLarge: true)
+              ),
+              // Right side - Login Form with subtle background
+              Container(
+                padding: const EdgeInsets.all(48),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: 400, maxWidth: 600),
+                      child: FloatingCard(padding: const EdgeInsets.all(32), child: LoginForm()),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -51,11 +70,12 @@ class _LoginScreenState extends BaseState<LoginScreen> {
                 child: Column(
                   children: [
                     const Expanded(flex: 1, child: LoginHeader(isLarge: false)),
-                    Expanded(flex: 2, child: Center(child: Column(
-                      children: [
-                        SizedBox(width: 400, child: FloatingCard(padding: const EdgeInsets.all(24), child: LoginForm())),
-                      ],
-                    ))),
+                    Expanded(
+                      flex: 2,
+                      child: Center(
+                        child: Column(children: [SizedBox(width: 400, child: FloatingCard(padding: const EdgeInsets.all(24), child: LoginForm()))]),
+                      ),
+                    ),
                   ],
                 ),
               ),

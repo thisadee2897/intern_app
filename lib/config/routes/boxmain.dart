@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 import 'package:project/screens/project/project_datail/views/widgets/backlog_widget.dart';
+import 'package:project/utils/extension/hex_color.dart';
 import 'package:project/utils/services/local_storage_service.dart';
 
 final isShowButtomNavigationBar = StateProvider<bool>((ref) => true);
@@ -39,15 +40,21 @@ class _ScaffoldWithAppbarState extends ConsumerState<ScaffoldWithAppbar> {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      body: Row(
-        children: [
-          if (!isSmallScreen && showBottomBar)
-            Container(
-              decoration: BoxDecoration(color: Colors.white, border: Border(right: BorderSide(color: Colors.grey.shade300, width: 1.0))),
-              child: Column(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            transform: const GradientRotation(-45),
+            colors: [HexColor.fromHex('#011031'), HexColor.fromHex('#001B4B'), HexColor.fromHex('#004AAF')],
+          ),
+        ),
+        child: Row(
+          children: [
+            if (!isSmallScreen && showBottomBar)
+              Column(
                 children: [
                   Expanded(
                     child: NavigationRail(
+                      backgroundColor: Colors.transparent,
                       indicatorShape: const CircleBorder(side: BorderSide(color: Colors.transparent, width: 0.0)),
                       selectedIndex: widget.navigationShell.currentIndex,
                       onDestinationSelected: _onTap,
@@ -81,9 +88,23 @@ class _ScaffoldWithAppbarState extends ConsumerState<ScaffoldWithAppbar> {
                   ),
                 ],
               ),
+            Container(
+              width: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.white.withOpacity(0.5),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
             ),
-          Expanded(child: widget.navigationShell),
-        ],
+            Expanded(child: widget.navigationShell),
+          ],
+        ),
       ),
       bottomNavigationBar:
           isSmallScreen && showBottomBar

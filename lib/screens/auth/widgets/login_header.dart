@@ -8,34 +8,30 @@ class LoginHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      spacing: isLarge ? 24 : 16,
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // Logo
-        Container(
-          width: isLarge ? 120 : 80,
-          height: isLarge ? 120 : 80,
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-            // border: isLarge
-            //     ? Border.all(color: Colors.white.withOpacity(0.3), width: 2)
-            //     : null,
-          ),
-          child: Icon(Icons.account_circle_outlined, size: isLarge ? 60 : 40, color: Theme.of(context).primaryColor),
-        ),
-        SizedBox(height: isLarge ? 24 : 16),
-
+        if (isLarge) AspectRatio(aspectRatio: 2, child: Image.asset(scale: 1, 'assets/icons/OHO-Task-IconOnly.png', fit: BoxFit.fitHeight)),
+        // SizedBox(height: isLarge ? 24 : 16),
         // Title
-        Text('ยินดีต้อนรับ', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: isLarge ? 32 : 24)),
-        SizedBox(height: isLarge ? 8 : 4),
-
+        Text(
+          'ยินดีต้อนรับ',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: isLarge ? 64 : 48, color: Colors.white),
+        ),
+        // SizedBox(height: isLarge ? 8 : 4),
         // Subtitle
         Text(
           'เข้าสู่ระบบเพื่อดำเนินการต่อ',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600], fontSize: isLarge ? 16 : 14),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white, fontSize: isLarge ? 32 : 28),
           textAlign: TextAlign.center,
         ),
-        if (isLarge) AspectRatio(aspectRatio: 1.5, child: Image.asset(scale: 1, 'assets/images/login_image.png', fit: BoxFit.fitHeight)),
+        if (isLarge)
+          SizedBox(
+            width: isLarge ? 400 : 200,
+            height: isLarge ? 200 : 100,
+            child: Image.asset(scale: 1, 'assets/icons/OHO-Task-TextOnly.png', fit: BoxFit.fitHeight),
+          ),
       ],
     );
   }

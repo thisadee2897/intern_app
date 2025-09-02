@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project/utils/extension/hex_color.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -33,59 +34,63 @@ class CustomTextField extends StatelessWidget {
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          validator: validator,
-          keyboardType: keyboardType,
-          obscureText: isPassword && !isPasswordVisible,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey[400]),
-            prefixIcon: Icon(
-              prefixIcon,
-              color: Colors.grey[500],
-            ),
-            suffixIcon: isPassword
-                ? IconButton(
-                    icon: Icon(
-                      isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.grey[500],
-                    ),
-                    onPressed: onTogglePasswordVisibility,
-                  )
-                : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Theme.of(context).primaryColor,
-                width: 2,
+        SizedBox(
+          height: 60,
+          child: TextFormField(
+            controller: controller,
+            validator: validator,
+            keyboardType: keyboardType,
+            obscureText: isPassword && !isPasswordVisible,
+            decoration: InputDecoration(
+              hoverColor: Colors.white10,
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey[400]),
+              prefixIcon: Icon(
+                prefixIcon,
+                color: Colors.white54,
               ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 2),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 2),
-            ),
-            filled: true,
-            fillColor: Colors.grey.shade50,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        isPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: Colors.white54,
+                      ),
+                      onPressed: onTogglePasswordVisibility,
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: HexColor.fromHex('#173768')),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: HexColor.fromHex('#173768')),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
+              filled: true,
+              fillColor: HexColor.fromHex('#001B47'),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
             ),
           ),
         ),
