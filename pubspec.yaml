@@ -112,6 +112,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/images/66.png
+    - assets/icons/
 flutter_launcher_icons:
   android:
     generate: true

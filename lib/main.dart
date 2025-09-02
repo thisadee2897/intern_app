@@ -18,11 +18,11 @@ void main() async {
   timeago.setLocaleMessages('en_short', timeago.EnShortMessages());
   
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    const lockedSize = Size(1024, 768);
-    setWindowTitle('My Locked Window');
+    const lockedSize = Size(1920, 1080);
+    setWindowVisibility(visible: true); //visible คือ ทำให้หน้าต่างแสดงผล
+    setWindowTitle('OHO Task');
     setWindowMinSize(lockedSize);
     // setWindowMaxSize(lockedSize);
-    
     // 🚀 Initialize Auto Update Manager
     try {
       await AutoUpdateManager().initialize();

@@ -76,146 +76,132 @@ class _HomeScreenState extends BaseState<HomeScreen>
           });
         }
         return Scaffold(
-          backgroundColor: Colors.grey.shade50,
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue.shade50,
-                  Colors.purple.shade50,
-                  Colors.pink.shade50,
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-            ),
-            child: workspaceState.appWhen(
-              dataBuilder: (workspaces) {
-                if (workspaces.isEmpty) {
-                  return const Center(child: Text('ไม่พบ workspace'));
-                }
-                return Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          crossAxisSpacing: 24,
-                          mainAxisSpacing: 24,
-                          childAspectRatio: aspectRatio,
-                        ),
-                        itemCount: workspaces.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            // ปุ่มสร้าง Workspace อยู่ที่ index แรก
-                            // return DottedBorder(
-                            //   options: RoundedRectDottedBorderOptions(color: Colors.grey, dashPattern: const [6, 3], radius: Radius.circular(20)),
-                            //   child: InkWell(
-                            //     onTap: () {},
-                            //     child: Container(
-                            //       decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.grey.shade100),
-                            //       child: Center(child: Icon(Icons.add, size: 50, color: Colors.grey)),
-                            //     ),
-                            //   ),
-                            // );
-                            return DottedBorder(
-                              options: RoundedRectDottedBorderOptions(
-                                color: Colors.grey,
-                                dashPattern: const [6, 3],
-                                radius: Radius.circular(20),
-                              ),
-                              child: InkWell(
-                                onTap: () async {
-                                  final result = await showDialog<bool>(
-                                    context: context,
-                                    builder:
-                                        (context) =>
-                                            const InsertUpdateWorkspaceDialog(),
-                                  );
-
-                                  if (result == true) {
-                                    // รีเฟรช workspace list
-                                    ref.invalidate(workspaceProvider);
-                                  }
-                                },
-
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color: Colors.grey.shade100,
-                                  ),
-
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.add,
-                                      size: 100,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          } else {
-                            // รายการ Workspace อื่นๆ จะเริ่มจาก index 1
-                            final workspace =
-                                workspaces[index -
-                                    1]; // ดึงข้อมูลจาก workspaces โดยใช้ index - 1
-                            // คำนวณ animation delay
-                            final delay = ((index - 1) * 0.1).clamp(0.0, 0.8);
-                            final animation = Tween<double>(
-                              begin: 0.0,
-                              end: 1.0,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: _animationController,
-                                curve: Interval(
-                                  delay,
-                                  (delay + 0.3).clamp(0.0, 1.0),
-                                  curve: Curves.easeOutCubic,
-                                ),
-                              ),
-                            );
-                            return AnimatedBuilder(
-                              animation: animation,
-                              builder: (context, child) {
-                                final animValue = animation.value.clamp(
-                                  0.0,
-                                  1.0,
+          backgroundColor: Colors.transparent,
+          body: workspaceState.appWhen(
+            dataBuilder: (workspaces) {
+              if (workspaces.isEmpty) {
+                return const Center(child: Text('ไม่พบ workspace'));
+              }
+              return Padding(
+                padding: const EdgeInsets.all(24),
+                child: AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 24,
+                        mainAxisSpacing: 24,
+                        childAspectRatio: aspectRatio,
+                      ),
+                      itemCount: workspaces.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          // ปุ่มสร้าง Workspace อยู่ที่ index แรก
+                          // return DottedBorder(
+                          //   options: RoundedRectDottedBorderOptions(color: Colors.grey, dashPattern: const [6, 3], radius: Radius.circular(20)),
+                          //   child: InkWell(
+                          //     onTap: () {},
+                          //     child: Container(
+                          //       decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.grey.shade100),
+                          //       child: Center(child: Icon(Icons.add, size: 50, color: Colors.grey)),
+                          //     ),
+                          //   ),
+                          // );
+                          return DottedBorder(
+                            options: RoundedRectDottedBorderOptions(
+                              color: Colors.grey,
+                              dashPattern: const [6, 3],
+                              radius: Radius.circular(20),
+                            ),
+                            child: InkWell(
+                              onTap: () async {
+                                final result = await showDialog<bool>(
+                                  context: context,
+                                  builder:
+                                      (context) =>
+                                          const InsertUpdateWorkspaceDialog(),
                                 );
-                                return Transform.translate(
-                                  offset: Offset(0, 30 * (1 - animValue)),
-                                  child: Opacity(
-                                    opacity: animValue,
-                                    child: Transform.scale(
-                                      scale: (0.8 + (0.2 * animValue)).clamp(
-                                        0.0,
-                                        1.0,
-                                      ),
-                                      child: WorkspaceCard(
-                                        workspace,
-                                        title: workspace.name ?? 'ไม่มีชื่อ',
-                                        color:
-                                            Colors
-                                                .primaries[(index - 1) %
-                                                    Colors.primaries.length]
-                                                .shade400,
-                                      ),
-                                    ),
-                                  ),
-                                );
+          
+                                if (result == true) {
+                                  // รีเฟรช workspace list
+                                  ref.invalidate(workspaceProvider);
+                                }
                               },
-                            );
-                          }
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+          
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.grey.shade100,
+                                ),
+          
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 100,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          // รายการ Workspace อื่นๆ จะเริ่มจาก index 1
+                          final workspace =
+                              workspaces[index -
+                                  1]; // ดึงข้อมูลจาก workspaces โดยใช้ index - 1
+                          // คำนวณ animation delay
+                          final delay = ((index - 1) * 0.1).clamp(0.0, 0.8);
+                          final animation = Tween<double>(
+                            begin: 0.0,
+                            end: 1.0,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _animationController,
+                              curve: Interval(
+                                delay,
+                                (delay + 0.3).clamp(0.0, 1.0),
+                                curve: Curves.easeOutCubic,
+                              ),
+                            ),
+                          );
+                          return AnimatedBuilder(
+                            animation: animation,
+                            builder: (context, child) {
+                              final animValue = animation.value.clamp(
+                                0.0,
+                                1.0,
+                              );
+                              return Transform.translate(
+                                offset: Offset(0, 30 * (1 - animValue)),
+                                child: Opacity(
+                                  opacity: animValue,
+                                  child: Transform.scale(
+                                    scale: (0.8 + (0.2 * animValue)).clamp(
+                                      0.0,
+                                      1.0,
+                                    ),
+                                    child: WorkspaceCard(
+                                      workspace,
+                                      title: workspace.name ?? 'ไม่มีชื่อ',
+                                      color:
+                                          Colors
+                                              .primaries[(index - 1) %
+                                                  Colors.primaries.length]
+                                              .shade400,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
+              );
+            },
           ),
         );
       },

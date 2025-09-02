@@ -29,8 +29,8 @@ class _AppState extends ConsumerState<App> {
             child: child!,
           ),
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      themeMode: ThemeMode.light,
+      theme: AppTheme.dark,
+      themeMode: ThemeMode.dark,
       title: 'Printer',
       localizationsDelegates: [
         FlutterQuillLocalizations.delegate,

@@ -4,6 +4,7 @@ import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
 import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
 import 'package:project/screens/auth/widgets/widgets.dart';
+import 'package:project/utils/extension/hex_color.dart';
 
 class LoginForm extends ConsumerStatefulWidget {
   const LoginForm({super.key});
@@ -123,16 +124,22 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           // Title for form
           Text(
             'เข้าสู่ระบบ',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey[800]),
+            style: Theme.of(context).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.w400, color: Colors.white),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
+          // 🔹 Email Field
+          // _buildTextField(hint: "อีเมล", icon: Icons.email),
+          const SizedBox(height: 16),
 
+          // 🔹 Password Field
+          // _buildTextField(hint: "รหัสผ่าน", icon: Icons.lock, obscure: true),
+          const SizedBox(height: 12),
           // Email Field
           CustomTextField(
             controller: _emailController,
             label: 'อีเมล',
-            hint: 'กรุณากรอกอีเมลของคุณ',
+            hint: 'อีเมล',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: _validateEmail,
@@ -143,7 +150,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           CustomTextField(
             controller: _passwordController,
             label: 'รหัสผ่าน',
-            hint: 'กรุณากรอกรหัสผ่านของคุณ',
+            hint: 'รหัสผ่าน',
             prefixIcon: Icons.lock_outline,
             isPassword: true,
             isPasswordVisible: _isPasswordVisible,
@@ -184,7 +191,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                         _rememberPassword = !_rememberPassword;
                       });
                     },
-                    child: Text('จำรหัสผ่าน', style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    child: Text('จำรหัสผ่าน', style: TextStyle(color: Colors.white, fontSize: 14)),
                   ),
                 ],
               ),
@@ -208,9 +215,9 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           // Divider
           Row(
             children: [
-              Expanded(child: Divider(color: Colors.grey[300])),
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text('หรือ', style: TextStyle(color: Colors.grey[500], fontSize: 14))),
-              Expanded(child: Divider(color: Colors.grey[300])),
+              Expanded(child: Container(height: 3, decoration: BoxDecoration(color: HexColor.fromHex('#002B77'), borderRadius: BorderRadius.circular(20)))),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text('หรือ', style: TextStyle(color: Colors.white, fontSize: 14))),
+              Expanded(child: Container(height: 3, decoration: BoxDecoration(color: HexColor.fromHex('#002B77'), borderRadius: BorderRadius.circular(20)))),
             ],
           ),
           const SizedBox(height: 24),
@@ -219,7 +226,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('ยังไม่มีบัญชี? ', style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+              Text('ยังไม่มีบัญชี? ', style: TextStyle(color: Colors.white, fontSize: 14)),
               TextButton(
                 onPressed: () {
                   _showSnackBar('ฟีเจอร์สมัครสมาชิกกำลังพัฒนา', Colors.orange);
