@@ -183,7 +183,7 @@ class _ProjectScreenState extends BaseState<ProjectScreen>
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
