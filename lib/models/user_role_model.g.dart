@@ -8,6 +8,9 @@ part of 'user_role_model.dart';
 
 _$UserRoleModelImpl _$$UserRoleModelImplFromJson(Map<String, dynamic> json) =>
     _$UserRoleModelImpl(
+      masterUser: json['master_user'] == null
+          ? null
+          : UserModel.fromJson(json['master_user'] as Map<String, dynamic>),
       canCreateCategory: json['can_create_category'] as bool?,
       canCreateProject: json['can_create_project'] as bool?,
       canCreateSprint: json['can_create_sprint'] as bool?,
@@ -16,6 +19,7 @@ _$UserRoleModelImpl _$$UserRoleModelImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$UserRoleModelImplToJson(_$UserRoleModelImpl instance) =>
     <String, dynamic>{
+      'master_user': instance.masterUser,
       'can_create_category': instance.canCreateCategory,
       'can_create_project': instance.canCreateProject,
       'can_create_sprint': instance.canCreateSprint,

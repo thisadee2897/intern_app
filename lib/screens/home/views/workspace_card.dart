@@ -495,6 +495,7 @@ import 'package:project/models/workspace_model.dart';
 import 'package:project/screens/home/providers/controllers/home_controller.dart';
 import 'package:project/screens/home/providers/controllers/image_workspace_controllers.dart';
 import 'package:project/screens/home/views/insert_update_workspace_screen.dart';
+import 'package:project/screens/home/views/user_management_screen.dart';
 import 'package:project/screens/project/views/project_screen.dart';
 
 class WorkspaceCard extends ConsumerStatefulWidget {
@@ -908,6 +909,52 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard>
                                           ),
                                         ),
                                       ),
+
+                                      // button manage access
+                                      Align(
+                                        alignment: Alignment.bottomLeft,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: IconButton(
+                                            tooltip: "manage access",
+                                            onPressed: () async {
+                                              final id =
+                                                  widget.workspace.id ?? '';
+                                              if (id.isEmpty) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      "Workspace ID is missing",
+                                                    ),
+                                                  ),
+                                                );
+                                                return;
+                                              }
+
+                                              await Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) =>
+                                                          UserManagementScreen(
+                                                            workspaceId: id,
+                                                          ),
+                                                ),
+                                              );
+
+                                              ref.invalidate(workspaceProvider);
+                                            },
+
+                                            icon: const Icon(
+                                              Icons.manage_accounts,
+                                              size: 20,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -915,6 +962,7 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard>
                             ),
                       ),
                     ),
+                    
                   );
                 },
               );
