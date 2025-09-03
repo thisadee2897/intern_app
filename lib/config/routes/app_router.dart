@@ -7,6 +7,7 @@ import 'package:project/screens/auth/providers/controllers/auth_controller.dart'
 import 'package:project/screens/home/providers/controllers/home_controller.dart';
 import 'package:project/screens/home/views/home_screen.dart';
 import 'package:project/screens/auth/view/login.dart';
+import 'package:project/screens/project/views/project_screen.dart';
 import 'package:project/screens/settings/profile/view/profile_screen.dart';
 import 'package:project/screens/settings/views/setting_screen.dart';
 import 'package:project/utils/services/local_storage_service.dart';
@@ -21,9 +22,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       String? token = await ref.read(localStorageServiceProvider).getToken();
       ref.invalidate(isLoggedInProvider);
       var currentPath = state.fullPath;
-      
+
       print('Redirect check - Token: ${token != null ? 'exists' : 'null'}, Current path: $currentPath');
-      
+
       if (token == null || token.isEmpty) {
         // ถ้าไม่มี token และไม่ได้อยู่ที่หน้า login ให้ไปหน้า login
         if (currentPath != Routes.login) {
@@ -73,7 +74,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             navigatorKey: _shellNavigatorHomeKey,
-
             routes: [
               GoRoute(
                 redirect: (context, state) {

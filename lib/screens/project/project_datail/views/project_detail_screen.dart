@@ -19,7 +19,8 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
   @override
   void initState() {
     super.initState();
-
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      
     // ตั้งค่า projectId ใน provider
     ref.read(selectProjectIdProvider.notifier).state = widget.projectId;
 
@@ -28,6 +29,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
 
     // โหลด Task ตาม projectId
     ref.read(taskBySprintControllerProvider(widget.projectId).notifier).fetch();
+    });
   }
 
   @override
