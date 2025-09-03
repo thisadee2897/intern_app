@@ -17,7 +17,7 @@ class ContextSummaryWidget extends StatelessWidget {
         height: 100,
         padding: const EdgeInsets.all(16),
         margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey, width: 1)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey, width: 1)),
         child: Row(
           spacing: 10,
           mainAxisSize: MainAxisSize.max,

@@ -39,8 +39,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
     return DefaultTabController(
       length: 4,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
+          backgroundColor: Colors.transparent,
           title: const Text('Project Detail'),
           shape: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1.0)),
           bottom: TabBar(

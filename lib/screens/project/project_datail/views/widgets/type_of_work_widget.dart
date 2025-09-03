@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/type_of_work_model.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/type_of_work_controller.dart';
+import 'package:project/utils/extension/context_extension.dart';
 
 class TypeOfWorkWidget extends ConsumerStatefulWidget {
   const TypeOfWorkWidget({super.key});
@@ -49,7 +50,7 @@ class _TypeOfWorkWidgetState extends ConsumerState<TypeOfWorkWidget> {
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(16),
       height: 400, // Add some space between rows
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.white),
+      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8)),
       child: typeOfWorkAsync.when(
         data: (items) => _buildContent(items, context),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -114,7 +115,7 @@ class _TypeOfWorkWidgetState extends ConsumerState<TypeOfWorkWidget> {
                             child: LinearProgressIndicator(
                               value: percentage,
                               minHeight: 30,
-                              backgroundColor: Colors.grey.shade300,
+                              backgroundColor: context.darkBlue1,
                               valueColor: AlwaysStoppedAnimation(typeColor),
                             ),
                           ),

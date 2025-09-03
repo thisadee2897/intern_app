@@ -49,7 +49,7 @@ class _TeamWorkloadWidgetState extends ConsumerState<TeamWorkloadWidget> {
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(16),
       height: 400, // Add some space between rows
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.white),
+      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8)),
       child: workloadAsync.when(
         data: (items) => _buildContent(items, context),
         loading: () => const Center(child: CircularProgressIndicator()),
