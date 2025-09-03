@@ -27,7 +27,6 @@ class _PriorityBreakdownWidgetState extends ConsumerState<PriorityBreakdownWidge
   decoration: BoxDecoration(
     border: Border.all(color: Colors.grey, width: 1),
     borderRadius: BorderRadius.circular(8),
-    color: Colors.white,
   ),
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,

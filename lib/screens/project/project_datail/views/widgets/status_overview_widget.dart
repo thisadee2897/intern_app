@@ -38,7 +38,6 @@ class _StatusOverviewWidgetState extends ConsumerState<StatusOverviewWidget> {
   decoration: BoxDecoration(
     border: Border.all(color: Colors.grey, width: 1),
     borderRadius: BorderRadius.circular(8),
-    color: Colors.white,
   ),
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,

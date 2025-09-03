@@ -30,7 +30,7 @@ class _RecentActivityWidgetState extends ConsumerState<RecentActivityWidget> {
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.symmetric(horizontal: 10),
       height: 400, // Add some space between rows
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.white),
+      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

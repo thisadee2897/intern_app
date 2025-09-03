@@ -6,6 +6,8 @@ extension BuildContextExtension on BuildContext {
   Color get primaryColor => Theme.of(this).primaryColor;
   // secondary color
   Color get secondaryColor => Theme.of(this).colorScheme.secondary;
+  // DarkBlue1
+  Color get darkBlue1 => HexColor.fromHex('#001239');
   BoxDecoration get containerColor => BoxDecoration(
     borderRadius: BorderRadius.circular(20),
     gradient: LinearGradient(
