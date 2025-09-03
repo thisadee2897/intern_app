@@ -7,21 +7,20 @@ import 'package:project/screens/home/providers/controllers/insert_or_update_work
 import 'package:project/screens/home/providers/controllers/search_dialog_user_Controllers.dart';
 import 'package:project/screens/home/providers/controllers/search_master_user_controllers.dart';
 
-// หน้าหลักสำหรับจัดการ User ใน Workspace
-class UserManagementScreen extends ConsumerStatefulWidget {
+/// ✅ Dialog สำหรับจัดการ User ใน Workspace
+class UserManagementDialog extends ConsumerStatefulWidget {
   final String workspaceId;
 
-  const UserManagementScreen({Key? key, required this.workspaceId})
+  const UserManagementDialog({Key? key, required this.workspaceId})
     : super(key: key);
 
   @override
-  ConsumerState<UserManagementScreen> createState() =>
-      _UserManagementScreenState();
+  ConsumerState<UserManagementDialog> createState() =>
+      _UserManagementDialogState();
 }
 
-class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
+class _UserManagementDialogState extends ConsumerState<UserManagementDialog> {
   final TextEditingController _searchController = TextEditingController();
-  Set<String> _selectedUserIds = {}; // เก็บ userId ที่เลือก (ตอนเลือกหลายคน)
 
   @override
   void initState() {
@@ -33,18 +32,6 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
     });
   }
 
-  // ฟังก์ชันสลับการเลือก user
-  void _toggleSelectUser(UserModel user, bool? selected) {
-    setState(() {
-      if (selected == true) {
-        _selectedUserIds.add(user.id!);
-      } else {
-        _selectedUserIds.remove(user.id!);
-      }
-    });
-  }
-
-  // ฟังก์ชันเปิด Dialog เพิ่ม User
   void _showAddUserDialog() {
     showDialog(
       context: context,
@@ -52,13 +39,11 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
     );
   }
 
-  // ฟังก์ชันเปิด Dialog ยืนยันการลบ User
   void _showDeleteConfirmationDialog(UserModel user) {
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            backgroundColor: Colors.white,
             title: const Text("ยืนยันการลบ"),
             content: Text("คุณแน่ใจว่าต้องการลบ ${user.name} หรือไม่?"),
             actions: [
@@ -72,16 +57,11 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                   final userId = user.id!;
                   final userName = user.name;
 
-                  // ตัด user ออกจาก UI ก่อน (optimistic update)
-                  ref.read(getWorkspaceRoleByWorkspaceController.notifier);
-
-                  // ยิง API เพื่อลบจริง
                   final success = await ref
                       .read(deleteWorkspaceRoleController.notifier)
                       .delete(widget.workspaceId, userId);
 
                   if (success) {
-                    // API ผ่าน → refresh ข้อมูลใหม่
                     await ref
                         .read(getWorkspaceRoleByWorkspaceController.notifier)
                         .fetch(widget.workspaceId);
@@ -89,7 +69,6 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                       SnackBar(content: Text("ลบ $userName สำเร็จ")),
                     );
                   } else {
-                    // API fail → rollback (คืน user กลับมา)
                     ref
                         .read(searchMasterUserController.notifier)
                         .restoreUser(user);
@@ -98,7 +77,7 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                     );
                   }
 
-                  Navigator.pop(context); // ปิด dialog
+                  Navigator.pop(context);
                 },
                 child: const Text("ลบ"),
               ),
@@ -109,68 +88,81 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ...existing code...
     final workspaceRolesState = ref.watch(
       getWorkspaceRoleByWorkspaceController,
     );
-    // ...existing code... // state ของ user list
 
-    return Scaffold(
+    return Dialog(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Manage access'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          // ปุ่ม Add people
-          TextButton(
-            onPressed: _showAddUserDialog,
-            style: TextButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 51, 116, 228),
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Add people'),
-          ),
-          const SizedBox(width: 16),
-        ],
-      ),
-      body: Container(
-        margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color.fromARGB(255, 210, 211, 211)),
-          borderRadius: BorderRadius.circular(6),
-        ),
+      insetPadding: const EdgeInsets.all(16),
+      child: Container(
+        width: 500,
+        padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // ช่อง Search หา user หน้า manage access
-            Container(
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 243, 243, 243),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (_) => setState(() {}), // เพื่อ trigger rebuild
-                decoration: const InputDecoration(
-                  hintText: "Find a collaborator...",
-                  hintStyle: TextStyle(
-                    color: Color.fromARGB(255, 167, 167, 167),
-                    fontSize: 16,
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Manage access',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
-                  border: InputBorder.none,
-                  icon: Icon(
-                    Icons.search,
-                    color: Color.fromARGB(255, 167, 167, 167),
-                  ),
+                ),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: _showAddUserDialog,
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Add people'),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close, color: Colors.grey),
+                      tooltip: 'Close',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Search box
+            TextField(
+              controller: _searchController,
+              onChanged: (_) => setState(() {}),
+
+              style: const TextStyle(color: Colors.black),
+              decoration: const InputDecoration(
+                hintText: "Find a collaborator...",
+                hintStyle: TextStyle(color: Color.fromARGB(255, 109, 109, 109)),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Color.fromARGB(255, 109, 109, 109),
+                ),
+                filled: true,
+
+                fillColor: Color.fromARGB(255, 225, 224, 224),
+                hoverColor: Color.fromARGB(255, 213, 213, 213), // ✅ สีตอน hover
+                border: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
                 ),
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
 
-            // แสดงรายชื่อ User
-            Expanded(
+            // User list
+            SizedBox(
+              height: 400,
+
               child: workspaceRolesState.when(
                 data: (roles) {
                   final keyword = _searchController.text.trim().toLowerCase();
@@ -193,8 +185,16 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                           .toList();
 
                   if (users.isEmpty) {
-                    return const Center(child: Text("ไม่พบผู้ใช้"));
+                    return const Center(
+                      child: Text(
+                        "ไม่พบผู้ใช้",
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 138, 137, 137),
+                        ),
+                      ),
+                    );
                   }
+
                   return ListView.separated(
                     itemCount: users.length,
                     separatorBuilder: (_, __) => const Divider(),
@@ -218,7 +218,7 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
   }
 }
 
-// Widget แสดง User 1 ราย
+// User list item
 class UserListItem extends StatelessWidget {
   final UserModel user;
   final VoidCallback onDelete;
@@ -234,33 +234,32 @@ class UserListItem extends StatelessWidget {
             user.image ?? "https://i.pravatar.cc/150",
           ),
         ),
-        const SizedBox(width: 18),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 user.name ?? '',
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
               Text(
                 "${user.email ?? ''} • Collaborator",
                 style: const TextStyle(
-                  color: Color.fromARGB(255, 84, 83, 83),
+                  color: Color.fromARGB(255, 118, 117, 117),
                   fontSize: 12,
                 ),
               ),
             ],
           ),
         ),
-
-        // ปุ่มลบ
         IconButton(
           onPressed: onDelete,
-          icon: const Icon(Icons.delete_outline),
-          iconSize: 18,
-          color: const Color.fromARGB(255, 168, 167, 167),
-          tooltip: 'Delete user',
+          icon: const Icon(Icons.delete_outline, color: Colors.grey, size: 16),
+          tooltip: 'delete user',
         ),
       ],
     );
@@ -333,10 +332,13 @@ class _AddUserDialogState extends ConsumerState<AddUserDialog> {
                 hintText: 'Search by username, full name, or email',
                 hintStyle: const TextStyle(
                   color: Color.fromARGB(255, 167, 167, 167),
+
                   fontSize: 16,
                 ),
                 filled: true,
-                fillColor: const Color.fromARGB(255, 235, 235, 235),
+
+                fillColor: Color.fromARGB(255, 225, 224, 224),
+                hoverColor: Color.fromARGB(255, 213, 213, 213), // ✅ สีตอน hover
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: BorderSide.none,
@@ -432,7 +434,7 @@ class _AddUserDialogState extends ConsumerState<AddUserDialog> {
                 } else {
                   return const Text(
                     "ไม่พบผู้ใช้",
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Color.fromARGB(255, 131, 130, 130)),
                   );
                 }
               },

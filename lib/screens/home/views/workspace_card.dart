@@ -790,7 +790,14 @@ class _WorkspaceCardState extends ConsumerState<WorkspaceCard> with TickerProvid
                                                 return;
                                               }
 
-                                              await Navigator.push(context, MaterialPageRoute(builder: (context) => UserManagementScreen(workspaceId: id)));
+                                              await showDialog(
+                                                context: context,
+                                                builder:
+                                                    (context) =>
+                                                        UserManagementDialog(
+                                                          workspaceId: id,
+                                                        ),
+                                              );
 
                                               ref.invalidate(workspaceProvider);
                                             },
