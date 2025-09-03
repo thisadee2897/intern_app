@@ -1,9 +1,11 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:project/apps/app.dart';
 import 'package:project/config/routes/app_router.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/screens/home/providers/controllers/home_controller.dart';
 import 'package:project/screens/home/views/insert_update_workspace_screen.dart';
+import 'package:project/utils/extension/abstract.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/components/export.dart';
 
@@ -110,7 +112,7 @@ class _HomeScreenState extends BaseState<HomeScreen>
                           // );
                           return DottedBorder(
                             options: RoundedRectDottedBorderOptions(
-                              color: Colors.grey,
+                              color: ACl.borderColor,
                               dashPattern: const [6, 3],
                               radius: Radius.circular(20),
                             ),
@@ -132,14 +134,13 @@ class _HomeScreenState extends BaseState<HomeScreen>
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
-                                  color: Colors.grey.shade100,
+                                  // color: Colors.grey.shade100,
                                 ),
-          
-                                child: const Center(
+                                child:  Center(
                                   child: Icon(
                                     Icons.add,
                                     size: 100,
-                                    color: Colors.grey,
+                                    color: Colors.white.withOpacity(0.5),
                                   ),
                                 ),
                               ),
