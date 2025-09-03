@@ -20,6 +20,8 @@ UserRoleModel _$UserRoleModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserRoleModel {
+  @JsonKey(name: 'master_user')
+  UserModel? get masterUser => throw _privateConstructorUsedError;
   @JsonKey(name: 'can_create_category')
   bool? get canCreateCategory => throw _privateConstructorUsedError;
   @JsonKey(name: 'can_create_project')
@@ -46,10 +48,13 @@ abstract class $UserRoleModelCopyWith<$Res> {
       _$UserRoleModelCopyWithImpl<$Res, UserRoleModel>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'can_create_category') bool? canCreateCategory,
+      {@JsonKey(name: 'master_user') UserModel? masterUser,
+      @JsonKey(name: 'can_create_category') bool? canCreateCategory,
       @JsonKey(name: 'can_create_project') bool? canCreateProject,
       @JsonKey(name: 'can_create_sprint') bool? canCreateSprint,
       @JsonKey(name: 'can_create_task') bool? canCreateTask});
+
+  $UserModelCopyWith<$Res>? get masterUser;
 }
 
 /// @nodoc
@@ -67,12 +72,17 @@ class _$UserRoleModelCopyWithImpl<$Res, $Val extends UserRoleModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? masterUser = freezed,
     Object? canCreateCategory = freezed,
     Object? canCreateProject = freezed,
     Object? canCreateSprint = freezed,
     Object? canCreateTask = freezed,
   }) {
     return _then(_value.copyWith(
+      masterUser: freezed == masterUser
+          ? _value.masterUser
+          : masterUser // ignore: cast_nullable_to_non_nullable
+              as UserModel?,
       canCreateCategory: freezed == canCreateCategory
           ? _value.canCreateCategory
           : canCreateCategory // ignore: cast_nullable_to_non_nullable
@@ -91,6 +101,20 @@ class _$UserRoleModelCopyWithImpl<$Res, $Val extends UserRoleModel>
               as bool?,
     ) as $Val);
   }
+
+  /// Create a copy of UserRoleModel
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $UserModelCopyWith<$Res>? get masterUser {
+    if (_value.masterUser == null) {
+      return null;
+    }
+
+    return $UserModelCopyWith<$Res>(_value.masterUser!, (value) {
+      return _then(_value.copyWith(masterUser: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -102,10 +126,14 @@ abstract class _$$UserRoleModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'can_create_category') bool? canCreateCategory,
+      {@JsonKey(name: 'master_user') UserModel? masterUser,
+      @JsonKey(name: 'can_create_category') bool? canCreateCategory,
       @JsonKey(name: 'can_create_project') bool? canCreateProject,
       @JsonKey(name: 'can_create_sprint') bool? canCreateSprint,
       @JsonKey(name: 'can_create_task') bool? canCreateTask});
+
+  @override
+  $UserModelCopyWith<$Res>? get masterUser;
 }
 
 /// @nodoc
@@ -121,12 +149,17 @@ class __$$UserRoleModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? masterUser = freezed,
     Object? canCreateCategory = freezed,
     Object? canCreateProject = freezed,
     Object? canCreateSprint = freezed,
     Object? canCreateTask = freezed,
   }) {
     return _then(_$UserRoleModelImpl(
+      masterUser: freezed == masterUser
+          ? _value.masterUser
+          : masterUser // ignore: cast_nullable_to_non_nullable
+              as UserModel?,
       canCreateCategory: freezed == canCreateCategory
           ? _value.canCreateCategory
           : canCreateCategory // ignore: cast_nullable_to_non_nullable
@@ -151,7 +184,8 @@ class __$$UserRoleModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserRoleModelImpl implements _UserRoleModel {
   const _$UserRoleModelImpl(
-      {@JsonKey(name: 'can_create_category') this.canCreateCategory,
+      {@JsonKey(name: 'master_user') this.masterUser,
+      @JsonKey(name: 'can_create_category') this.canCreateCategory,
       @JsonKey(name: 'can_create_project') this.canCreateProject,
       @JsonKey(name: 'can_create_sprint') this.canCreateSprint,
       @JsonKey(name: 'can_create_task') this.canCreateTask});
@@ -159,6 +193,9 @@ class _$UserRoleModelImpl implements _UserRoleModel {
   factory _$UserRoleModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserRoleModelImplFromJson(json);
 
+  @override
+  @JsonKey(name: 'master_user')
+  final UserModel? masterUser;
   @override
   @JsonKey(name: 'can_create_category')
   final bool? canCreateCategory;
@@ -174,7 +211,7 @@ class _$UserRoleModelImpl implements _UserRoleModel {
 
   @override
   String toString() {
-    return 'UserRoleModel(canCreateCategory: $canCreateCategory, canCreateProject: $canCreateProject, canCreateSprint: $canCreateSprint, canCreateTask: $canCreateTask)';
+    return 'UserRoleModel(masterUser: $masterUser, canCreateCategory: $canCreateCategory, canCreateProject: $canCreateProject, canCreateSprint: $canCreateSprint, canCreateTask: $canCreateTask)';
   }
 
   @override
@@ -182,6 +219,8 @@ class _$UserRoleModelImpl implements _UserRoleModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$UserRoleModelImpl &&
+            (identical(other.masterUser, masterUser) ||
+                other.masterUser == masterUser) &&
             (identical(other.canCreateCategory, canCreateCategory) ||
                 other.canCreateCategory == canCreateCategory) &&
             (identical(other.canCreateProject, canCreateProject) ||
@@ -194,7 +233,7 @@ class _$UserRoleModelImpl implements _UserRoleModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, canCreateCategory,
+  int get hashCode => Object.hash(runtimeType, masterUser, canCreateCategory,
       canCreateProject, canCreateSprint, canCreateTask);
 
   /// Create a copy of UserRoleModel
@@ -215,7 +254,8 @@ class _$UserRoleModelImpl implements _UserRoleModel {
 
 abstract class _UserRoleModel implements UserRoleModel {
   const factory _UserRoleModel(
-          {@JsonKey(name: 'can_create_category') final bool? canCreateCategory,
+          {@JsonKey(name: 'master_user') final UserModel? masterUser,
+          @JsonKey(name: 'can_create_category') final bool? canCreateCategory,
           @JsonKey(name: 'can_create_project') final bool? canCreateProject,
           @JsonKey(name: 'can_create_sprint') final bool? canCreateSprint,
           @JsonKey(name: 'can_create_task') final bool? canCreateTask}) =
@@ -224,6 +264,9 @@ abstract class _UserRoleModel implements UserRoleModel {
   factory _UserRoleModel.fromJson(Map<String, dynamic> json) =
       _$UserRoleModelImpl.fromJson;
 
+  @override
+  @JsonKey(name: 'master_user')
+  UserModel? get masterUser;
   @override
   @JsonKey(name: 'can_create_category')
   bool? get canCreateCategory;
