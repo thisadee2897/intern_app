@@ -27,7 +27,7 @@ class DetailRowWidget<T> extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(width: 120, child: Text(title, style: TextStyle(color: Colors.grey.shade700, fontSize: 14))),
+          SizedBox(width: 120, child: Text(title, style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255), fontSize: 14))),
           Expanded(
             child: SizedBox(
               height: 40,

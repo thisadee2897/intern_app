@@ -7,6 +7,7 @@ import 'package:project/controllers/priority_controller.dart';
 import 'package:project/controllers/task_status_controller.dart';
 import 'package:project/controllers/type_of_work_controller.dart';
 import 'package:project/models/task_status_model.dart';
+import 'package:project/screens/auth/widgets/glass_container.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/sprint_in_borad_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/task_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
@@ -89,8 +90,8 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
     // ✅ รอโหลด Task ใหม่ก่อนรีเฟรช Board
     await _loadTasks(); 
 
-  } catch (e) {
-    print("❌ อัปเดต status ผิดพลาด: $e");
+  } catch (e) 
+  {
   }
 },
 
@@ -206,75 +207,161 @@ Future<void> _showAddTaskDialog(String statusId) async {
     context: context,
     builder: (context) {
       return StatefulBuilder(builder: (context, setStateDialog) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('เพิ่มงานใหม่'),
-          content: Column(
+        return Dialog(
+  insetPadding: const EdgeInsets.all(16),
+  backgroundColor: Colors.transparent,
+  child: ConstrainedBox(
+    constraints: const BoxConstraints(maxWidth: 400),
+    child: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: FloatingCard(
+          padding: const EdgeInsets.all(24),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Header
+              Text(
+                'เพิ่มงานใหม่',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 16),
+
+              // ชื่องาน
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'ชื่องาน'),
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'ชื่องาน',
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: HexColor.fromHex('#001B4B'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: HexColor.fromHex('#00C6FF')),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white, width: 2),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                ),
                 autofocus: true,
               ),
               const SizedBox(height: 16),
+
+              // Dropdown เลือก Sprint
               sprintAsync.when(
-                data: (sprintList) {
-                  return DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: 'เลือก Sprint'),
-                    value: selectedSprintId,
-                    items: sprintList.map((sprint) {
-                      return DropdownMenuItem(
-                        value: sprint.id,
-                        child: Text(sprint.name ?? 'ไม่มีชื่อ Sprint'),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      setStateDialog(() {
-                        selectedSprintId = val;
-                      });
+                data: (sprintList) => DropdownButtonFormField<String>(
+                  value: selectedSprintId,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'เลือก Sprint',
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    filled: true,
+                    fillColor: HexColor.fromHex('#001B4B'),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: HexColor.fromHex('#00C6FF')),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.white, width: 2),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  ),
+                  items: sprintList
+                      .map((sprint) => DropdownMenuItem(
+                            value: sprint.id,
+                            child: Text(
+                              sprint.name ?? 'ไม่มีชื่อ Sprint',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: (val) {
+                    setStateDialog(() {
+                      selectedSprintId = val;
+                    });
+                  },
+                ),
+                loading: () =>
+                    const Center(child: CircularProgressIndicator(color: Colors.white)),
+                error: (err, _) => Text('Error loading sprint: $err',
+                    style: const TextStyle(color: Colors.white)),
+              ),
+              const SizedBox(height: 24),
+
+              // Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: HexColor.fromHex('#002B77'), width: 2),
+                      backgroundColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 28),
+                    ),
+                    child: const Text('ยกเลิก', style: TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(width: 12),
+                  FilledButton(
+                    onPressed: () {
+                      if (nameController.text.trim().isEmpty) {
+                        CustomSnackbar.showSnackBar(
+                          context: context,
+                          title: 'ข้อมูลไม่ครบ',
+                          message: 'กรุณากรอกชื่องาน',
+                          contentType: ContentType.warning,
+                          color: Colors.orange,
+                        );
+                        return;
+                      }
+                      if (selectedSprintId == null) {
+                        CustomSnackbar.showSnackBar(
+                          context: context,
+                          title: 'ข้อมูลไม่ครบ',
+                          message: 'กรุณาเลือก Sprint',
+                          contentType: ContentType.warning,
+                          color: Colors.orange,
+                        );
+                        return;
+                      }
+                      Navigator.of(context).pop(true);
                     },
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Text('Error loading sprint: $err'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: HexColor.fromHex('#003B99'),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 28),
+                    ),
+                    child: const Text('เพิ่ม',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ],
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('ยกเลิก'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.trim().isEmpty) {
-                  CustomSnackbar.showSnackBar(
-  context: context,
-  title: 'ข้อมูลไม่ครบ',
-  message: 'กรุณากรอกชื่องาน',
-  contentType: ContentType.warning,
-  color: Colors.orange,
+        ),
+      ),
+    ),
+  ),
 );
-                  return;
-                }
-                if (selectedSprintId == null) {
-                  CustomSnackbar.showSnackBar(
-  context: context,
-  title: 'ข้อมูลไม่ครบ',
-  message: 'กรุณาเลือก Sprint',
-  contentType: ContentType.warning,
-  color: Colors.orange,
-);
-                  return;
-                }
-                Navigator.of(context).pop(true);
-              },
-              child: const Text('เพิ่ม'),
-            ),
-          ],
-        );
+
       });
     },
   );
@@ -312,36 +399,52 @@ Future<void> _showAddTaskDialog(String statusId) async {
     final taskAsync = ref.watch(taskBySprintControllerProvider(widget.projectId));
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       body: taskAsync.when(
         data: (_) => AppFlowyBoard(
           config: AppFlowyBoardConfig(
             groupCornerRadius: 18,
             groupBodyPadding: const EdgeInsets.all(8.0),
-            groupBackgroundColor: HexColor.fromHex('#F7F8FC'),
+             groupBackgroundColor: const Color.fromARGB(255, 248, 242, 242).withOpacity(0.05),
             stretchGroupHeight: false,
           ),
           controller: boardController,
-          cardBuilder: (context, groupId, groupItem) {
-            if (groupItem is! MyGroupItem) return const SizedBox.shrink();
-            return Padding(
-              key: ValueKey(groupItem.id),
-              padding: const EdgeInsets.all(0),
-              child: InkWell(
-                onTap: () => _showTaskDetailPanel(groupItem.taskId),
-                child: AppFlowyGroupCard(
-                  key: ValueKey(groupItem.id),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                      child: Text(groupItem.title),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+  cardBuilder: (context, groupId, groupItem) {
+  if (groupItem is! MyGroupItem) return const SizedBox.shrink();
+  return Padding(
+    key: ValueKey(groupItem.id),
+    padding: const EdgeInsets.all(0),
+    child: InkWell(
+      onTap: () => _showTaskDetailPanel(groupItem.taskId),
+      child: Material(
+        color: Colors.transparent,
+        elevation: 0, // ลดเงา แต่ยังมี ripple
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05), // โปร่งใสเล็กน้อย
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            groupItem.title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+},
+
+
           headerBuilder: (context, groupData) {
             final status = statusList.firstWhere(
               (s) => s.id == groupData.id,
@@ -352,11 +455,12 @@ Future<void> _showAddTaskDialog(String statusId) async {
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: HexColor.fromHex('#F7F8FC'),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: groupColor, width: 2),
-              ),
+             decoration: BoxDecoration(
+  color: HexColor.fromHex('#F7F8FC').withOpacity(0.1), // โปร่งใส
+  borderRadius: BorderRadius.circular(12),
+  border: Border.all(color: groupColor, width: 2),
+),
+
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -373,37 +477,39 @@ Future<void> _showAddTaskDialog(String statusId) async {
             );
           },
           footerBuilder: (context, groupData) {
-            return Padding(
-              padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
-              child: InkWell(
-                onTap: () => _showAddTaskDialog(groupData.id),
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: HexColor.fromHex('#A3E635'), width: 2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.add, size: 18, color: Color(0xFF22C55E)),
-                      SizedBox(width: 6),
-                      Text(
-                        'New',
-                        style: TextStyle(
-                          color: Color(0xFF22C55E),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+  return Padding(
+    padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+    child: InkWell(
+      onTap: () => _showAddTaskDialog(groupData.id),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1), // โปร่งใส
+          border: Border.all(color: HexColor.fromHex('#A3E635'), width: 2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.add, size: 18, color: Color(0xFF22C55E)),
+            SizedBox(width: 6),
+            Text(
+              'New',
+              style: TextStyle(
+                color: Color(0xFF22C55E),
+                fontWeight: FontWeight.bold,
               ),
-            );
-          },
-          groupConstraints: const BoxConstraints.tightFor(width: 280),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+},
+         groupConstraints: BoxConstraints.tightFor(
+  width: MediaQuery.of(context).size.width / 5,
+),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error loading tasks: $err')),

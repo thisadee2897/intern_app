@@ -4,6 +4,7 @@ import 'package:project/controllers/priority_controller.dart';
 import 'package:project/controllers/task_status_controller.dart';
 import 'package:project/controllers/type_of_work_controller.dart';
 import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
+import 'package:project/screens/auth/widgets/glass_container.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/sprint_in_borad_controller.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/insert_controller.dart';
 import 'package:flutter/material.dart';
@@ -95,246 +96,253 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            return Dialog(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+           return Dialog(
+  insetPadding: const EdgeInsets.all(16),
+  backgroundColor: Colors.transparent,
+  child: ConstrainedBox(
+    constraints: const BoxConstraints(maxWidth: 500),
+    child: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: FloatingCard(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header
+              Text(
+                'เพิ่มงานใหม่',
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 28,
+              const SizedBox(height: 16),
+              const Divider(color: Colors.white70, thickness: 1),
+              const SizedBox(height: 16),
+
+              // 🔤 Task Name
+              TextField(
+                controller: nameController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'ชื่อ Task *',
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: HexColor.fromHex('#001B4B'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: HexColor.fromHex('#00C6FF')),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 20),
                 ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 500),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                autofocus: true,
+              ),
+              const SizedBox(height: 16),
+
+              // 👤 Dropdown เลือก Assignee
+              DropdownButtonFormField<String>(
+                value: selectedAssigneeId,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Assignee',
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: HexColor.fromHex('#001B4B'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: HexColor.fromHex('#00C6FF')),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        const BorderSide(color: Colors.white, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 20),
+                ),
+                items: assigneeList
+                    .map<DropdownMenuItem<String>>((user) => DropdownMenuItem(
+                          value: user.id.toString(),
+                          child: Text(user.name ?? '',
+                              style: const TextStyle(color: Colors.white)),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setStateDialog(() {
+                    selectedAssigneeId = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 📅 Start & End Date
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Start Date',
+                    style: TextStyle(
+                      color: Colors.grey.shade300,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Stack(
+                    alignment: Alignment.centerRight,
                     children: [
-                      const Text(
-                        'เพิ่มงานใหม่',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                      SmartDateFieldPicker(
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 20),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                          fillColor: HexColor.fromHex('#001B4B'),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // 🔤 Task Name
-                      TextField(
-                        controller: nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'ชื่อ Task *',
-                          border: OutlineInputBorder(),
-                        ),
-                        autofocus: true,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // 👤 Dropdown เลือก Assignee
-                      DropdownButtonFormField<String>(
-                        value: selectedAssigneeId,
-                        decoration: const InputDecoration(
-                          labelText: 'Assignee',
-                          border: OutlineInputBorder(),
-                        ),
-                        items:
-                            assigneeList.map<DropdownMenuItem<String>>((user) {
-                              return DropdownMenuItem<String>(
-                                value: user.id.toString(),
-                                child: Text(user.name ?? ''),
-                              );
-                            }).toList(),
-                        onChanged: (value) {
+                        initialDate: startDate,
+                        controller: startDateController,
+                        onDateSelected: (date) {
                           setStateDialog(() {
-                            selectedAssigneeId = value;
+                            startDate = date;
+                            if (endDate != null &&
+                                startDate != null &&
+                                endDate!.isBefore(startDate!)) {
+                              endDate = null;
+                            }
                           });
                         },
                       ),
-                      const SizedBox(height: 16),
-
-                      // 📅 Start & End Date
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Start Date',
-                            style: TextStyle(
-                              color: Colors.grey.shade700,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Stack(
-                            alignment: Alignment.centerRight,
-                            children: [
-                              SmartDateFieldPicker(
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.only(
-                                    left: 12,
-                                    right: 40,
-                                  ),
-                                  border: OutlineInputBorder(),
-                                ),
-                                initialDate: startDate,
-                                controller: startDateController,
-                                onDateSelected: (date) {
-                                  setStateDialog(() {
-                                    startDate = date;
-                                    if (endDate != null &&
-                                        startDate != null &&
-                                        endDate!.isBefore(startDate!)) {
-                                      endDate = null;
-                                    }
-                                  });
-                                },
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(right: 12),
-                                child: Icon(
-                                  Icons.calendar_today,
-                                  color: Colors.grey,
-                                  size: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          Text(
-                            'End Date',
-                            style: TextStyle(
-                              color: Colors.grey.shade700,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Stack(
-                            alignment: Alignment.centerRight,
-                            children: [
-                              SmartDateFieldPicker(
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.only(
-                                    left: 12,
-                                    right: 40,
-                                  ),
-                                  border: OutlineInputBorder(),
-                                ),
-                                initialDate: endDate,
-                                controller: endDateController,
-                                enabled: startDate != null,
-                                firstDate: startDate?.add(
-                                  const Duration(days: 1),
-                                ),
-                                onDateSelected: (date) {
-                                  setStateDialog(() {
-                                    endDate = date;
-                                  });
-                                },
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(right: 12),
-                                child: Icon(
-                                  Icons.calendar_today,
-                                  color: Colors.grey,
-                                  size: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // 📝 Description
-                      TextField(
-                        controller: descController,
-                        decoration: const InputDecoration(
-                          labelText: 'รายละเอียดงาน',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 24),
-
-                      // ✅ Action buttons
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          const SizedBox(width: 12),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0071BC),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 12,
-                              ),
-                            ),
-                            onPressed: () {
-                              if (nameController.text.trim().isEmpty) {
-                                if (mounted) {
-                                  CustomSnackbar.showSnackBar(
-                                    context: context,
-                                    title: "แจ้งเตือน",
-                                    message: "กรุณากรอกชื่องาน",
-                                    contentType: ContentType.warning,
-                                    color: Colors.orange,
-                                  );
-                                }
-                                return;
-                              }
-
-                              if (startDate == null) {
-                                if (mounted) {
-                                  CustomSnackbar.showSnackBar(
-                                    context: context,
-                                    title: "แจ้งเตือน",
-                                    message: "กรุณาเลือกวันที่เริ่ม",
-                                    contentType: ContentType.warning,
-                                    color: Colors.orange,
-                                  );
-                                }
-                                return;
-                              }
-
-                              if (endDate == null) {
-                                if (mounted) {
-                                  CustomSnackbar.showSnackBar(
-                                    context: context,
-                                    title: "แจ้งเตือน",
-                                    message: "กรุณาเลือกวันที่สิ้นสุด",
-                                    contentType: ContentType.warning,
-                                    color: Colors.orange,
-                                  );
-                                }
-                                return;
-                              }
-
-                              Navigator.of(context).pop(true);
-                            },
-
-                            child: const Text(
-                              'Start',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
+                      const Padding(
+                        padding: EdgeInsets.only(right: 12),
+                        child: Icon(Icons.calendar_today,
+                            color: Colors.white70, size: 20),
                       ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'End Date',
+                    style: TextStyle(
+                      color: Colors.grey.shade300,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      SmartDateFieldPicker(
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 20),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                          fillColor: HexColor.fromHex('#001B4B'),
+                        ),
+                        initialDate: endDate,
+                        controller: endDateController,
+                        enabled: startDate != null,
+                        firstDate: startDate?.add(const Duration(days: 1)),
+                        onDateSelected: (date) {
+                          setStateDialog(() {
+                            endDate = date;
+                          });
+                        },
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(right: 12),
+                        child: Icon(Icons.calendar_today,
+                            color: Colors.white70, size: 20),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            );
+              const SizedBox(height: 16),
+
+              // 📝 Description
+              TextField(
+                controller: descController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'รายละเอียดงาน',
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: HexColor.fromHex('#001B4B'),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.white, width: 2)),
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 20),
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 24),
+
+              // ✅ Action buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: HexColor.fromHex('#002B77'), width: 2),
+                      backgroundColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 28),
+                    ),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  FilledButton(
+                    onPressed: () {
+                      if (nameController.text.trim().isEmpty ||
+                          startDate == null ||
+                          endDate == null) {
+                        // handle validation (เหมือนเดิม)
+                        return;
+                      }
+                      Navigator.of(context).pop(true);
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: HexColor.fromHex('#003B99'),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 28),
+                    ),
+                    child: const Text(
+                      'Start',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  ),
+);
+
           },
         );
       },
@@ -781,7 +789,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                                       child: Text(
                                         DateHelpers.format(date, 'd'),
                                         style: const TextStyle(
-                                          color: Colors.black45,
+                                        
                                         ),
                                       ),
                                     ),
@@ -913,7 +921,6 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                                   "${taskWithLayout.name}\n${taskWithLayout.taskStartDate} - ${taskWithLayout.taskEndDate}",
                               child: Text(
                                 taskWithLayout.name ?? '',
-                                style: const TextStyle(color: Colors.black54),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
