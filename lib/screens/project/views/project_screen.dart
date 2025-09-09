@@ -8,6 +8,7 @@ import 'package:project/models/category_model.dart';
 import 'package:project/models/project_h_d_model.dart';
 import 'package:project/models/user_login_model.dart';
 import 'package:project/models/workspace_model.dart';
+import 'package:project/screens/auth/widgets/glass_container.dart';
 import 'package:project/screens/project/project_datail/providers/controllers/category_controller.dart';
 import 'package:project/screens/project/project_datail/views/project_detail_screen.dart';
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
@@ -377,62 +378,123 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
     );
   }
 
-  Future<void> _showDeleteCategoryDialog(String categoryId) async {
-    await showModal(
-      context: context,
-      configuration: const FadeScaleTransitionConfiguration(),
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Row(children: [Icon(Icons.warning_rounded, color: Colors.orange.shade600), const SizedBox(width: 12), const Text('ยืนยันการลบ')]),
-            content: const Text('คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้? การกระทำนี้ไม่สามารถย้อนกลับได้', style: TextStyle(fontSize: 14)),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context, false), child: Text('ยกเลิก', style: TextStyle(color: Colors.grey.shade600))),
-              Container(
-                decoration: BoxDecoration(color: Colors.red.shade600, borderRadius: BorderRadius.circular(8)),
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('ลบ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                ),
+ Future<void> _showDeleteCategoryDialog(String categoryId) async {
+  await showModal(
+    context: context,
+    configuration: const FadeScaleTransitionConfiguration(),
+    builder: (context) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: FloatingCard(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                          colors: [Color(0xFF667eea), Color(0xFF764ba2)]),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.warning_rounded,
+                        color: Colors.white, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'ยืนยันการลบ',
+                    style: TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              const Text(
+                'คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้? การกระทำนี้ไม่สามารถย้อนกลับได้',
+                style: TextStyle(fontSize: 14, color: Colors.white70),
+              ),
+              const SizedBox(height: 24),
+
+              // Action buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey.shade600, width: 2),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 16),
+                    ),
+                    child: const Text('ยกเลิก', style: TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.red.shade600,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('ลบ',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                  ),
+                ],
               ),
             ],
           ),
-    ).then((confirmed) async {
-      if (confirmed == true) {
-        try {
-          await ref.read(deleteProjectCategoryControllerProvider.notifier).deleteCategory({'project_category_id': categoryId});
-          await ref.read(categoryProvider.notifier).getCategory(widget.workspace.id!);
+        ),
+      ),
+    ),
+  ).then((confirmed) async {
+    if (confirmed == true) {
+      try {
+        await ref.read(deleteProjectCategoryControllerProvider.notifier)
+            .deleteCategory({'project_category_id': categoryId});
+        await ref.read(categoryProvider.notifier)
+            .getCategory(widget.workspace.id!);
 
-          if (context.mounted) {
-            CustomSnackbar.showSnackBar(
-              context: context,
-              title: "สำเร็จ",
-              message: "ลบหมวดหมู่สำเร็จ",
-              contentType: ContentType.success,
-              color: Colors.green, // ใส่ไปเพราะ method require
-            );
+        if (context.mounted) {
+          CustomSnackbar.showSnackBar(
+            context: context,
+            title: "สำเร็จ",
+            message: "ลบหมวดหมู่สำเร็จ",
+            contentType: ContentType.success,
+            color: Colors.green,
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          String errorMessage = '';
+          if (e.runtimeType == DioException) {
+            DioException err = e as DioException;
+            errorMessage = err.message ?? 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
           }
-        } catch (e) {
-          if (context.mounted) {
-            String errorMessage = '';
-            if (e.runtimeType == DioException) {
-              DioException err = e as DioException;
-              errorMessage = err.message ?? 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
-            }
 
-            CustomSnackbar.showSnackBar(
-              context: context,
-              title: "ผิดพลาด",
-              message: " $errorMessage",
-              contentType: ContentType.failure,
-              color: Colors.red, // ใส่ไปเพราะ method require
-            );
-          }
+          CustomSnackbar.showSnackBar(
+            context: context,
+            title: "ผิดพลาด",
+            message: " $errorMessage",
+            contentType: ContentType.failure,
+            color: Colors.red,
+          );
         }
       }
-    });
-  }
+    }
+  });
+}
+
 
   Widget _buildProjectItem(ProjectHDModel project, int index, CategoryModel category) {
     return InkWell(

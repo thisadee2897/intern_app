@@ -25,7 +25,7 @@ class DetailDateRowWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(width: 120, child: Text(title, style: TextStyle(color: Colors.grey.shade700, fontSize: 14))),
+          SizedBox(width: 120, child: Text(title, style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255), fontSize: 14))),
           Expanded(child: SizedBox(height: 40, child: SmartDateFieldPicker(
             enabled: enabled,  
             decoration: InputDecoration(
@@ -51,7 +51,7 @@ class TitleForTaskX extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         SizedBox(width: 80, child: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16))),
-        Text(' : $value', style: const TextStyle(fontSize: 14, color: Colors.black87)),
+        Text(' : $value', style: const TextStyle(fontSize: 14, color: Color.fromARGB(221, 255, 255, 255))),
       ],
     );
   }

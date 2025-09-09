@@ -20,6 +20,7 @@ import 'package:project/screens/project/project_datail/views/widgets/detail_row_
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'package:project/utils/extension/async_value_sliver_extension.dart';
 import 'package:project/utils/extension/date_string_to_format_th.dart';
+import 'package:project/utils/extension/hex_color.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../providers/controllers/delete_task_controller.dart';
 import '../../providers/controllers/insert_comment_task_controller.dart';
@@ -87,95 +88,144 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
       });
     });
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      width: ref.watch(showTaskDetailProvider) ? 495 : 0,
-      height: double.infinity,
-      color: Colors.white,
-      child: state.when(
-        data: (data) {
-          return Column(
-            children: [
-              Container(
-                height: 60,
-                decoration: BoxDecoration(color: Colors.white, border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1))),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          controller: taskNameController,
-                          onChanged: (value) {
-                            ref.read(taskDetailProvider.notifier).updateTaskName(value);
-                          },
-                          decoration: InputDecoration(border: InputBorder.none, hintText: 'Task Name', hintStyle: TextStyle(color: Colors.grey.shade600)),
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                        ),
+  duration: const Duration(milliseconds: 200),
+  curve: Curves.easeInOut,
+  width: ref.watch(showTaskDetailProvider) ? 495 : 0,
+  height: double.infinity,
+  decoration: BoxDecoration(
+    color: HexColor.fromHex('#001B4B').withOpacity(0.9), // 👈 เปลี่ยนเป็นธีมเข้มโปร่ง
+    borderRadius: const BorderRadius.only(
+      topLeft: Radius.circular(16),
+      bottomLeft: Radius.circular(16),
+    ),
+  ),
+  child: state.when(
+    data: (data) {
+      return Column(
+        children: [
+          Container(
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.transparent.withOpacity(0.3), // 👈 Header โปร่ง
+              border: Border(
+                bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: taskNameController,
+                      onChanged: (value) {
+                        ref.read(taskDetailProvider.notifier).updateTaskName(value);
+                      },
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Task Name',
+                        hintStyle: TextStyle(color: Colors.grey.shade300), // 👈 hint text เบา
                       ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold, color: Colors.white), // 👈 font ขาว
                     ),
-                    Row(
-                      children: [
-                        TextButton(
-                          onPressed: () async {
-                            try {
-                              await _updateTaskName();
-                              await _updateDescription();
-                              await ref.read(taskDetailProvider.notifier).updateTaskData();
-                              ScaffoldMessenger.of(context).clearSnackBars();
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Task updated successfully')));
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating task: $e')));
-                            }
-                          },
-                          child: const Text('Update'),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () {
-                            ref.read(showTaskDetailProvider.notifier).state = false;
-                          },
-                        ),
-                      ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () async {
+                        try {
+                          await _updateTaskName();
+                          await _updateDescription();
+                          await ref.read(taskDetailProvider.notifier).updateTaskData();
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Task updated successfully')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error updating task: $e')),
+                          );
+                        }
+                      },
+                      child: const Text('Update', style: TextStyle(color: Colors.white)),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white), // 👈 icon ขาว
+                      onPressed: () {
+                        ref.read(showTaskDetailProvider.notifier).state = false;
+                      },
                     ),
                   ],
                 ),
-              ),
+              ],
+            ),
+          ),
 
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TitleForTask(title: 'Project', value: data.projectHd?.name ?? 'No Project'),
-                        TitleForTask(title: 'Sprint', value: data.sprint?.name ?? 'No Sprint'),
-                        Gap(12),
-                        Row(children: [const Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)), const Spacer()]),
-                        const SizedBox(height: 8),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TitleForTask(title: 'Project', value: data.projectHd?.name ?? 'No Project'),
+                    TitleForTask(title: 'Sprint', value: data.sprint?.name ?? 'No Sprint'),
+                    Gap(12),
 
-                        TextField(maxLines: 10, controller: descriptionController,
-                        onChanged: (value) {
-                          ref.read(taskDetailProvider.notifier).updateDescription(value);
-                        },
-                        ),
-                        const SizedBox(height: 24),
+                    Row(
+                      children: const [
+                        Text('Description',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: Colors.white)), // 👈 font ขาว
+                        Spacer()
+                      ],
+                    ),
+                    const SizedBox(height: 8),
 
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    TextField(
+                      maxLines: 10,
+                      controller: descriptionController,
+                      onChanged: (value) {
+                        ref.read(taskDetailProvider.notifier).updateDescription(value);
+                      },
+                      style: const TextStyle(color: Colors.white), // 👈 font ขาว
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1), // 👈 กล่องโปร่งบาง
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        hintText: 'Add description...',
+                        hintStyle: TextStyle(color: Colors.grey.shade400),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1), // 👈 กล่องโปร่ง
+                        border: Border.all(color: Colors.grey.shade300.withOpacity(0.3)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Details', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                                  // Delete Task And Show Dialog confirmation
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline, color: Colors.grey),
+                              const Text('Details',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: Colors.white)), // 👈 font ขาว
+                              IconButton(
+                                    icon: const Icon(Icons.delete_outline, color: Colors.red),
                                     onPressed: () {
                                       showDialog(
                                         context: context,
@@ -281,7 +331,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                         Container(
                           margin: const EdgeInsets.only(top: 16),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.all(Radius.circular(20))),
+                         decoration: BoxDecoration(color:  Colors.transparent, borderRadius: BorderRadius.circular(20)),
                           child: Column(
                             children: [
                               QuillSimpleToolbar(
@@ -323,24 +373,30 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                   }
 
                                   return AnimatedContainer(
-                                    duration: const Duration(milliseconds: 120),
-                                    curve: Curves.ease,
-                                    height: _getEditorHeight(),
-                                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
-                                    child: QuillEditor(
-                                      controller: _controller,
-                                      focusNode: _editorFocusNode,
-                                      scrollController: _editorScrollController,
-                                      config: QuillEditorConfig(
-                                        placeholder: 'พิมพ์ความคิดเห็น...',
-                                        padding: const EdgeInsets.all(6),
-                                        embedBuilders: [],
-                                        scrollable: true,
-                                        expands: false,
-                                        searchConfig: QuillSearchConfig(),
-                                      ),
-                                    ),
-                                  );
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.ease,
+      height: _getEditorHeight(),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: DefaultTextStyle(
+        style: const TextStyle(color: Colors.black),
+        child: QuillEditor(
+          controller: _controller,
+          focusNode: _editorFocusNode,
+          scrollController: _editorScrollController,
+          config: QuillEditorConfig(
+            placeholder: 'พิมพ์ความคิดเห็น...',
+            padding: const EdgeInsets.all(6),
+            embedBuilders: [],
+            scrollable: true,
+            expands: false,
+            searchConfig: QuillSearchConfig(),
+          ),
+        ),
+      ),
+    );
                                 },
                               ),
                               const SizedBox(height: 8),
@@ -406,7 +462,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                                   ],
                                                 ),
                                                 IconButton(
-                                                  icon: const Icon(Icons.delete_outline, color: Colors.black45),
+                                                  icon: const Icon(Icons.delete_outline, color: Colors.red),
                                                   onPressed: () async {
                                                     showDialog(
                                                       context: context,
@@ -438,29 +494,33 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                                 ),
                                               ],
                                             ),
-                                            IgnorePointer(
-                                              ignoring: true,
-                                              child: Container(
-                                                margin: const EdgeInsets.only(top: 4),
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(color: Colors.grey.shade300),
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  color: Colors.white,
-                                                ),
-                                                child: QuillEditor(
-                                                  
-                                                  controller: controller,
-                                                  focusNode: FocusNode(),
-                                                  scrollController: ScrollController(),
-                                                  config: QuillEditorConfig(
-                                                    padding: const EdgeInsets.all(12),
-                                                    scrollable: false,
-                                                    expands: false,
-                                                    embedBuilders: [],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                        IgnorePointer(
+  ignoring: true,
+  child: Container(
+    margin: const EdgeInsets.only(top: 4),
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.grey.shade300),
+      borderRadius: BorderRadius.circular(8),
+      color: Colors.white, // เปลี่ยนเป็นโปร่ง
+    ),
+    child: DefaultTextStyle(
+      style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)), // เปลี่ยนเป็นสีขาว
+      child: QuillEditor(
+        controller: controller,
+        focusNode: FocusNode(),
+        scrollController: ScrollController(),
+        config: QuillEditorConfig(
+          padding: const EdgeInsets.all(12),
+          scrollable: false,
+          expands: false,
+          embedBuilders: [],
+        ),
+      ),
+    ),
+  ),
+),
+
+
                                           ],
                                         ),
                                       ),
@@ -551,7 +611,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 120, child: Text(label, style: TextStyle(color: Colors.grey.shade700, fontSize: 14))),
+          SizedBox(width: 120, child: Text(label, style: TextStyle(color: Colors.white, fontSize: 14))),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -559,9 +619,9 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                 if (isAssignee && !hasAssignee) ...[
                   Row(
                     children: [
-                      Icon(Icons.person_outline, size: 16, color: Colors.grey.shade600),
+                      Icon(Icons.person_outline, size: 16, color: Colors.white),
                       const SizedBox(width: 4),
-                      Text(value, style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
+                      Text(value, style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255), fontSize: 14)),
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -570,7 +630,7 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                   Text(
                     value,
                     style: TextStyle(
-                      color: isHighlighted ? Colors.blue : Colors.black87,
+                      color: isHighlighted ? Colors.blue : Colors.white,
                       fontSize: 14,
                       fontWeight: isHighlighted ? FontWeight.w500 : FontWeight.normal,
                     ),
