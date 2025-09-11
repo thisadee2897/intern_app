@@ -67,6 +67,10 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
       _searchAnimationController.forward();
       _categoryAnimationController.forward();
       onRefresh();
+      // ✅ ตั้ง workspaceId global สำหรับใช้งานข้ามหน้า
+      final wsId = widget.workspace.id ?? '';
+      ref.read(selectWorkspaceIdProvider.notifier).state = wsId.isNotEmpty ? wsId : null;
+      debugPrint('[ProjectScreen] selectedWorkspaceId set to $wsId');
     });
 
     _searchController.addListener(_onSearchChanged);
@@ -502,7 +506,16 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
       onTap: () {
         ref.read(selectProjectIdProvider.notifier).state = project.id;
         ref.read(projectSelectingProvider.notifier).state = project; // เก็บค่าโปรเจค ก่อนเปิดหน้ารายละเอียด
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(projectId: project.id!)));
+        // ✅ ตั้งค่า workspaceId ของโปรเจคที่เลือก
+        ref.read(selectWorkspaceIdProvider.notifier).state = project.category?.workspaceId;
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ProjectDetailScreen(
+              projectId: project.id!,
+              workspaceId: project.category?.workspaceId ?? widget.workspace.id ?? '0',
+            ),
+          ),
+        );
       },
       child: Padding(
         padding: const EdgeInsets.all(16),

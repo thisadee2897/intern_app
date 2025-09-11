@@ -44,6 +44,11 @@ class _BacklogWidgetState extends BaseState<BacklogWidget> with TickerProviderSt
     ref.read(sprintProvider.notifier).get();
     ref.read(masterTaskStatusControllerProvider.notifier).fetchTaskStatuses();
     ref.read(dropDownSprintFormCompleteProvider.notifier).get();
+    // ✅ ตั้งค่า workspaceId ก่อนโหลด assignee
+    final wsId = ref.read(projectSelectingProvider).category?.workspaceId;
+    if (wsId != null && wsId.isNotEmpty) {
+      ref.read(selectWorkspaceIdProvider.notifier).state = wsId;
+    }
     ref.read(listAssignProvider.notifier).get();
     ref.read(listPriorityProvider.notifier).get();
     ref.read(listTaskStatusProvider.notifier).get();

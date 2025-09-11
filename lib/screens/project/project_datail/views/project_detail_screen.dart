@@ -5,11 +5,13 @@ import 'package:project/screens/project/project_datail/providers/controllers/tas
 import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 import 'widgets/export.dart';
 import 'package:project/screens/project/project_datail/gantt_chart/views/widgets/gantt_app_widget.dart';
+import 'package:project/controllers/assignee_controller.dart';
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
   final String projectId;
+  final String workspaceId;
 
-  const ProjectDetailScreen({super.key, required this.projectId});
+  const ProjectDetailScreen({super.key, required this.projectId, required this.workspaceId});
 
   @override
   ConsumerState<ProjectDetailScreen> createState() => _ProjectDetailScreenState();
@@ -23,6 +25,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
       
     // ตั้งค่า projectId ใน provider
     ref.read(selectProjectIdProvider.notifier).state = widget.projectId;
+
+    // ตั้ง workspaceId จากพารามิเตอร์ (แน่นอนที่สุด)
+    ref.read(selectWorkspaceIdProvider.notifier).state = widget.workspaceId;
+    debugPrint('[ProjectDetail] set from param: workspaceId=${widget.workspaceId}');
+
+    // โหลดรายชื่อผู้ใช้ตามสิทธิ์ของ workspace (สำหรับ dropdown)
+    ref.read(listAssignProvider.notifier).get();
 
     // โหลด Sprint
     ref.read(sprintProvider.notifier).get();

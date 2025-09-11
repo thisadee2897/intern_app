@@ -44,6 +44,11 @@ class _CommentTaskScreenState extends ConsumerState<CommentTaskScreen> {
 
     // Prefetch dropdown data providers
     Future.microtask(() {
+      // ✅ ตั้งค่า workspaceId ก่อนโหลด assignee
+      final wsId = ref.read(projectSelectingProvider).category?.workspaceId;
+      if (wsId != null && wsId.isNotEmpty) {
+        ref.read(selectWorkspaceIdProvider.notifier).state = wsId;
+      }
       ref.read(listAssignProvider.notifier).get();
       ref.read(listPriorityProvider.notifier).get();
       ref.read(listTypeOfWorkProvider.notifier).get();

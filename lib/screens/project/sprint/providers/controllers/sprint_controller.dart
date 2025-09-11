@@ -152,7 +152,7 @@ class InsertUpdateSprintNotifier extends StateNotifier<AsyncValue<SprintModel>> 
     }
   }
 
-  // Start Sprint
+// Start Sprint
   Future<void> startSprint(String id, String? goal, String name) async {
     state = const AsyncValue.loading();
     try {
@@ -231,6 +231,9 @@ final selectProjectIdProvider = StateProvider<String?>((ref) => null); //  Provi
 
 final projectSelectingProvider = StateProvider<ProjectHDModel>((ref) => ProjectHDModel());
 final sprintSelectingProvider = StateProvider<SprintModel>((ref) => SprintModel());
+
+// ✅ Provider ใหม่สำหรับเก็บ workspaceId ที่ถูกเลือก
+final selectWorkspaceIdProvider = StateProvider<String?>((ref) => null);
 
 // final apiDeleteSprint = Provider((ref) => DeleteSprintApi()); //  Provider สำหรับ API ลบ
 final apiDeleteSprint = Provider<DeleteSprintApi>((ref) => DeleteSprintApi(ref: ref));
