@@ -1,6 +1,5 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:project/apps/app.dart';
 import 'package:project/config/routes/app_router.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/screens/home/providers/controllers/home_controller.dart';
@@ -82,7 +81,51 @@ class _HomeScreenState extends BaseState<HomeScreen>
           body: workspaceState.appWhen(
             dataBuilder: (workspaces) {
               if (workspaces.isEmpty) {
-                return const Center(child: Text('ไม่พบ workspace'));
+                return Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 24,
+                      mainAxisSpacing: 24,
+                      childAspectRatio: aspectRatio,
+                    ),
+                    itemCount: 1,
+                    itemBuilder: (context, index) {
+                      return DottedBorder(
+                        options: RoundedRectDottedBorderOptions(
+                          color: ACl.borderColor,
+                          dashPattern: const [6, 3],
+                          radius: Radius.circular(20),
+                        ),
+                        child: InkWell(
+                          onTap: () async {
+                            final result = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => const InsertUpdateWorkspaceDialog(),
+                            );
+
+                            if (result == true) {
+                              ref.invalidate(workspaceProvider);
+                            }
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.add,
+                                size: 100,
+                                color: Colors.white.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
               }
               return Padding(
                 padding: const EdgeInsets.all(24),
