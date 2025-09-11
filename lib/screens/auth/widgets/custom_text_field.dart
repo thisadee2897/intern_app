@@ -11,6 +11,9 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? onTogglePasswordVisibility;
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
+  final void Function(String)? onChanged;
+  final Widget? suffix;
+  final AutovalidateMode autovalidateMode;
 
   const CustomTextField({
     super.key,
@@ -23,6 +26,9 @@ class CustomTextField extends StatelessWidget {
     this.onTogglePasswordVisibility,
     this.validator,
     this.keyboardType = TextInputType.text,
+    this.onChanged,
+    this.suffix,
+    this.autovalidateMode = AutovalidateMode.disabled,
   });
 
   @override
@@ -39,13 +45,16 @@ class CustomTextField extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 60,
+          height: 80,
           child: TextFormField(
+            autovalidateMode: autovalidateMode,
             controller: controller,
             validator: validator,
             keyboardType: keyboardType,
             obscureText: isPassword && !isPasswordVisible,
+            onChanged: onChanged,
             decoration: InputDecoration(
+              suffix:suffix,
               hoverColor: Colors.white10,
               hintText: hint,
               hintStyle: TextStyle(color: Colors.grey[400]),

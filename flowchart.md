@@ -7,15 +7,15 @@ Flowchart นี้แสดงการไหลของกระบวนก�
 
 ```mermaid
 flowchart TD
-    A[เริ่มต้นแอป] --> B{มี Token หรือไม่?}
+    A[เริ่มต้นแอป] --> B{มี Token หรือไม่}
     B -->|ไม่มี| C[หน้า Login]
-    B -->|มี| D{Token หมดอายุ?}
+    B -->|มี| D{Token หมดอายุ}
     D -->|หมดอายุ| C
     D -->|ยังใช้ได้| E[หน้า Home]
     
-    C --> F[กรอก Username/Password]
+    C --> F[กรอก Username และ Password]
     F --> G[ส่งข้อมูลไป Backend]
-    G --> H{Login สำเร็จ?}
+    G --> H{Login สำเร็จ}
     H -->|สำเร็จ| I[บันทึก Token]
     H -->|ไม่สำเร็จ| J[แสดง Error Message]
     J --> F
@@ -30,7 +30,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[หน้า Home] --> B[โหลด Workspace List]
-    B --> C{มี Workspace?}
+    B --> C{มี Workspace}
     C -->|ไม่มี| D[แสดงข้อความไม่พบ workspace]
     C -->|มี| E[แสดง Workspace Cards]
     
@@ -42,7 +42,7 @@ flowchart TD
     
     G --> K[กรอกข้อมูล Workspace]
     K --> L[ส่งข้อมูลไป API]
-    L --> M{สร้างสำเร็จ?}
+    L --> M{สร้างสำเร็จ}
     M -->|สำเร็จ| N[รีเฟรช Workspace List]
     M -->|ไม่สำเร็จ| O[แสดง Error]
     O --> K
@@ -50,7 +50,7 @@ flowchart TD
     
     H --> P[แก้ไขข้อมูล Workspace]
     P --> Q[ส่งข้อมูลไป API]
-    Q --> R{แก้ไขสำเร็จ?}
+    Q --> R{แก้ไขสำเร็จ}
     R -->|สำเร็จ| N
     R -->|ไม่สำเร็จ| S[แสดง Error]
     S --> P
@@ -323,13 +323,13 @@ flowchart TD
     N -->|Profile| O[Profile Management]
     N -->|Preferences| P[App Preferences]
     
-    subgraph "Modal Navigation"
+    subgraph Modal_Navigation
         Q[Task Detail Modal]
         R[Create/Edit Dialogs]
         S[Confirmation Dialogs]
     end
     
-    subgraph "Back Navigation"
+    subgraph Back_Navigation
         T[Browser Back] --> U[Previous Screen]
         V[App Back Button] --> U
     end

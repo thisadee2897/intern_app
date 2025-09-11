@@ -13,19 +13,14 @@ class DeleteWorkspaceController extends StateNotifier<AsyncValue<void>> {
       await ref.read(apiDeleteWorkspace).delete(id: id);
       state = const AsyncValue.data(null); // ลบสำเร็จ
     } on DioException catch (e, st) {
-  String errorMessage =
-      e.response?.data['message']?.toString() ?? 'Unknown server error';
-  state = AsyncValue.error(errorMessage, st);
-  rethrow;
-} catch (e, st) {
-  state = AsyncValue.error(e, st);
-  rethrow;
-}
-
+      String errorMessage = e.response?.data['message']?.toString() ?? 'Unknown server error';
+      state = AsyncValue.error(errorMessage, st);
+      rethrow;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 }
 
-final deleteWorkspaceControllerProvider = 
-  StateNotifierProvider<DeleteWorkspaceController, AsyncValue<void>>(
-    (ref) => DeleteWorkspaceController(ref),
-  );
+final deleteWorkspaceControllerProvider = StateNotifierProvider<DeleteWorkspaceController, AsyncValue<void>>((ref) => DeleteWorkspaceController(ref));

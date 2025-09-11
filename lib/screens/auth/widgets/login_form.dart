@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/config/routes/route_config.dart';
 import 'package:project/config/routes/route_helper.dart';
 import 'package:project/screens/auth/providers/controllers/auth_controller.dart';
+import 'package:project/screens/auth/view/login.dart';
 import 'package:project/screens/auth/widgets/widgets.dart';
 import 'package:project/utils/extension/hex_color.dart';
 
@@ -116,6 +117,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final showRegister = ref.watch(flipToRegisterProvider);
     return Form(
       key: _formKey,
       child: Column(
@@ -229,7 +231,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               Text('ยังไม่มีบัญชี? ', style: TextStyle(color: Colors.white, fontSize: 14)),
               TextButton(
                 onPressed: () {
-                  _showSnackBar('ฟีเจอร์สมัครสมาชิกกำลังพัฒนา', Colors.orange);
+                  // _showSnackBar('ฟีเจอร์สมัครสมาชิกกำลังพัฒนา', Colors.orange);
+                  ref.read(flipToRegisterProvider.notifier).state = !showRegister;
                 },
                 style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 child: Text('สมัครสมาชิก', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 14, fontWeight: FontWeight.w600)),
