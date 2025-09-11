@@ -155,6 +155,19 @@ class LocalStorageService {
     fcmToken = null;
     _profileImage = null;
   }
+
+  /// Clear only authentication-related data while preserving other preferences
+  Future<void> clearAuthOnly() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_auth_token);
+    await prefs.remove(_userLoginKey);
+    await prefs.remove(_profileImageKey);
+    await prefs.remove(_keyFcmToken);
+    _userLoginData = const UserLoginModel();
+    _userToken = null;
+    fcmToken = null;
+    _profileImage = null;
+  }
 }
 
 /// ##########################
