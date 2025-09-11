@@ -31,7 +31,7 @@ flowchart TD
 flowchart TD
     A[หน้า Home] --> B[โหลด Workspace List]
     B --> C{มี Workspace?}
-    C -->|ไม่มี| D[แสดงข้อความ "ไม่พบ workspace"]
+    C -->|ไม่มี| D[แสดงข้อความไม่พบ workspace]
     C -->|มี| E[แสดง Workspace Cards]
     
     E --> F{User Action}
