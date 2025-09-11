@@ -58,9 +58,8 @@ class ApiInterceptor extends Interceptor {
       //     message: err.response?.data['detail'] ?? 'Unauthorized',
       //   ),
       // );
-      ref.read(localStorageServiceProvider).deleteToken();
-      ref.read(localStorageServiceProvider).clear();
-      ref.read(logoutProvider.future);
+      // Centralized logout to avoid races/duplicates
+      performLogout(ref);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(appRouterProvider).go(Routes.login);
       });

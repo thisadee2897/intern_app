@@ -40,18 +40,24 @@ final isLoggedInProvider = FutureProvider<bool>((ref) async {
   return token != null;
 });
 
-// logout Function
-FutureProvider<void> logoutProvider = FutureProvider<void>((ref) async {
+// Centralized logout logic
+Future<void> performLogout(Ref ref) async {
   try {
     print('Starting logout process...');
-    await ref.watch(localStorageServiceProvider).clear();
+    // Preserve remember-me data by clearing only auth-related items
+    await ref.read(localStorageServiceProvider).clearAuthOnly();
     print('Local storage cleared');
     ref.invalidate(isLoggedInProvider);
     ref.invalidate(loginProvider);
     print('Providers invalidated');
   } catch (e) {
-    print('logoutProvider error: $e');
+    print('performLogout error: $e');
     rethrow;
   }
+}
+
+// Logout provider (autoDispose to ensure fresh execution each time)
+final logoutProvider = FutureProvider.autoDispose<void>((ref) async {
+  await performLogout(ref);
 });
 
