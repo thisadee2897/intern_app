@@ -150,6 +150,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             onChanged: (p0) {
               ref.read(textPasswordRegisterProvider.notifier).state = p0;
             },
+            isPasswordVisible: ref.watch(passwordVisibleRegisterProvider),
+            onTogglePasswordVisibility: () => ref.read(passwordVisibleRegisterProvider.notifier).state = !ref.read(passwordVisibleRegisterProvider),
             validator: (value) => AuthValidators.validatePassword(value),
           ),
           SizedBox(height: 20.0),
@@ -164,6 +166,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             },
             prefixIcon: Icons.lock_outline,
             isPassword: true,
+            isPasswordVisible: ref.watch(confirmPasswordVisibleRegisterProvider),
+            onTogglePasswordVisibility:
+                () => ref.read(confirmPasswordVisibleRegisterProvider.notifier).state = !ref.read(confirmPasswordVisibleRegisterProvider),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'กรุณายืนยันรหัสผ่าน';

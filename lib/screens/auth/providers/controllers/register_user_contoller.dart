@@ -37,3 +37,8 @@ final checkPasswordRegisterProvider = Provider<bool>((ref) {
     return password == confirmPassword;
   }
 });
+
+
+
+final passwordVisibleRegisterProvider = StateProvider<bool>((ref) => false);
+final confirmPasswordVisibleRegisterProvider = StateProvider<bool>((ref) => false);
