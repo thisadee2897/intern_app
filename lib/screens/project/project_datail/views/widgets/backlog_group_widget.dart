@@ -540,6 +540,7 @@ void _showErrorSnackBar(String message) {
       onPressed: () => _handleCompleteSprint(item),
       child: const Text('Complete sprint', style: TextStyle(color: Color.fromARGB(255, 91, 91, 91))),
     );
+    
   }
 
   /// Style ของปุ่ม
@@ -679,60 +680,43 @@ void _showErrorSnackBar(String message) {
               ),
               const Gap(10),
 
-              // Start Date
-const Text('Start date', style: TextStyle(color: Colors.white)),
-SizedBox(
-  width: 400,
-  child: Container(
-    decoration: BoxDecoration(
-      color: HexColor.fromHex('#001B4B'),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: HexColor.fromHex('#00C6FF'), width: 2), // ✅ ขอบเหมือนเพื่อน
-    ),
-    child: FormStartDateWidget(
-      startDate: ref.watch(formStartDateProvider),
-      endDate: ref.watch(formEndDateProvider),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select start date';
-        }
-        return null;
-      },
-      onChanged: (date) =>
-          ref.read(formStartDateProvider.notifier).state = date,
-    ),
-  ),
-),
-const Gap(10),
-
-// End Date
-const Text('End date', style: TextStyle(color: Colors.white)),
-SizedBox(
-  width: 400,
-  child: Container(
-    decoration: BoxDecoration(
-      color: HexColor.fromHex('#001B4B'),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: HexColor.fromHex('#00C6FF'), width: 2), // ✅ ขอบเหมือนเพื่อน
-    ),
-    child: FormEndDateWidget(
-      startDate: ref.watch(formStartDateProvider),
-      endDate: ref.watch(formEndDateProvider),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select end date';
-        }
-        return null;
-      },
-      onChanged: (date) =>
-          ref.read(formEndDateProvider.notifier).state = date,
-    ),
-  ),
-),
-
-              const Gap(10),
-
-              // Sprint goal
+          // Start Date
+ const TitleWidget(text: 'Start date'),
+                    SizedBox(
+                      width: 400,
+                      child: FormStartDateWidget(
+                        startDate: ref.watch(formStartDateProvider),
+                        endDate: ref.watch(formEndDateProvider),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select start date';
+                          }
+                          return null;
+                        },
+                        onChanged: (DateTime date) {
+                          ref.read(insertUpdateSprintProvider.notifier).updateStartDate(date);
+                        },
+                      ),
+                    ),
+                    const Gap(10),
+                    const TitleWidget(text: 'End date'),
+                    SizedBox(
+                      width: 400,
+                      child: FormEndDateWidget(
+                        startDate: ref.watch(formStartDateProvider),
+                        endDate: ref.watch(formEndDateProvider),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select end date';
+                          }
+                          return null;
+                        },
+                        onChanged: (date) {
+                          ref.read(insertUpdateSprintProvider.notifier).updateEndDate(date);
+                        },
+                      ),
+                    ),
+                        // Sprint goal
               const Text('Sprint goal', style: TextStyle(color: Colors.white)),
               SizedBox(
                 width: 552,
@@ -861,6 +845,9 @@ SizedBox(
     // แสดง dialog สำหรับเริ่ม sprint
     if (!mounted) return;
     await _showStartSprintDialog(taskCount, item);
+    ref.invalidate(sprintProvider);
+    await ref.read(sprintProvider.notifier).get();
+
   }
 
   /// จัดการการจบ Sprint
@@ -982,6 +969,9 @@ Future<void> _handleCompleteSprint(SprintModel item) async {
                                       if (!mounted) return;
                                       Navigator.pop(context);
                                       _showSuccessSnackBar('Sprint completed successfully');
+                                      ref.invalidate(sprintProvider);
+        await ref.read(sprintProvider.notifier).get();
+
                                     } catch (e) {
                                       _showErrorSnackBar('Error completing sprint: ${e.toString()}');
                                     }
@@ -1044,111 +1034,112 @@ Future<void> _handleCompleteSprint(SprintModel item) async {
                   padding: const EdgeInsets.all(24),
                   child: FloatingCard(
                     padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Header
-                        Text(
-                          'Start Sprint',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '$taskCount work items will be included in this sprint.',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        const Text('Required fields are marked with an asterisk *',
-                            style: TextStyle(color: Colors.white70)),
-                        const Gap(10),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Header
+                          Text(
+                            'Start Sprint',
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            '$taskCount work items will be included in this sprint.',
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                          const Text('Required fields are marked with an asterisk *',
+                              style: TextStyle(color: Colors.white70)),
+                          const Gap(10),
 
-                        // Sprint name
-                        const Text('Sprint name', style: TextStyle(color: Colors.white)),
-                        SizedBox(
-                          width: 400,
-                          child: TextFormField(
-                            initialValue: item.name ?? '',
-                            onChanged: (value) => ref
-                                .read(insertUpdateSprintProvider.notifier)
-                                .updateName(value),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter sprint name';
-                              }
-                              return null;
-                            },
-                            style: const TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: HexColor.fromHex('#001B4B'),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                    color: HexColor.fromHex('#00C6FF'), width: 2),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide:
-                                    const BorderSide(color: Colors.white, width: 2),
+                          // Sprint name
+                          const Text('Sprint name', style: TextStyle(color: Colors.white)),
+                          SizedBox(
+                            width: 400,
+                            child: TextFormField(
+                              initialValue: item.name ?? '',
+                              onChanged: (value) => ref
+                                  .read(insertUpdateSprintProvider.notifier)
+                                  .updateName(value),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter sprint name';
+                                }
+                                return null;
+                              },
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: HexColor.fromHex('#001B4B'),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: HexColor.fromHex('#00C6FF'), width: 2),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide:
+                                      const BorderSide(color: Colors.white, width: 2),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const Gap(10),
+                          const Gap(10),
 
-                      // Start Date
-const Text('Start date', style: TextStyle(color: Colors.white)),
-SizedBox(
-  width: 400,
-  child: Container(
-    decoration: BoxDecoration(
-      color: HexColor.fromHex('#001B4B'),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: HexColor.fromHex('#00C6FF'), width: 2), // ✅ ขอบเหมือนเพื่อน
-    ),
-    child: FormStartDateWidget(
-      startDate: ref.watch(formStartDateProvider),
-      endDate: ref.watch(formEndDateProvider),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select start date';
-        }
-        return null;
-      },
-      onChanged: (date) =>
-          ref.read(formStartDateProvider.notifier).state = date,
-    ),
-  ),
-),
-const Gap(10),
+                        // Start Date
+ const Text('Start date', style: TextStyle(color: Colors.white)),
+ SizedBox(
+   width: 400,
+   child: Container(
+     decoration: BoxDecoration(
+       color: HexColor.fromHex('#001B4B'),
+       borderRadius: BorderRadius.circular(12),
+       border: Border.all(color: HexColor.fromHex('#00C6FF'), width: 2), // ✅ ขอบเหมือนเพื่อน
+     ),
+     child: FormStartDateWidget(
+       startDate: ref.watch(formStartDateProvider),
+       endDate: ref.watch(formEndDateProvider),
+       validator: (value) {
+         if (value == null || value.isEmpty) {
+           return 'Please select start date';
+         }
+         return null;
+       },
+       onChanged: (date) =>
+           ref.read(formStartDateProvider.notifier).state = date,
+     ),
+   ),
+ ),
+ const Gap(10),
 
-// End Date
-const Text('End date', style: TextStyle(color: Colors.white)),
-SizedBox(
-  width: 400,
-  child: Container(
-    decoration: BoxDecoration(
-      color: HexColor.fromHex('#001B4B'),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: HexColor.fromHex('#00C6FF'), width: 2), // ✅ ขอบเหมือนเพื่อน
-    ),
-    child: FormEndDateWidget(
-      startDate: ref.watch(formStartDateProvider),
-      endDate: ref.watch(formEndDateProvider),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select end date';
-        }
-        return null;
-      },
-      onChanged: (date) =>
-          ref.read(formEndDateProvider.notifier).state = date,
-    ),
+ // End Date
+ const Text('End date', style: TextStyle(color: Colors.white)),
+ SizedBox(
+   width: 400,
+   child: Container(
+     decoration: BoxDecoration(
+       color: HexColor.fromHex('#001B4B'),
+       borderRadius: BorderRadius.circular(12),
+       border: Border.all(color: HexColor.fromHex('#00C6FF'), width: 2), // ✅ ขอบเหมือนเพื่อน
+     ),
+     child: FormEndDateWidget(
+       startDate: ref.watch(formStartDateProvider),
+       endDate: ref.watch(formEndDateProvider),
+       validator: (value) {
+         if (value == null || value.isEmpty) {
+           return 'Please select end date';
+         }
+         return null;
+       },
+       onChanged: (date) =>
+           ref.read(formEndDateProvider.notifier).state = date,
+            ),
   ),
 ),
                         const Gap(10),
@@ -1183,52 +1174,53 @@ SizedBox(
                                 borderSide:
                                     const BorderSide(color: Colors.white, width: 2),
                               ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
+     ),
+   ),
+ ),
+                           const SizedBox(height: 24),
 
-                        // Actions
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            OutlinedButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                    color: HexColor.fromHex('#002B77'), width: 2),
-                                backgroundColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 16, horizontal: 28),
-                              ),
-                              child: const Text('Cancel',
-                                  style: TextStyle(color: Colors.white)),
-                            ),
-                            const SizedBox(width: 12),
-                            FilledButton(
-                              onPressed: () => _performStartSprint(formKey, item),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: HexColor.fromHex('#003B99'),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 16, horizontal: 28),
-                              ),
-                              child: const Text('Start'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
+                           // Actions
+                           Row(
+                             mainAxisAlignment: MainAxisAlignment.end,
+                             children: [
+                               OutlinedButton(
+                                 onPressed: () => Navigator.pop(context),
+                                 style: OutlinedButton.styleFrom(
+                                   side: BorderSide(
+                                       color: HexColor.fromHex('#002B77'), width: 2),
+                                   backgroundColor: Colors.transparent,
+                                   shape: RoundedRectangleBorder(
+                                     borderRadius: BorderRadius.circular(12),
+                                   ),
+                                   padding: const EdgeInsets.symmetric(
+                                       vertical: 16, horizontal: 28),
+                                 ),
+                                 child: const Text('Cancel',
+                                     style: TextStyle(color: Colors.white)),
+                               ),
+                               const SizedBox(width: 12),
+                               FilledButton(
+                                 onPressed: () => _performStartSprint(formKey, item),
+                                 style: FilledButton.styleFrom(
+                                   backgroundColor: HexColor.fromHex('#003B99'),
+                                   shape: RoundedRectangleBorder(
+                                     borderRadius: BorderRadius.circular(12),
+                                   ),
+                                   padding: const EdgeInsets.symmetric(
+                                       vertical: 16, horizontal: 28),
+                                 ),
+                                 child: const Text('Start'),
+                               ),
+                             ],
+                           ),
+                         ],
+                       ),
+                     ),
+                   ),
+                 ),
+               ),
+             ),
+           );
         },
       );
     },
@@ -1238,11 +1230,30 @@ SizedBox(
 
   /// ดำเนินการเริ่ม Sprint
   Future<void> _performStartSprint(GlobalKey<FormState> formKey, SprintModel item) async {
-    if (!formKey.currentState!.validate()) {
+    final formState = formKey.currentState;
+    if (formState == null) {
+      _showErrorSnackBar('เกิดข้อผิดพลาดของแบบฟอร์ม กรุณาลองใหม่');
       return;
     }
+    if (!formState.validate()) {
+      _showErrorSnackBar('กรุณากรอกข้อมูลให้ครบถ้วน');
+      return;
+    }
+    // ป้องกัน id ว่าง และช่วย debug
+    final sprintId = item.id ?? widget.item.id;
+    if (sprintId == null || sprintId.isEmpty) {
+      _showErrorSnackBar('ไม่พบ Sprint ID สำหรับเริ่ม Sprint');
+      return;
+    }
+    final startD = ref.read(formStartDateProvider);
+    final endD = ref.read(formEndDateProvider);
+    if (startD == null || endD == null) {
+      _showErrorSnackBar('กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด');
+      return;
+    }
+    debugPrint('[StartSprint] id=$sprintId name=${item.name} startDate=$startD endDate=$endD');
     try {
-      await ref.read(insertUpdateSprintProvider.notifier).startSprint(item.id!, item.goal ?? '', item.name ?? '');
+      await ref.read(insertUpdateSprintProvider.notifier).startSprint(sprintId, item.goal ?? '', item.name ?? '');
 
       if (!mounted) return;
 

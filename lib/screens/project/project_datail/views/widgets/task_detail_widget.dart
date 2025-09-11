@@ -254,18 +254,28 @@ class _TaskDetailWidgetState extends ConsumerState<TaskDetailWidget> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              DetailRowWidget<String>(
-                                title: 'Assignee',
-                                dropDownKey: assigneeKey,
-                                selectedItem: data.assignedTo?.name,
-                                items: ref.watch(dropdownListAssignProvider),
-                                onSaved: (item) {
-                                  UserModel assignee = ref.read(listAssignProvider).value!.firstWhere((e) => e.name == item);
-                                  ref.read(taskDetailProvider.notifier).updateAssignee(assignee);
-
-                                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selected: $item')));
-                                },
-                              ),
+                              () {
+                                final assignItems = ref.watch(dropdownListAssignProvider);
+                                if (assignItems.isEmpty) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Text(
+                                      'ไม่มีรายชื่อผู้ใช้ให้เลือก (ยังไม่ได้แชร์สิทธิ์ใน Workspace นี้)',
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.orangeAccent),
+                                    ),
+                                  );
+                                }
+                                return DetailRowWidget<String>(
+                                  title: 'Assignee',
+                                  dropDownKey: assigneeKey,
+                                  selectedItem: data.assignedTo?.name,
+                                  items: assignItems,
+                                  onSaved: (item) {
+                                    UserModel assignee = ref.read(listAssignProvider).value!.firstWhere((e) => e.name == item);
+                                    ref.read(taskDetailProvider.notifier).updateAssignee(assignee);
+                                  },
+                                );
+                              }(),
                               DetailRowWidget<String>(
                                 title: 'Priority',
                                 dropDownKey: priorityKey,

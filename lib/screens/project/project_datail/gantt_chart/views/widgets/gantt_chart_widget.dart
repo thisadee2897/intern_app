@@ -10,6 +10,7 @@ import 'package:project/screens/project/project_datail/providers/controllers/ins
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project/models/sprint_model.dart';
+import 'package:project/models/user_model.dart';
 import 'package:project/utils/extension/context_extension.dart';
 import 'package:project/utils/extension/custom_snackbar.dart';
 import 'package:project/utils/extension/hex_color.dart';
@@ -18,6 +19,7 @@ import '../../providers/controllers/gantt_data_controller.dart';
 import '../../utils/date_helpers.dart';
 import 'package:project/screens/project/project_datail/views/widgets/task_comment_detail.dart';
 import 'package:smart_date_field_picker/smart_date_field_picker.dart';
+import 'package:project/screens/project/sprint/providers/controllers/sprint_controller.dart';
 // ...existing code...
 
 class GanttChartWidget extends ConsumerStatefulWidget {
@@ -88,8 +90,7 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     // state เก็บ assignee ที่เลือก
     String? selectedAssigneeId = currentUserId;
 
-    // โหลด list assignee
-    final assigneeList = ref.read(listAssignProvider).value ?? [];
+    // ลบ snapshot เดิม: final assigneeList = ref.read(listAssignProvider).value ?? [];
 
     final result = await showDialog<bool>(
       context: context,
@@ -146,38 +147,46 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
               ),
               const SizedBox(height: 16),
 
-              // 👤 Dropdown เลือก Assignee
-              DropdownButtonFormField<String>(
-                value: selectedAssigneeId,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Assignee',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  filled: true,
-                  fillColor: HexColor.fromHex('#001B4B'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: HexColor.fromHex('#00C6FF')),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Colors.white, width: 2),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 20),
-                ),
-                items: assigneeList
-                    .map<DropdownMenuItem<String>>((user) => DropdownMenuItem(
-                          value: user.id.toString(),
-                          child: Text(user.name ?? '',
-                              style: const TextStyle(color: Colors.white)),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setStateDialog(() {
-                    selectedAssigneeId = value;
-                  });
+              // 👤 Dropdown เลือก Assignee (watch provider เพื่ออัปเดตอัตโนมัติ)
+              Consumer(
+                builder: (context, ref, _) {
+                  final assigneeState = ref.watch(listAssignProvider);
+                  final assigneeList = assigneeState.maybeWhen(
+                    data: (data) => data,
+                    orElse: () => <UserModel>[],
+                  );
+                  return DropdownButtonFormField<String>(
+                    value: selectedAssigneeId,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Assignee',
+                      labelStyle: const TextStyle(color: Colors.white70),
+                      filled: true,
+                      fillColor: HexColor.fromHex('#001B4B'),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: HexColor.fromHex('#00C6FF')),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.white, width: 2),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 20),
+                    ),
+                    items: assigneeList
+                        .map<DropdownMenuItem<String>>((user) => DropdownMenuItem(
+                              value: user.id?.toString() ?? '0',
+                              child: Text(user.name ?? '',
+                                  style: const TextStyle(color: Colors.white)),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setStateDialog(() {
+                        selectedAssigneeId = value;
+                      });
+                    },
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -219,10 +228,9 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                           });
                         },
                       ),
-                      const Padding(
-                        padding: EdgeInsets.only(right: 12),
-                        child: Icon(Icons.calendar_today,
-                            color: Colors.white70, size: 20),
+                      IconButton(
+                        onPressed: () => startDateController.toggle(),
+                        icon: const Icon(Icons.calendar_month, color: Colors.white),
                       ),
                     ],
                   ),
@@ -249,92 +257,100 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
                         ),
                         initialDate: endDate,
                         controller: endDateController,
-                        enabled: startDate != null,
-                        firstDate: startDate?.add(const Duration(days: 1)),
                         onDateSelected: (date) {
                           setStateDialog(() {
                             endDate = date;
                           });
                         },
                       ),
-                      const Padding(
-                        padding: EdgeInsets.only(right: 12),
-                        child: Icon(Icons.calendar_today,
-                            color: Colors.white70, size: 20),
+                      IconButton(
+                        onPressed: () => endDateController.toggle(),
+                        icon: const Icon(Icons.calendar_month, color: Colors.white),
                       ),
                     ],
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
 
-              // 📝 Description
-              TextField(
-                controller: descController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'รายละเอียดงาน',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  filled: true,
-                  fillColor: HexColor.fromHex('#001B4B'),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.white, width: 2)),
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 20),
-                ),
-                maxLines: 3,
-              ),
               const SizedBox(height: 24),
 
-              // ✅ Action buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: HexColor.fromHex('#002B77'), width: 2),
-                      backgroundColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 28),
-                    ),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('ยกเลิก'),
                   ),
-                  const SizedBox(width: 12),
-                  FilledButton(
-                    onPressed: () {
-                      if (nameController.text.trim().isEmpty ||
-                          startDate == null ||
-                          endDate == null) {
-                        // handle validation (เหมือนเดิม)
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final enteredName = nameController.text;
+                      debugPrint('[GanttAddTask] name raw="$enteredName" trimmed="${enteredName.trim()}" len=${enteredName.trim().length}');
+                      if (enteredName.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('กรุณากรอกชื่อ Task')),
+                        );
                         return;
                       }
-                      Navigator.of(context).pop(true);
+                      if ((sprintId).isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('ไม่พบ Sprint ที่จะเพิ่มงาน')),
+                        );
+                        return;
+                      }
+                      if (startDate == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('กรุณาเลือก Start Date')),
+                        );
+                        return;
+                      }
+                      if (endDate == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('กรุณาเลือก End Date')),
+                        );
+                        return;
+                      }
+
+                      try {
+                        final body = {
+                          "task_id": "0",
+                          "project_hd_id": widget.projectId,
+                          "sprint_id": sprintId,
+                          "master_priority_id": "1",
+                          "master_task_status_id": "1",
+                          "master_type_of_work_id": "1",
+                          "task_name": enteredName.trim(),
+                          "task_description": descController.text.trim(),
+                          "task_assigned_to": (selectedAssigneeId ?? currentUserId ?? "0").toString(),
+                          "task_start_date": DateHelpers.format(startDate!, 'yyyy-MM-dd'),
+                          "task_end_date": DateHelpers.format(endDate!, 'yyyy-MM-dd'),
+                          "task_is_active": true,
+                        };
+                        debugPrint('[GanttAddTask] submit body: $body');
+
+                        await ref.read(insertOrUpdateTaskControllerProvider.notifier).submit(
+                          body: body,
+                        );
+
+                        final submitState = ref.read(insertOrUpdateTaskControllerProvider);
+                        if (submitState.hasError) {
+                          throw submitState.error ?? 'ไม่ทราบสาเหตุ';
+                        }
+                        debugPrint('[GanttAddTask] submit response: ${submitState.value}');
+
+                        if (!mounted) return;
+                        Navigator.pop(context, true);
+                      } catch (e) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('บันทึกงานไม่สำเร็จ: $e')),
+                        );
+                      }
                     },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: HexColor.fromHex('#003B99'),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 28),
-                    ),
-                    child: const Text(
-                      'Start',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
+                    child: const Text('บันทึก'),
                   ),
                 ],
-              ),
+              )
             ],
           ),
         ),
@@ -342,61 +358,17 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     ),
   ),
 );
-
           },
         );
       },
     );
 
-    // 📤 ส่งข้อมูลถ้ากด Save
     if (result == true) {
-      final body = {
-        "task_id": "0",
-        "project_hd_id": widget.projectId,
-        "sprint_id": sprintId,
-        "master_priority_id": "1",
-        "master_task_status_id": "1",
-        "master_type_of_work_id": "1",
-        "task_name": nameController.text.trim(),
-        "task_description": descController.text.trim(),
-        "task_assigned_to":
-            selectedAssigneeId ?? currentUserId, // ✅ default เป็น login id
-        "task_start_date": DateHelpers.format(startDate!, 'yyyy-MM-dd'),
-        "task_end_date": DateHelpers.format(endDate!, 'yyyy-MM-dd'),
-        "task_is_active": true,
-      };
-
-      print('[GanttChartWidget] Submit body: $body');
-      await ref
-          .read(insertOrUpdateTaskControllerProvider.notifier)
-          .submit(body: body);
-
-      final state = ref.read(insertOrUpdateTaskControllerProvider);
-      if (mounted) {
-        if (state.hasError) {
-          CustomSnackbar.showSnackBar(
-            context: context,
-            title: "เกิดข้อผิดพลาด",
-            message: "${state.error}",
-            contentType: ContentType.failure,
-            color: Colors.red,
-          );
-        } else {
-          CustomSnackbar.showSnackBar(
-            context: context,
-            title: "สำเร็จ",
-            message: "เพิ่มงานสำเร็จ",
-            contentType: ContentType.success,
-            color: Colors.green,
-          );
-        }
-      }
       await _loadTasks();
     }
   }
 
   Future<void> _loadTasks() async {
-    ref.invalidate(ganttDataProvider);
     await ref.read(ganttDataProvider.notifier).get();
     setState(() {});
   }
@@ -416,6 +388,11 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
     super.initState();
     // Prefetch dropdown providers for use in dialogs
     Future.microtask(() {
+      // ✅ ตั้งค่า workspaceId ก่อนโหลด assignee
+      final wsId = ref.read(projectSelectingProvider).category?.workspaceId;
+      if (wsId != null && wsId.isNotEmpty) {
+        ref.read(selectWorkspaceIdProvider.notifier).state = wsId;
+      }
       ref.read(listAssignProvider.notifier).get();
       ref.read(listPriorityProvider.notifier).get();
       ref.read(listTypeOfWorkProvider.notifier).get();
@@ -455,14 +432,6 @@ class _GanttChartWidgetState extends ConsumerState<GanttChartWidget> {
       _isSyncingHorizontal = true;
       _taskHorizontalController.jumpTo(
         _headerHorizontalController.position.pixels,
-      );
-      _isSyncingHorizontal = false;
-    });
-    _taskHorizontalController.addListener(() {
-      if (_isSyncingHorizontal) return;
-      _isSyncingHorizontal = true;
-      _headerHorizontalController.jumpTo(
-        _taskHorizontalController.position.pixels,
       );
       _isSyncingHorizontal = false;
     });
