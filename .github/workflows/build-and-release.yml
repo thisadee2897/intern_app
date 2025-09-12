@@ -70,7 +70,7 @@ jobs:
         run: |
           # สร้าง DMG file หรือ ZIP ถ้า DMG ไม่สำเร็จ
           mkdir -p dist
-          cp -R build/macos/Build/Products/Release/project.app dist/
+          cp -R "build/macos/Build/Products/Release/OHO Task.app" dist/
           
           # ลอง create DMG ก่อน
           if hdiutil create -volname "InternApp" -srcfolder dist -ov -format UDZO "InternApp-macOS-${{ github.ref_name }}.dmg" 2>/dev/null; then
