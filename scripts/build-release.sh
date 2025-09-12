@@ -171,8 +171,12 @@ git commit -m "chore: bump version to $VERSION" || print_warning "No changes to 
 
 # Create Git tag
 print_status "🏷️ Creating Git tag"
-git tag -a "$TAG_NAME" -m "Release version $VERSION"
-print_success "Git tag $TAG_NAME created"
+if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+    print_warning "Git tag $TAG_NAME already exists, skipping tag creation"
+else
+    git tag -a "$TAG_NAME" -m "Release version $VERSION"
+    print_success "Git tag $TAG_NAME created"
+fi
 
 # Show summary
 print_success "🎉 Build and release process completed!"
