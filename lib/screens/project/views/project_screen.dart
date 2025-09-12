@@ -295,22 +295,22 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
                 _buildCategoryActions(category),
               ],
             ),
-            children: [
+             children: [
               if (category.projects.isEmpty)
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: Colors.transparent),
                   ),
                   child: Center(
                     child: Column(
                       children: [
-                        Icon(Icons.folder_open_rounded, size: 48, color: Colors.grey.shade400),
+                        Icon(Icons.folder_open_rounded, size: 48, color: const Color.fromARGB(255, 255, 255, 255)),
                         const SizedBox(height: 12),
-                        Text('ไม่มีโปรเจคในหมวดหมู่นี้', style: TextStyle(color: Colors.grey.shade600, fontSize: 14, fontWeight: FontWeight.w500)),
+                        Text('ไม่มีโปรเจคในหมวดหมู่นี้'),
                       ],
                     ),
                   ),

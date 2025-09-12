@@ -70,7 +70,7 @@ class _TypeOfWorkWidgetState extends ConsumerState<TypeOfWorkWidget> {
         RichText(
           text: TextSpan(
             text: "Get a breakdown of work items by their types. ",
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color.fromARGB(255, 253, 253, 253)),
             children: [TextSpan(text: "View all items", style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w500))],
           ),
         ),
@@ -80,12 +80,12 @@ class _TypeOfWorkWidgetState extends ConsumerState<TypeOfWorkWidget> {
           children: [
             Expanded(
               flex: 2,
-              child: Text("Type", style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey[700])),
+              child: Text("Type", style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
             ),
 
             Expanded(
               flex: 3,
-              child: Text("Distribution", style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey[700])),
+              child: Text("Distribution", style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -121,7 +121,7 @@ class _TypeOfWorkWidgetState extends ConsumerState<TypeOfWorkWidget> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text("${(percentage * 100).toStringAsFixed(0)}%", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                        Text("${(percentage * 100).toStringAsFixed(0)}%", style: const TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
                   );

@@ -26,7 +26,7 @@ class _DashboardTypeOfWorkWidgetState extends ConsumerState<DashboardTypeOfWorkW
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.symmetric(horizontal: 10),
       height: 400, // Add some space between rows
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.white),
+      decoration: BoxDecoration(border: Border.all(color: const Color.fromARGB(255, 255, 255, 255), width: 1), borderRadius: BorderRadius.circular(8), color: Colors.white),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
