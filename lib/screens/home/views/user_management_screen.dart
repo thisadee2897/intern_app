@@ -230,9 +230,12 @@ class UserListItem extends StatelessWidget {
     return Row(
       children: [
         CircleAvatar(
-          backgroundImage: NetworkImage(
-            user.image ?? "https://i.pravatar.cc/150",
-          ),
+          backgroundImage: user.image != null && user.image!.isNotEmpty
+              ? NetworkImage(user.image!)
+              : null,
+          child: user.image == null || user.image!.isEmpty
+              ? const Icon(Icons.person, color: Colors.grey)
+              : null,
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -293,6 +296,7 @@ class _AddUserDialogState extends ConsumerState<AddUserDialog> {
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(searchDialogUserController);
+    final workspaceRolesState = ref.watch(getWorkspaceRoleByWorkspaceController);
 
     return AlertDialog(
       backgroundColor: Colors.white,
@@ -354,10 +358,27 @@ class _AddUserDialogState extends ConsumerState<AddUserDialog> {
                 if (_searchController.text.isEmpty) {
                   return const SizedBox.shrink();
                 }
-                if (users.isNotEmpty) {
+                
+                // กรอง email ที่มีอยู่แล้วใน workspace ออก
+                final existingEmails = workspaceRolesState.when(
+                  data: (roles) => roles
+                      .map((role) => role.masterUser?.email)
+                      .where((email) => email != null && email.isNotEmpty)
+                      .toSet(),
+                  loading: () => <String>{},
+                  error: (_, __) => <String>{},
+                );
+                
+                final filteredUsers = users.where((user) => 
+                  user.email == null || 
+                  user.email!.isEmpty || 
+                  !existingEmails.contains(user.email)
+                ).toList();
+                
+                if (filteredUsers.isNotEmpty) {
                   return Column(
                     children:
-                        users.map((user) {
+                        filteredUsers.map((user) {
                           final isSelected = _selectedUserIds.contains(user.id);
                           return InkWell(
                             onTap: () {
@@ -392,10 +413,13 @@ class _AddUserDialogState extends ConsumerState<AddUserDialog> {
                               child: Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundImage: NetworkImage(
-                                      user.image ?? 'https://i.pravatar.cc/150',
-                                    ),
+                                    backgroundImage: user.image != null && user.image!.isNotEmpty
+                                        ? NetworkImage(user.image!)
+                                        : null,
                                     radius: 20,
+                                    child: user.image == null || user.image!.isEmpty
+                                        ? const Icon(Icons.person, color: Colors.grey)
+                                        : null,
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(

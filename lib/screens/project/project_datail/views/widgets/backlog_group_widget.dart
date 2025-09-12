@@ -226,11 +226,11 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       child: Center(
         child: Column(
           children: [
-            Icon(Icons.assignment_outlined, size: 35, color: Colors.grey[600]),
+            Icon(Icons.assignment_outlined, size: 35, color: const Color.fromARGB(255, 255, 255, 255)),
             const SizedBox(height: 8),
-            Text('ไม่มีงานในรายการ', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+            Text('ไม่มีงานในรายการ',),
             const SizedBox(height: 4),
-            Text('กดปุ่ม + เพื่อเพิ่มงานใหม่', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+            Text('กดปุ่ม + เพื่อเพิ่มงานใหม่'),
           ],
         ),
       ),
@@ -681,9 +681,15 @@ void _showErrorSnackBar(String message) {
               const Gap(10),
 
           // Start Date
- const TitleWidget(text: 'Start date'),
-                    SizedBox(
-                      width: 400,
+const Text('Start date', style: TextStyle(color: Colors.white)),
+  SizedBox(
+   width: 400,
+   child: Container(
+     decoration: BoxDecoration(
+       color: HexColor.fromHex('#001B4B'),
+       borderRadius: BorderRadius.circular(12),
+       border: Border.all(color: HexColor.fromHex('#00C6FF'), width: 2), // ✅ ขอบเหมือนเพื่อน
+     ),
                       child: FormStartDateWidget(
                         startDate: ref.watch(formStartDateProvider),
                         endDate: ref.watch(formEndDateProvider),
@@ -698,10 +704,18 @@ void _showErrorSnackBar(String message) {
                         },
                       ),
                     ),
+  ),
                     const Gap(10),
-                    const TitleWidget(text: 'End date'),
-                    SizedBox(
-                      width: 400,
+                    // End Date
+ const Text('End date', style: TextStyle(color: Colors.white)),
+  SizedBox(
+   width: 400,
+   child: Container(
+     decoration: BoxDecoration(
+       color: HexColor.fromHex('#001B4B'),
+       borderRadius: BorderRadius.circular(12),
+       border: Border.all(color: HexColor.fromHex('#00C6FF'), width: 2), // ✅ ขอบเหมือนเพื่อน
+     ),
                       child: FormEndDateWidget(
                         startDate: ref.watch(formStartDateProvider),
                         endDate: ref.watch(formEndDateProvider),
@@ -716,6 +730,8 @@ void _showErrorSnackBar(String message) {
                         },
                       ),
                     ),
+  ),
+                    const Gap(10),
                         // Sprint goal
               const Text('Sprint goal', style: TextStyle(color: Colors.white)),
               SizedBox(

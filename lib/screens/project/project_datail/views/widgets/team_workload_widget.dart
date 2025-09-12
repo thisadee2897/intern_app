@@ -75,7 +75,7 @@ class _TeamWorkloadWidgetState extends ConsumerState<TeamWorkloadWidget> {
         RichText(
           text: TextSpan(
             text: "Monitor the capacity of your team. ",
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color.fromARGB(255, 255, 255, 255)),
             children: [TextSpan(text: "Reassign work items to get the right balance", style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w500))],
           ),
         ),
@@ -84,11 +84,11 @@ class _TeamWorkloadWidgetState extends ConsumerState<TeamWorkloadWidget> {
           children: [
             Expanded(
               flex: 2,
-              child: Text("Assignee", style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey[700])),
+              child: Text("Assignee", style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, )),
             ),
             Expanded(
               flex: 3,
-              child: Text("Work distribution", style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey[700])),
+              child: Text("Work distribution", style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold,)),
             ),
           ],
         ),
