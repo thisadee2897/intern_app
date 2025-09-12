@@ -64,12 +64,24 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS App
-        run: flutter build macos --release
+        run: |
+          flutter build macos --release
+          echo "Built app contents:"
+          ls -la "build/macos/Build/Products/Release/"
 
       - name: Create Package
         run: |
           # สร้าง DMG file หรือ ZIP ถ้า DMG ไม่สำเร็จ
           mkdir -p dist
+          
+          # Check if the app exists
+          if [ ! -d "build/macos/Build/Products/Release/OHO Task.app" ]; then
+            echo "Error: OHO Task.app not found!"
+            echo "Available files:"
+            ls -la "build/macos/Build/Products/Release/"
+            exit 1
+          fi
+          
           cp -R "build/macos/Build/Products/Release/OHO Task.app" dist/
           
           # ลอง create DMG ก่อน
