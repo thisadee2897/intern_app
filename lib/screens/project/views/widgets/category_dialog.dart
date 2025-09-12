@@ -103,7 +103,13 @@ class _AddCategoryDialogState extends ConsumerState<AddCategoryDialog> with Tick
                         controller: _nameController,
                         onChanged: (value) {
                           ref.read(categoryNameProvider.notifier).state = value;
-                          ref.refresh(checkTextCategoryUniqueNameProvider);
+                          // Debounce the validation to avoid rapid provider updates
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            if (mounted && value == ref.read(categoryNameProvider)) {
+                              // ignore: unused_result
+                              ref.refresh(checkTextCategoryUniqueNameProvider);
+                            }
+                          });
                         },
                         decoration: InputDecoration(
                           labelText: 'ชื่อหมวดหมู่',

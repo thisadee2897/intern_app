@@ -73,7 +73,7 @@ case "$(uname -s)" in
         
         print_status "📦 Creating DMG"
         mkdir -p releases/$VERSION/macos
-        cp -R build/macos/Build/Products/Release/project.app releases/$VERSION/macos/
+        cp -R "build/macos/Build/Products/Release/OHO Task.app" releases/$VERSION/macos/
         
         # Create DMG (requires create-dmg: brew install create-dmg)
         if command -v create-dmg &> /dev/null; then
@@ -82,8 +82,8 @@ case "$(uname -s)" in
                 --window-pos 200 120 \
                 --window-size 600 300 \
                 --icon-size 100 \
-                --icon "project.app" 175 120 \
-                --hide-extension "project.app" \
+                --icon "OHO Task.app" 175 120 \
+                --hide-extension "OHO Task.app" \
                 --app-drop-link 425 120 \
                 "releases/$VERSION/InternApp-macOS-$TAG_NAME.dmg" \
                 "releases/$VERSION/macos/"

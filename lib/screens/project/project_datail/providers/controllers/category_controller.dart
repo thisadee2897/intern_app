@@ -38,10 +38,16 @@ final categoryNameErrorProvider = StateProvider<String?>((ref) => null);
 final checkTextCategoryUniqueNameProvider = FutureProvider.autoDispose<void>((ref) async {
   final name = ref.watch(categoryNameProvider);
   if (name.isEmpty) {
-    ref.read(categoryNameErrorProvider.notifier).state = 'ห้ามเว้นว่าง';
+    // Use Future.microtask to avoid modifying providers during initialization
+    Future.microtask(() => 
+      ref.read(categoryNameErrorProvider.notifier).state = 'ห้ามเว้นว่าง'
+    );
   } else {
     final response = await ref.read(apiProjectCategoryUniqueName).get(testSearch: name);
-    ref.read(categoryNameErrorProvider.notifier).state =
-        response.isEmpty ? null : 'ชื่อหมวดหมู่นี้ถูกใช้แล้ว';
+    // Use Future.microtask to avoid modifying providers during initialization
+    Future.microtask(() => 
+      ref.read(categoryNameErrorProvider.notifier).state =
+          response.isEmpty ? null : 'ชื่อหมวดหมู่นี้ถูกใช้แล้ว'
+    );
   }
 });

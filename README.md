@@ -14,7 +14,7 @@ dart run build_runner build --delete-conflicting-outputs
 ./scripts/build-release.sh 1.0.7
 
 # 2. Push tag ขึ้น GitHub
-git push origin v1.0.7
+git push origin v1.0.8
 
 # 3. GitHub Actions จะ build และสร้าง release อัตโนมัติ
 

@@ -182,7 +182,15 @@ class _ProjectScreenState extends BaseState<ProjectScreen> with TickerProviderSt
         actions: [
           // _buildSearchField(),
           const SizedBox(width: 12),
-          OutlinedButton.icon(onPressed: () => _showAddCategoryDialog(CategoryModel(id: '0')), label: const Text('สร้างหมวดหมู่ใหม่')),
+          Flexible(
+            child: OutlinedButton.icon(
+              onPressed: () => _showAddCategoryDialog(CategoryModel(id: '0')), 
+              label: const Text(
+                'สร้างหมวดหมู่ใหม่',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
           const SizedBox(width: 16),
         ],
       ),
