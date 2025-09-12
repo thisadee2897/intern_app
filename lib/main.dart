@@ -22,6 +22,7 @@ void main() async {
     setWindowVisibility(visible: true); //visible คือ ทำให้หน้าต่างแสดงผล
     setWindowTitle('OHO Task');
     setWindowMinSize(lockedSize);
+    setWindowFrame(Rect.fromLTWH(0, 0, lockedSize.width, lockedSize.height));
     // setWindowMaxSize(lockedSize);
     // 🚀 Initialize Auto Update Manager
     try {
