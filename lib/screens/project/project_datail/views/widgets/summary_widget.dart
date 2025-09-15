@@ -28,7 +28,7 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 10,
               children: [
-                ProjectOverViewWidget(),
+                // ProjectOverViewWidget(),
                 Row(
                   children: [
                     SizedBox(width: constraints.maxWidth / 2, child: _statusOverview(context)),
@@ -65,7 +65,7 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 10,
               children: [
-                ProjectOverViewWidget(),
+                // ProjectOverViewWidget(),
                 Row(
                   children: [
                     SizedBox(width: constraints.maxWidth / 2, child: _statusOverview(context)),
@@ -102,7 +102,7 @@ class _SummaryWidgetState extends BaseState<SummaryWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 10,
               children: [
-                ProjectOverViewWidget(),
+                // ProjectOverViewWidget(),
                 SizedBox(width: constraints.maxWidth, child: _statusOverview(context)),
                 Gap(5),
                 SizedBox(width: constraints.maxWidth, child: _recentActivity(context)),
