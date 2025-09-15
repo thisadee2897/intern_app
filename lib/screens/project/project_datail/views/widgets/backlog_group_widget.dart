@@ -326,24 +326,47 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   //   Navigator.push(context, MaterialPageRoute(builder: (_) => CommentScreen(task: task)));
   // }
 
-  /// Dropdown สำหรับเปลี่ยนสถานะของ task
+ /// Dropdown สำหรับเปลี่ยนสถานะของ task
   Widget _buildTaskStatusDropdown(TaskModel task, String projectHdId) {
     final listDropdown = ref.watch(masterTaskStatusControllerProvider).value ?? [];
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.grey)),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [HexColor.fromHex('#004EF7'), HexColor.fromHex('#0033A2')],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       constraints: const BoxConstraints(maxWidth: 120),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: task.taskStatus!.id,
           isDense: true,
           iconSize: 18,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
-          dropdownColor: Colors.white,
-          items:
-              listDropdown.map<DropdownMenuItem<String>>((status) {
-                return DropdownMenuItem<String>(value: status.id, child: Text(status.name ?? 'ไม่ระบุ', style: const TextStyle(fontSize: 12)));
-              }).toList(),
+          icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+          style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500),
+          dropdownColor: HexColor.fromHex('#004EF7'),
+          items: listDropdown.map<DropdownMenuItem<String>>((status) {
+            return DropdownMenuItem<String>(
+              value: status.id, 
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Text(
+                  status.name ?? 'ไม่ระบุ', 
+                  style: const TextStyle(fontSize: 12, color: Colors.white),
+                ),
+              ),
+            );
+          }).toList(),
           onChanged: (newStatusId) => _updateTaskStatus(task, newStatusId, projectHdId),
         ),
       ),
@@ -437,7 +460,7 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   //   }
   // }
 
-  /// ปุ่มสำหรับสร้างงานใหม่
+  /// ปุ่มสำหรับสร้างงานใหม่ (ใช้แบบเดิม - สีขาว)
   Widget _buildCreateButton(SprintModel sprint) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -453,8 +476,6 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
       ),
     );
   }
-
-  /// จัดการการสร้าง Task ใหม่
 
   /// แสดง Success SnackBar
    void _showSuccessSnackBar(String message) {
@@ -517,33 +538,103 @@ void _showErrorSnackBar(String message) {
 
   /// ปุ่มสร้าง Sprint ใหม่
   Widget _buildCreateSprintButton() {
-    return ElevatedButton(
-      style: _getButtonStyle(),
-      onPressed: () => _handleCreateOrUpdateSprint(SprintModel(id: '0')),
-      child: const Text('Create sprint', style: TextStyle(color: Color.fromARGB(255, 91, 91, 91))),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [HexColor.fromHex('#004EF7'), HexColor.fromHex('#0033A2')],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          minimumSize: const Size(0, 36),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        ),
+        onPressed: () => _handleCreateOrUpdateSprint(SprintModel(id: '0')),
+        child: const Text('Create sprint', style: TextStyle(color: Colors.white)),
+      ),
     );
   }
 
   /// ปุ่มเริ่ม Sprint
   Widget _buildStartSprintButton(int taskCount) {
-    return ElevatedButton(
-      style: _getButtonStyle(),
-      onPressed: () => _handleStartSprint(taskCount),
-      child: const Text('Start sprint', style: TextStyle(color: Color.fromARGB(255, 91, 91, 91))),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [HexColor.fromHex('#004EF7'), HexColor.fromHex('#0033A2')],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          minimumSize: const Size(0, 36),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        ),
+        onPressed: () => _handleStartSprint(taskCount),
+        child: const Text('Start sprint', style: TextStyle(color: Colors.white)),
+      ),
     );
   }
 
   /// ปุ่มจบ Sprint
   Widget _buildCompleteSprintButton(SprintModel item) {
-    return ElevatedButton(
-      style: _getButtonStyle(),
-      onPressed: () => _handleCompleteSprint(item),
-      child: const Text('Complete sprint', style: TextStyle(color: Color.fromARGB(255, 91, 91, 91))),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [HexColor.fromHex('#004EF7'), HexColor.fromHex('#0033A2')],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          minimumSize: const Size(0, 36),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        ),
+        onPressed: () => _handleCompleteSprint(item),
+        child: const Text('Complete sprint', style: TextStyle(color: Colors.white)),
+      ),
     );
-    
   }
 
-  /// Style ของปุ่ม
   ButtonStyle _getButtonStyle() {
     return ElevatedButton.styleFrom(
       backgroundColor: const Color.fromARGB(255, 251, 250, 250),
