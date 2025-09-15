@@ -87,15 +87,15 @@ class _BacklogGroupWidgetState extends ConsumerState<BacklogGroupWidget> with Ro
   margin: const EdgeInsets.all(5),
   padding: const EdgeInsets.all(5),
   decoration: BoxDecoration(
-    color: Colors.transparent, // โปร่งใส 100%
+    color: Colors.black.withOpacity(0.1), // โปร่งใส 100%
     borderRadius: BorderRadius.circular(12), // โค้งมนเหมือน Project Screen
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.1), // Shadow เบาๆ
-        blurRadius: 4,
-        offset: const Offset(0, 2),
-      ),
-    ],
+    // boxShadow: [
+    //   BoxShadow(
+    //     color: Colors.black.withOpacity(0.1), // Shadow เบาๆ
+    //     blurRadius: 4,
+    //     offset: const Offset(0, 2),
+    //   ),
+    // ],
   ),
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
